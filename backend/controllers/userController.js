@@ -1,0 +1,121 @@
+import db from "../config/db.js";
+
+// POST /api/users/register
+export const registerUser = async (req, res) => {
+  const { username, email, password } = req.body;
+
+  // validate เบื้องต้น
+  if (!username || !email || !password) {
+    return res.status(400).json({
+      message: "กรุณากรอกข้อมูลให้ครบ",
+    });
+  }
+
+  try {
+    // เช็ก email ซ้ำ
+    const [existing] = await db.query(
+      "SELECT user_id FROM User WHERE email = ?",
+      [email],
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({
+        message: "Email นี้ถูกใช้แล้ว",
+      });
+    }
+
+    // insert user ใหม่
+    const [result] = await db.query(
+      `INSERT INTO User (username, email, password)
+       VALUES (?, ?, ?)`,
+      [username, email, password],
+    );
+
+    res.status(201).json({
+      message: "สมัครสมาชิกสำเร็จ",
+      user_id: result.insertId,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+// POST /api/users/login
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "กรุณากรอก email และ password",
+    });
+  }
+
+  try {
+    const [rows] = await db.query(
+      "SELECT User_id, Username, Email, Password FROM User WHERE Email = ?",
+      [email],
+    );
+
+    if (rows.length === 0) {
+      return res.status(401).json({
+        message: "Email หรือ Password ไม่ถูกต้อง",
+      });
+    }
+
+    const user = rows[0];
+
+    // ยังไม่ hash → เทียบตรง ๆ
+    if (user.Password !== password) {
+      return res.status(401).json({
+        message: "Email หรือ Password ไม่ถูกต้อง",
+      });
+    }
+
+    res.status(200).json({
+      message: "Login สำเร็จ",
+      user: {
+        user_id: user.User_id,
+        username: user.Username,
+        email: user.Email,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+// GET /api/users/:id
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      message: "User id is required",
+    });
+  }
+
+  try {
+    const [rows] = await db.query(
+      `SELECT User_id, Username, Email, Created_at
+       FROM User
+       WHERE User_id = ?`,
+      [id],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "ไม่พบ user",
+      });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
