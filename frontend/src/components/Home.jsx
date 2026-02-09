@@ -9,7 +9,7 @@ const Home = () => {
         alt="Vite logo"
         style={{ width: "120px", marginBottom: "1rem" }}
       />
-      <h1>Vite + React</h1>
+      <h1>kong1412</h1> 
       <p style={{ fontSize: "1.2rem", color: "#888" }}>
         Get started by editing <code>src/components/Home.jsx</code>
       </p>
