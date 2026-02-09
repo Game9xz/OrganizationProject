@@ -14,7 +14,7 @@ export const registerUser = async (req, res) => {
   try {
     // เช็ก email ซ้ำ
     const [existing] = await db.query(
-      "SELECT user_id FROM User WHERE email = ?",
+      "SELECT user_id FROM user WHERE email = ?",
       [email],
     );
 
@@ -26,7 +26,7 @@ export const registerUser = async (req, res) => {
 
     // insert user ใหม่
     const [result] = await db.query(
-      `INSERT INTO User (username, email, password)
+      `INSERT INTO user (username, email, password)
        VALUES (?, ?, ?)`,
       [username, email, password],
     );
@@ -66,7 +66,7 @@ export const loginUser = async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      "SELECT User_id, Username, Email, Password FROM User WHERE Email = ?",
+      "SELECT user_id, username, email, password FROM user WHERE email = ?",
       [email],
     );
 
@@ -86,7 +86,7 @@ export const loginUser = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Login สำเร็จ",
+      message: "Login สำเร็จ!",
       user: {
         user_id: user.User_id,
         username: user.Username,
@@ -112,9 +112,9 @@ export const getUserById = async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      `SELECT User_id, Username, Email, Created_at
-       FROM User
-       WHERE User_id = ?`,
+      `SELECT user_id, username, email, created_at
+       FROM user
+       WHERE user_id = ?`,
       [id],
     );
 
