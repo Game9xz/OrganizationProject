@@ -86,7 +86,7 @@ export const loginUser = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Login สำเร็จ",
+      message: "Login สำเร็จ!",
       user: {
         user_id: user.User_id,
         username: user.Username,
