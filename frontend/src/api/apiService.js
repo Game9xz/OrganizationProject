@@ -47,7 +47,7 @@ export const loginUser = async (email, password) => {
   }
 };
 
-// Get user by ID
+// Get user by IDtest
 export const getUserById = async (userId) => {
   try {
     const response = await fetch(`${API_BASE_URL}/users/${userId}`);
