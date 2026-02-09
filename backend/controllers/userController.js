@@ -79,18 +79,18 @@ export const loginUser = async (req, res) => {
     const user = rows[0];
 
     // ยังไม่ hash → เทียบตรง ๆ
-    if (user.Password !== password) {
+    if (user.password !== password) {
       return res.status(401).json({
         message: "Email หรือ Password ไม่ถูกต้อง",
       });
     }
 
     res.status(200).json({
-      message: "Login สำเร็จ!",
+      message: "Login สำเร็จ!!",
       user: {
-        user_id: user.User_id,
-        username: user.Username,
-        email: user.Email,
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
       },
     });
   } catch (err) {
