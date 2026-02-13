@@ -1,0 +1,56 @@
+.start-container {
+  display: flex;
+  height: 100vh;
+  background-color: #111;
+  color: #fff;
+}
+
+/* ซ้าย */
+.start-left {
+  flex: 1;
+}
+
+.start-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ขวา */
+.start-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.start-logo {
+  font-size: 48px;
+  letter-spacing: 2px;
+}
+
+.start-logo span {
+  color: #8a2be2;
+}
+
+.start-text {
+  margin: 20px 0 40px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.start-btn {
+  padding: 12px 40px;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  background-color: #8a2be2;
+  color: #fff;
+  cursor: pointer;
+}
+
+.start-btn:hover {
+  opacity: 0.85;
+}

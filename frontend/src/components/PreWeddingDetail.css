@@ -1,0 +1,117 @@
+.pre-container {
+  display: flex;
+  min-height: 100vh;
+  background: #0f0f0f;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #1a1a1a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  padding: 12px 0;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.logout {
+  background: #ff4d4d;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+}
+
+/* Main */
+.pre-content {
+  flex: 1;
+  padding: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pre-card {
+  background: linear-gradient(145deg, #1b1b1b, #202020);
+  width: 100%;
+  max-width: 1350px;
+  border-radius: 30px;
+  padding: 60px;
+  position: relative;
+}
+
+/* Back button */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Layout */
+.pre-body {
+  display: flex;
+  gap: 80px;
+  align-items: center;
+}
+
+.pre-image {
+  width: 450px;
+  height: 650px; /* ให้สูง */
+  object-fit: cover; /* ครอปให้เต็ม */
+  border-radius: 20px;
+}
+
+.pre-text {
+  flex: 1;
+  max-width: 600px;
+  line-height: 1.9;
+}
+
+.pre-text h2 {
+  font-size: 32px;
+  margin-bottom: 15px;
+}
+
+.price {
+  color: #a78bfa;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+.pre-text ul {
+  margin: 10px 0 20px;
+}
+
+.pre-btn {
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 10px 25px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+}

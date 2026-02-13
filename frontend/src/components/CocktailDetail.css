@@ -1,0 +1,149 @@
+/* ===== Layout หลัก ===== */
+.cocktail-container {
+  display: flex;
+  min-height: 100vh;
+  background: #0f0f0f;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 220px;
+  background: #1a1a1a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand h3 {
+  margin: 10px 0 5px;
+}
+
+.brand span {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  padding: 12px 0;
+  cursor: pointer;
+  color: #ccc;
+  transition: 0.3s;
+}
+
+.menu li:hover {
+  color: #9b5cff;
+}
+
+.logout {
+  background: #ff4d4d;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ===== Main Content ===== */
+.cocktail-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ===== Card ===== */
+.cocktail-card {
+  background: linear-gradient(145deg, #1b1b1b, #202020);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: 20px;
+  position: relative;
+}
+
+/* หัวข้อ */
+.cocktail-card h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+/* ปุ่มย้อนกลับ */
+.back-btn {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* ===== Body Layout ===== */
+.cocktail-body {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* รูปหลัก */
+.cocktail-body img {
+  width: 480px;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+/* ข้อความ */
+.cocktail-text {
+  max-width: 520px;
+  line-height: 1.9;
+  font-size: 16px;
+  color: #ddd;
+}
+
+/* ===== ปุ่มหลัก ===== */
+.cocktail-btn {
+  display: block;
+  margin: 40px auto 0;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 14px 60px;
+  border-radius: 30px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cocktail-btn:hover {
+  opacity: 0.85;
+}
+
+/* ===== Footer ===== */
+.cocktail-footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #aaa;
+  font-size: 14px;
+}

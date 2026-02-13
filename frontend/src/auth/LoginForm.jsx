@@ -38,7 +38,7 @@ const Login = () => {
         icon: "success",
         confirmButtonText: "หน้าแรก",
       }).then(() => {
-        navigate("/home");
+        navigate("/homepage");
       });
     } else {
       // Login ไม่สำเร็จ

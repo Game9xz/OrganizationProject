@@ -1,0 +1,196 @@
+.detail-container {
+  display: flex;
+  min-height: 100vh;
+  background: #1e1e1e;
+  color: #fff;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #2b2b2b;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand h3 {
+  margin: 0;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 30px 0;
+}
+
+.menu li {
+  padding: 10px 0;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.menu li:hover {
+  color: #fff;
+}
+
+.logout {
+  margin-top: auto;
+  background: #ff5a5a;
+  border: none;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* Content */
+.detail-content {
+  flex: 1;
+  padding: 40px;
+  position: relative;
+
+  max-width: 1200px; /* จำกัดความกว้าง */
+  margin: 0 auto; /* จัดให้อยู่กลาง */
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #7c3aed;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.detail-main {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.main-image {
+  width: 280px; /* เล็กลง */
+  height: 340px; /* เล็กลง */
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.detail-text {
+  max-width: 500px;
+  line-height: 1.7;
+  color: #ddd;
+}
+
+.package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  max-width: 900px; /* จำกัดความกว้าง */
+  margin: 40px auto 0; /* 🔥 จัดให้อยู่กึ่งกลาง */
+}
+
+.package-card {
+  background: #2b2b2b;
+  padding: 15px; /* ลด padding */
+  border-radius: 16px;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.package-card img {
+  width: 100%;
+  height: 160px; /* จาก 220 → 160 */
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.price {
+  display: block;
+  margin: 8px 0;
+  color: #a78bfa;
+}
+
+.detail-btn {
+  background: #7c3aed;
+  border: none;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Footer */
+.footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  color: #aaa;
+  font-size: 14px;
+}
+
+/* Cat Logo */
+.cat-logo {
+  width: 60px;
+  height: 60px;
+  background: #f3f3f3;
+  border-radius: 16px;
+  position: relative;
+  margin: 0 auto 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cat-logo .face {
+  width: 30px;
+  height: 30px;
+  background: #000;
+  border-radius: 50%;
+  position: relative;
+}
+
+.cat-logo .ear {
+  width: 18px;
+  height: 18px;
+  background: #000;
+  position: absolute;
+  top: 8px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.cat-logo .ear.left {
+  left: 10px;
+}
+
+.cat-logo .ear.right {
+  right: 10px;
+}
+
+.cat-logo .eye {
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+}
+
+.left-eye {
+  left: 7px;
+}
+
+.right-eye {
+  right: 7px;
+}

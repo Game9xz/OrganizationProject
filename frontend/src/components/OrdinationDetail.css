@@ -1,0 +1,154 @@
+/* ===================================================
+   LAYOUT
+=================================================== */
+.ordination-container {
+  display: flex;
+  min-height: 100vh;
+  background: #0f0f0f;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===================================================
+   SIDEBAR
+=================================================== */
+.sidebar {
+  width: 220px;
+  background: #1a1a1a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand span {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  padding: 12px 0;
+  cursor: pointer;
+  color: #ccc;
+  transition: 0.3s;
+}
+
+.menu li:hover {
+  color: #9b5cff;
+}
+
+.logout {
+  background: #ff4d4d;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ===================================================
+   MAIN CONTENT
+=================================================== */
+.ordination-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===================================================
+   CARD
+=================================================== */
+.ordination-card {
+  background: linear-gradient(145deg, #1b1b1b, #202020);
+  width: 100%;
+  max-width: 1350px;
+  margin: 0 auto;
+  padding: 60px 80px;
+  border-radius: 30px;
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ordination-card h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 40px;
+}
+
+/* ===================================================
+   BACK BUTTON
+=================================================== */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ===================================================
+   BODY LAYOUT
+=================================================== */
+.ordination-body {
+  display: flex;
+  gap: 80px;
+  align-items: center;
+  justify-content: center;
+}
+
+.ordination-body img {
+  width: 420px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.ordination-text {
+  max-width: 650px;
+  line-height: 1.9;
+  font-size: 16px;
+}
+
+/* ===================================================
+   BUTTON
+=================================================== */
+.ordination-btn {
+  display: block;
+  margin: 50px auto 0;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 14px 60px;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* ===================================================
+   FOOTER
+=================================================== */
+.ordination-footer {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  color: #aaa;
+  font-size: 14px;
+}
