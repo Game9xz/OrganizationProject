@@ -1,0 +1,111 @@
+.wed-container {
+  display: flex;
+  min-height: 100vh;
+  background: #0f0f0f;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #1a1a1a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  padding: 12px 0;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.logout {
+  background: #ff4d4d;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+}
+
+/* Main */
+.wed-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wed-card {
+  background: #1c1c1c;
+  width: 100%;
+  max-width: 1200px;
+  border-radius: 25px;
+  padding: 40px;
+  position: relative;
+}
+
+/* Back button */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Layout */
+.wed-body {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+/* รูปสูงมากกว่ากว้าง */
+.wed-image {
+  width: 400px;
+  height: 600px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.wed-text {
+  flex: 1;
+  line-height: 1.8;
+}
+
+.wed-text h2 {
+  margin-bottom: 15px;
+  font-size: 28px;
+}
+
+.price {
+  color: #a78bfa;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.wed-text ul {
+  margin: 15px 0 25px;
+}
+
+.wed-btn {
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 10px 30px;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+}

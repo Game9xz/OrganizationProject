@@ -1,0 +1,101 @@
+.eng-container {
+  display: flex;
+  min-height: 100vh;
+  background: #0f0f0f;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #1a1a1a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  padding: 12px 0;
+  color: #ccc;
+  cursor: pointer;
+}
+
+/* Main */
+.eng-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.eng-card {
+  background: #1c1c1c;
+  width: 100%;
+  max-width: 1200px;
+  border-radius: 20px;
+  padding: 40px;
+  position: relative;
+}
+
+/* Back */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Layout */
+.eng-body {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+.eng-image {
+  width: 420px;
+  height: 600px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.eng-text {
+  flex: 1;
+  line-height: 1.8;
+}
+
+.eng-text h2 {
+  margin-bottom: 15px;
+}
+
+.price {
+  color: #a78bfa;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.eng-text ul {
+  margin: 20px 0;
+}
+
+.eng-btn {
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 10px 25px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+}
