@@ -2,6 +2,10 @@ import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useWorkContext } from "../context/WorkContext";
 import "./WorkStatus.css";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
+import { th } from "date-fns/locale";
 
 // Icons
 const IconLogout = () => (
@@ -87,6 +91,8 @@ export default function WorkStatus() {
     budget: "",
     status: "undetermined",
   });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isDateOpen, setIsDateOpen] = useState(false);
 
   const logout = () => {
     localStorage.removeItem("se_remember");
@@ -124,21 +130,6 @@ export default function WorkStatus() {
     activeTab === "all"
       ? allEvents
       : allEvents.filter((e) => e.status === activeTab);
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "preparing":
-        return "กำลังจัดเตรียม";
-      case "in_progress":
-        return "กำลังดำเนินการ";
-      case "completed":
-        return "เสร็จสิ้น";
-      case "undetermined":
-        return "ยังไม่ได้กำหนด";
-      default:
-        return status;
-    }
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -192,6 +183,12 @@ export default function WorkStatus() {
 
     addEvent(newWork);
     setIsModalOpen(false);
+  };
+  const formatThaiBE = (d) => {
+    if (!d) return "";
+    const year = d.getFullYear() + 543;
+    const dayMonth = format(d, "d MMMM", { locale: th });
+    return `${dayMonth} ${year}`;
   };
 
   return (
@@ -413,16 +410,30 @@ export default function WorkStatus() {
               <div className="form-group">
                 <label>วันที่</label>
                 <div className="date-input-wrapper">
-                  <span className="calendar-icon-left">
+                  <span
+                    className="calendar-icon-left"
+                    onClick={() => setIsDateOpen(true)}
+                  >
                     <IconCalendar />
                   </span>
-                  <input
-                    type="text"
-                    name="date"
-                    value={newWork.date}
-                    onChange={handleInputChange}
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date) => {
+                      setSelectedDate(date);
+                      setNewWork((prev) => ({
+                        ...prev,
+                        date: formatThaiBE(date),
+                      }));
+                      setIsDateOpen(false);
+                    }}
+                    open={isDateOpen}
+                    onInputClick={() => setIsDateOpen(true)}
+                    onClickOutside={() => setIsDateOpen(false)}
+                    locale={th}
+                    placeholderText="14/2/2568"
                     className="form-input with-icon-left"
-                    placeholder="14/2/2568"
+                    dateFormat="dd/MM/yyyy"
+                    showPopperArrow={false}
                   />
                 </div>
               </div>

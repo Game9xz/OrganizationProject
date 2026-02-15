@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './WorkRecordDetail.css';
 
 export default function WorkRecord() {
   const navigate = useNavigate();
   const location = useLocation();
-  const params = useParams();
-  const [notifyCount] = useState(0);
+  
   
   // Get event data from navigation state
-  const eventId = params.id;
   const eventData = location.state?.event || {};
-  const eventType = location.state?.eventType || 'wedding';
   const passedTimeline = location.state?.timeline || [];
   
   // Use event data for display
   const eventTitle = eventData?.title || 'บันทึกงานวันนี้';
   const eventDate = eventData?.date || '31 ตุลาคม, 2025';
   const eventLocation = eventData?.location || '';
-  const eventBudget = eventData?.budget || '';
-  const eventPeople = eventData?.people || '';
+  
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);

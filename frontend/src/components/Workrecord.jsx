@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useWorkContext } from "../context/WorkContext";
 import "./Workrecord.css";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
+import { th } from "date-fns/locale";
 
 // Icons
 const IconCalendar = () => (
@@ -508,6 +512,8 @@ export default function WorkRecord() {
     room: "",
     category: "",
   });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isDateOpen, setIsDateOpen] = useState(false);
 
   const logout = () => {
     localStorage.removeItem("se_remember");
@@ -570,6 +576,12 @@ export default function WorkRecord() {
 
     addEvent(newWork);
     setIsCreateModalOpen(false);
+  };
+  const formatThaiBE = (d) => {
+    if (!d) return "";
+    const year = d.getFullYear() + 543;
+    const dayMonth = format(d, "d MMMM", { locale: th });
+    return `${dayMonth} ${year}`;
   };
 
   const confirmDelete = () => {
@@ -935,16 +947,30 @@ export default function WorkRecord() {
                 <div className="form-group date-group">
                   <label>วันที่</label>
                   <div className="date-input-wrapper">
-                    <span className="calendar-icon-left">
+                    <span
+                      className="calendar-icon-left"
+                      onClick={() => setIsDateOpen(true)}
+                    >
                       <IconCalendar />
                     </span>
-                    <input
-                      type="text"
-                      name="date"
-                      value={newWork.date}
-                      onChange={handleCreateInputChange}
+                    <DatePicker
+                      selected={selectedDate}
+                      onChange={(date) => {
+                        setSelectedDate(date);
+                        setNewWork((prev) => ({
+                          ...prev,
+                          date: formatThaiBE(date),
+                        }));
+                        setIsDateOpen(false);
+                      }}
+                      open={isDateOpen}
+                      onInputClick={() => setIsDateOpen(true)}
+                      onClickOutside={() => setIsDateOpen(false)}
+                      locale={th}
+                      placeholderText="14/2/2568"
                       className="form-input with-icon-left"
-                      placeholder="14/2/2568"
+                      dateFormat="dd/MM/yyyy"
+                      showPopperArrow={false}
                     />
                   </div>
                 </div>
