@@ -74,6 +74,60 @@ const IconCalendar = () => (
   </svg>
 );
 
+const createEventTimeline = (eventId) => {
+  const timelines = {
+    1: [
+      { time: "06.00 น.", items: [{ title: "พิธีเช้าตักบาตร", timeRange: "เริ่มต้น 06:00 - 08:00 น.", type: "normal" }] },
+      { time: "09.00 น.", items: [{ title: "พิธีแห่ขันหมาก", timeRange: "เริ่มต้น 09:00 - 10:30 น.", type: "normal" }, { title: "พิธีการสู่ขอ และนับสินสอด", timeRange: "เริ่มต้น 10:30 - 11:00 น.", type: "normal" }, { title: "พิธีหลั่งน้ำพระพุทธมนต์", timeRange: "เริ่มต้น 11:30 - 12:00 น.", type: "normal" }] },
+      { time: "12.00 น.", items: [{ title: "รับประทานอาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 14:00 น.", type: "normal" }, { title: "พักผ่อน", timeRange: "เริ่มต้น 12:00 - 15:00 น.", type: "warning" }] },
+      { time: "15.00 น.", items: [{ title: "เตรียมตัว", timeRange: "เริ่มต้น 15:30 - 18:00 น.", type: "normal" }] },
+      { time: "18.00 น.", items: [{ title: "พิธีเย็น", timeRange: "เริ่มต้น 18:00 - 18:30 น.", type: "normal" }] },
+    ],
+    2: [
+      { time: "06.00 น.", items: [{ title: "พิธีเช้าตักบาตร", timeRange: "เริ่มต้น 06:30 - 08:00 น.", type: "normal" }] },
+      { time: "09.00 น.", items: [{ title: "พิธีแห่ขันหมาก", timeRange: "เริ่มต้น 09:00 - 10:00 น.", type: "normal" }, { title: "การประกอบพิธี", timeRange: "เริ่มต้น 10:30 - 11:30 น.", type: "normal" }] },
+      { time: "12.00 น.", items: [{ title: "เลี้ยงอาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 13:30 น.", type: "normal" }] },
+      { time: "15.00 น.", items: [{ title: "เตรียมเย็น", timeRange: "เริ่มต้น 15:00 - 16:30 น.", type: "normal" }] },
+      { time: "18.00 น.", items: [{ title: "สังสรรค์คืนค่ำ", timeRange: "เริ่มต้น 18:30 - 20:00 น.", type: "normal" }] },
+    ],
+    3: [
+      { time: "06.00 น.", items: [{ title: "เตรียมการ", timeRange: "เริ่มต้น 07:00 - 08:30 น.", type: "normal" }] },
+      { time: "09.00 น.", items: [{ title: "พิธีหลัก", timeRange: "เริ่มต้น 09:30 - 11:00 น.", type: "normal" }, { title: "ถ่ายรูป", timeRange: "เริ่มต้น 11:00 - 11:30 น.", type: "normal" }] },
+      { time: "12.00 น.", items: [{ title: "อาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 13:00 น.", type: "normal" }] },
+      { time: "15.00 น.", items: [{ title: "ลงพื้น", timeRange: "เริ่มต้น 15:00 - 17:00 น.", type: "normal" }] },
+      { time: "18.00 น.", items: [] },
+    ],
+    4: [
+      { time: "06.00 น.", items: [{ title: "เตรียมพื้นที่", timeRange: "เริ่มต้น 06:00 - 07:00 น.", type: "normal" }] },
+      { time: "09.00 น.", items: [{ title: "พิธีวิวาห์", timeRange: "เริ่มต้น 09:00 - 10:00 น.", type: "normal" }, { title: "ฉากหลัง", timeRange: "เริ่มต้น 10:00 - 11:00 น.", type: "normal" }] },
+      { time: "12.00 น.", items: [{ title: "ปลุกเสก", timeRange: "เริ่มต้น 12:30 - 13:30 น.", type: "normal" }] },
+      { time: "15.00 น.", items: [{ title: "แพทย์เยี่ยม", timeRange: "เริ่มต้น 15:30 - 16:30 น.", type: "normal" }] },
+      { time: "18.00 น.", items: [{ title: "ดูหน้า", timeRange: "เริ่มต้น 18:00 - 19:00 น.", type: "normal" }] },
+    ],
+    5: [
+      { time: "06.00 น.", items: [] },
+      { time: "09.00 น.", items: [{ title: "ตั้งค่าสถานที่", timeRange: "เริ่มต้น 09:00 - 11:00 น.", type: "normal" }] },
+      { time: "12.00 น.", items: [{ title: "เสิร์ฟอาหาร", timeRange: "เริ่มต้น 12:00 - 13:00 น.", type: "normal" }] },
+      { time: "15.00 น.", items: [{ title: "ตัดเค้ก", timeRange: "เริ่มต้น 15:00 - 15:30 น.", type: "normal" }] },
+      { time: "18.00 น.", items: [{ title: "การแสดงสด", timeRange: "เริ่มต้น 18:00 - 20:00 น.", type: "normal" }] },
+    ],
+    6: [
+      { time: "06.00 น.", items: [] },
+      { time: "09.00 น.", items: [{ title: "ลงทะเบียน", timeRange: "เริ่มต้น 08:30 - 09:00 น.", type: "normal" }, { title: "สปีชอาร์ต", timeRange: "เริ่มต้น 09:00 - 10:30 น.", type: "normal" }] },
+      { time: "12.00 น.", items: [{ title: "อาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 13:00 น.", type: "normal" }, { title: "Workshop", timeRange: "เริ่มต้น 13:00 - 14:30 น.", type: "normal" }] },
+      { time: "15.00 น.", items: [{ title: "อภิปรายกลุ่ม", timeRange: "เริ่มต้น 15:00 - 16:30 น.", type: "normal" }] },
+      { time: "18.00 น.", items: [{ title: "เลี้ยงค่ำ", timeRange: "เริ่มต้น 18:00 - 19:30 น.", type: "normal" }] },
+    ],
+  };
+  return timelines[eventId] || [
+    { time: "06.00 น.", items: [] },
+    { time: "09.00 น.", items: [] },
+    { time: "12.00 น.", items: [] },
+    { time: "15.00 น.", items: [] },
+    { time: "18.00 น.", items: [] },
+  ];
+};
+
 export default function WorkStatus() {
   const navigate = useNavigate();
   const { weddingEvents, partyEvents, updateEventStatus, addEvent } =
@@ -352,7 +406,12 @@ export default function WorkStatus() {
                   <td className="col-action">
                     <button
                       className="detail-btn"
-                      onClick={() => navigate(`/workrecord/detail/${event.id}`)}
+                      onClick={() => {
+                        const timeline = createEventTimeline(event.id);
+                        navigate(`/workrecord/detail/${event.id}`, {
+                          state: { event, timeline },
+                        });
+                      }}
                     >
                       รายละเอียด
                     </button>
