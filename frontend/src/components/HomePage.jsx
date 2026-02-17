@@ -1,12 +1,30 @@
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [user, setUser] = useState(null);
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    // เช็คก่อนใน localStorage
+    let storedUser = localStorage.getItem("user");
+
+    // ถ้าไม่มี ให้ไปดูใน sessionStorage
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   return (
     <div className="home-container">
       {/* Sidebar */}
@@ -21,8 +39,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <nav className="nav-menu">
@@ -55,7 +73,16 @@ export default function HomePage() {
           <div className="nav-item">งบประมาณ</div>
         </nav>
 
-        <button className="logout">Log out</button>
+        <button
+          className="logout"
+          onClick={() => {
+            localStorage.removeItem("user");
+            sessionStorage.removeItem("user");
+            navigate("/login");
+          }}
+        >
+          Log out
+        </button>
       </aside>
 
       {/* Main content */}
