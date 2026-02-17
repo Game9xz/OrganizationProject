@@ -12,6 +12,9 @@ export default function Inventory() {
     navigate("/login");
   };
 
+  const statusLabel = (s) =>
+    s === "available" ? "มีอยู่ในคลัง" : s === "low" ? "ใกล้หมด" : "สินค้าหมด";
+
   const TOTAL_KINDS = 218;
 
   const items = useMemo(() => [
@@ -129,7 +132,7 @@ export default function Inventory() {
                 <div className="inv-name">{it.name}</div>
                 <div className="inv-meta">
                   <span>คงเหลือ: {it.remain}</span>
-                  <span>สถานที่: {it.location}</span>
+                  <span>สถานะ: {statusLabel(it.status)}</span>
                 </div>
               </div>
             </article>
