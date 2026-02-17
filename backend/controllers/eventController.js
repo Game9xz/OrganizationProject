@@ -109,6 +109,24 @@ export const updateEvent = async (req, res) => {
   }
 };
 
+export const getEventById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query("SELECT * FROM events WHERE event_id = ?", [
+      id,
+    ]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "ไม่พบงาน" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // ลบงาน
 export const deleteEvent = async (req, res) => {
   try {
