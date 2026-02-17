@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useWorkContext } from "../context/WorkContext";
+import { useWorkContext } from "../context/useWorkContext";
 import "./WorkStatus.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -283,7 +283,7 @@ export default function WorkStatus() {
           <Link to="#" className="nav-item">
             ออกแบบ
           </Link>
-          <Link to="#" className="nav-item">
+          <Link to="/inventory" className="nav-item">
             คลัง
           </Link>
           <Link to="#" className="nav-item">

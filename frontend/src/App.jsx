@@ -17,6 +17,7 @@ import FuneralPackageDetail from "./components/FuneralPackageDetail";
 import CocktailPackageDetail from "./components/CocktailPackageDetail";
 import OrdinationPackageDetail from "./components/OrdinationPackageDetail";
 import HomePage from "./components/HomePage.jsx";
+import Inventory from "./components/Inventory.jsx";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
         path="/event/ordination/package"
         element={<OrdinationPackageDetail />}
       />
+      <Route path="/inventory" element={<Inventory />} />
     </Routes>
   );
 }

@@ -1,8 +1,5 @@
-import React, { createContext, useState, useContext } from "react";
-
-const WorkContext = createContext();
-
-export const useWorkContext = () => useContext(WorkContext);
+import React, { useState } from "react";
+import { WorkContext } from "./WorkContextBase";
 
 export const WorkProvider = ({ children }) => {
   const [weddingEvents, setWeddingEvents] = useState([
