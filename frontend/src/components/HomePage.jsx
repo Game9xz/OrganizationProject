@@ -70,7 +70,12 @@ export default function HomePage() {
           <div className="nav-item">ออกแบบ</div>
           <div className={isActive("/inventory") ? "nav-item active" : "nav-item"} onClick={() => navigate("/inventory")}>คลัง</div>
           <div className="nav-item">สถานะคลัง</div>
-          <div className="nav-item">งบประมาณ</div>
+          <div
+            className={isActive("/budget") ? "nav-item active" : "nav-item"}
+            onClick={() => navigate("/budget")}
+          >
+            งบประมาณ
+          </div>
         </nav>
 
         <button

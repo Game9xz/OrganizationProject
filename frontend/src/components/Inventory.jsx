@@ -87,7 +87,7 @@ export default function Inventory() {
           <Link to="#" className="nav-item">
             สถานะคลัง
           </Link>
-          <Link to="#" className="nav-item">
+          <Link to="/budget" className="nav-item">
             งบประมาณ
           </Link>
         </nav>

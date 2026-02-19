@@ -18,6 +18,8 @@ import CocktailPackageDetail from "./components/CocktailPackageDetail";
 import OrdinationPackageDetail from "./components/OrdinationPackageDetail";
 import HomePage from "./components/HomePage.jsx";
 import Inventory from "./components/Inventory.jsx";
+import Budget from "./components/Budget.jsx";
+import BudgetDetail from "./components/BudgetDetail.jsx";
 
 function App() {
   return (
@@ -48,6 +50,8 @@ function App() {
         element={<OrdinationPackageDetail />}
       />
       <Route path="/inventory" element={<Inventory />} />
+      <Route path="/budget" element={<Budget />} />
+      <Route path="/budget/:type" element={<BudgetDetail />} />
     </Routes>
   );
 }
