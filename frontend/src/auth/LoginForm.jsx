@@ -17,7 +17,7 @@ const Login = () => {
     setError("");
     setLoading(true);
 
-    const result = await loginUser(email, password);
+    const result = await loginUser(email, password, rememberMe);
 
     setLoading(false);
 
@@ -25,21 +25,17 @@ const Login = () => {
       // Login สำเร็จ
       console.log("Login successful:", result.data);
 
-      // เก็บข้อมูล user ใน localStorage (ถ้าเลือก Remember me)
+      // เก็บข้อมูล user ลง storage ตามที่ HomePage ต้องการ
+      const userData = result.data.user || result.data || {};
       if (rememberMe) {
-        localStorage.setItem("user", JSON.stringify(result.data.user));
+        localStorage.setItem("user", JSON.stringify(userData));
       } else {
-        sessionStorage.setItem("user", JSON.stringify(result.data.user));
+        sessionStorage.setItem("user", JSON.stringify(userData));
       }
 
-      // TODO: นำทางไปหน้าอื่น หรือ update state
-      Swal.fire({
-        title: "เข้าสู่ระบบสำเร็จ!",
-        icon: "success",
-        confirmButtonText: "หน้าแรก",
-      }).then(() => {
-        navigate("/homepage");
-      });
+      // นำทางไปหน้า homepage
+      console.log("กำลังจะไป homepage");
+      navigate("/homepage", { replace: true });
     } else {
       // Login ไม่สำเร็จ
       setError(result.error);

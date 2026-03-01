@@ -68,7 +68,12 @@ export default function HomePage() {
           </div>
 
           <div className="nav-item">ออกแบบ</div>
-          <div className={isActive("/inventory") ? "nav-item active" : "nav-item"} onClick={() => navigate("/inventory")}>คลัง</div>
+          <div
+            className={isActive("/inventory") ? "nav-item active" : "nav-item"}
+            onClick={() => navigate("/inventory")}
+          >
+            คลัง
+          </div>
           <div className="nav-item">สถานะคลัง</div>
           <div className="nav-item">งบประมาณ</div>
         </nav>
@@ -78,6 +83,8 @@ export default function HomePage() {
           onClick={() => {
             localStorage.removeItem("user");
             sessionStorage.removeItem("user");
+            localStorage.removeItem("token");
+            sessionStorage.removeItem("token");
             navigate("/login");
           }}
         >
