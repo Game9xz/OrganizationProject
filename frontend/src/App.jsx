@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginForm from "./auth/LoginForm";
+import LoginForm from "./auth/LoginForm.jsx";
 import SignUpForm from "./auth/SignUpForm";
 import Home from "./components/Home";
 import Workrecord from "./components/Workrecord";
