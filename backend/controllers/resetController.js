@@ -1,27 +1,9 @@
+import { Resend } from "resend";
 import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 
-// ตั้งค่า transporter สำหรับส่ง email (รองรับ Google Workspace เช่น @ku.th)
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first"); // บังคับ IPv4 (Railway ไม่รองรับ IPv6)
-
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-        rejectUnauthorized: false,
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // สร้าง OTP 6 หลัก
 const generateOTP = () => {
@@ -78,7 +60,23 @@ export const requestOTP = async (req, res) => {
       `,
         };
 
-        await transporter.sendMail(mailOptions);
+        await resend.emails.send({
+            from: "Event Organizer <onboarding@resend.dev>",
+            to: email,
+            subject: "รหัส OTP สำหรับรีเซ็ตรหัสผ่าน",
+            reply_to: "yourname@ku.th",
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; background: #1a1a1a; border-radius: 16px;">
+          <h2 style="color: #a855f7; text-align: center; margin-bottom: 8px;">🔐 รีเซ็ตรหัสผ่าน</h2>
+          <p style="color: #ccc; text-align: center; margin-bottom: 24px;">ใช้รหัส OTP ด้านล่างเพื่อยืนยันตัวตน</p>
+          <div style="background: linear-gradient(135deg, #7c3aed, #a855f7); padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 36px; font-weight: bold; color: white; letter-spacing: 8px;">${otp}</span>
+          </div>
+          <p style="color: #999; text-align: center; font-size: 14px;">รหัสนี้จะหมดอายุใน <strong style="color: #f59e0b;">5 นาที</strong></p>
+          <p style="color: #666; text-align: center; font-size: 12px; margin-top: 24px;">หากคุณไม่ได้ร้องขอรีเซ็ตรหัสผ่าน กรุณาเพิกเฉยต่อ email นี้</p>
+        </div>
+    `,
+        });
 
         res.status(200).json({ message: "ส่ง OTP ไปที่ email เรียบร้อยแล้ว" });
     } catch (err) {
