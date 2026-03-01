@@ -289,7 +289,7 @@ export default function WorkStatus() {
           <Link to="#" className="nav-item">
             สถานะคลัง
           </Link>
-          <Link to="/budget" className="nav-item">
+          <Link to="#" className="nav-item">
             งบประมาณ
           </Link>
         </nav>

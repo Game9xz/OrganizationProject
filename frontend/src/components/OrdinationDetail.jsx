@@ -33,7 +33,7 @@ export default function OrdinationDetail() {
             ←
           </button>
 
-          <h2>Ordination Ceremony</h2>
+          <h2>Ordination</h2>
 
           <div className="ordination-body">
             <img src="/funeral1.jpg" alt="Ordination" />

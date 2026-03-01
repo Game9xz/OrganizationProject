@@ -104,7 +104,7 @@ const Login = () => {
             </div>
 
             <div className="forgot-password">
-              <a href="#">Forgotten Password | รับรหัสผ่าน</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); navigate("/forgot-password"); }}>Forgotten Password | รับรหัสผ่าน</a>
             </div>
 
             <button type="submit" className="submit-btn" disabled={loading}>

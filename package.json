@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "date-fns": "^4.1.0",
-    "mysql2": "^3.17.2",
     "react-datepicker": "^9.1.0"
   }
 }

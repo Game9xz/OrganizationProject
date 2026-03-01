@@ -59,30 +59,26 @@
 /* ===== Main Content ===== */
 .funeral-content {
   flex: 1;
-  padding: 40px;   /* ให้เท่าหน้า 2 */
+  padding: 20px 40px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 /* ===== Card ===== */
 .funeral-card {
-  background: linear-gradient(145deg, #1b1b1b, #202020);
+  background: #1c1c1c;
   width: 100%;
-  max-width: 1350px;      /* เท่าหน้า 2 */
-  margin: 0 auto;         /* จัดกลางเหมือนหน้า 2 */
-  padding: 60px 80px;
+  max-width: 1100px; /* 🔥 กว้างขึ้น */
+  padding: 60px 80px; /* 🔥 เพิ่มพื้นที่ด้านใน */
   border-radius: 30px;
   position: relative;
-
-  display: flex;          /* เพิ่ม */
-  flex-direction: column; /* เพิ่ม */
-  align-items: center;    /* เพิ่ม */
+  min-height: 500px;
 }
 
 .funeral-card h2 {
   text-align: center;
-  font-size: 28px;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 /* ปุ่มย้อนกลับ */
@@ -102,36 +98,36 @@
 /* ===== Body ===== */
 .funeral-body {
   display: flex;
-  gap: 80px;
-  align-items: center;    /* ให้เหมือนหน้า 2 */
+  gap: 70px; /* 🔥 เพิ่มระยะห่าง */
+  align-items: center;
   justify-content: center;
 }
 
 .funeral-body img {
-  width: 420px;
-  height: 320px;
+  width: 400px;
+  height: 300px;
   object-fit: cover;
   border-radius: 20px;
 }
 
 .funeral-text {
-  max-width: 650px;
-  line-height: 1.9;
-  font-size: 16px;
+  max-width: 500px;
+  line-height: 1.8;
+  color: #ddd;
 }
-
 
 /* ===== ปุ่มหลัก ===== */
 .funeral-btn {
   display: block;
-  margin: 50px auto 0;
+  margin: 40px auto 0;
   background: linear-gradient(90deg, #7c3aed, #a855f7);
   border: none;
-  padding: 14px 60px;
+  padding: 12px 40px;
   border-radius: 30px;
   color: white;
-  cursor: pointer;
   font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 .funeral-btn:hover {

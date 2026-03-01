@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Inventory.css";
 import "./Workrecord.css";
@@ -16,9 +16,8 @@ export default function Inventory() {
     s === "available" ? "มีอยู่ในคลัง" : s === "low" ? "ใกล้หมด" : "สินค้าหมด";
 
   const TOTAL_KINDS = 218;
-  const LOW_THRESHOLD = 5;
 
-  const initialItems = useMemo(() => [
+  const items = useMemo(() => [
     { id: 1, name: "โต๊ะจัดเลี้ยง", status: "available", remain: 24, location: "คลัง A", imageUrl: "https://www.thanawantent.com/wp-content/uploads/2013/08/%E0%B9%82%E0%B8%95%E0%B9%8A%E0%B8%B0%E0%B8%88%E0%B8%B5%E0%B8%99-2.jpg" },
     { id: 2, name: "เก้าอี้/โต๊ะ งานเลี้ยง", status: "available", remain: 150, location: "คลัง A", imageUrl: "https://thesun-service.com/wp-content/uploads/2015/09/318792099_610877087707432_7631995644192319998_n-e1673236637830.jpg" },
     { id: 3, name: "แบคดรอป", status: "available", remain: 12, location: "คลัง B", imageUrl: "https://piteereetong.com/wp-content/uploads/2025/07/backdrop7-768x563.jpg" },
@@ -35,7 +34,6 @@ export default function Inventory() {
     { id: 14, name: "ไฟเวที", status: "low", remain: 2, location: "คลัง E", imageUrl: "https://image.made-in-china.com/202f0j00LreqRSwsyibm/Easy-Install-Wedding-Stage-Equipment-Lighting-Truss-Decoration-Truss.webp" },
     { id: 15, name: "ไฟประดับ", status: "available", remain: 40, location: "คลัง E", imageUrl: "https://down-th.img.susercontent.com/file/sg-11134201-22110-lt8n01t8qhkv06" },
   ], []);
-  const [items, setItems] = useState(initialItems);
 
   const stats = useMemo(() => {
     const remaining = items
@@ -45,36 +43,6 @@ export default function Inventory() {
     const outCount = items.filter((it) => it.status === "out").length;
     return { totalKinds: TOTAL_KINDS, remaining, lowCount, outCount };
   }, [items]);
-
-  const adjustRemain = async (id, delta) => {
-    const current = items.find((it) => it.id === id);
-    const prevRemain = current ? current.remain || 0 : 0;
-    const newRemain = Math.max(0, prevRemain + delta);
-    const newStatus =
-      newRemain === 0 ? "out" : newRemain <= LOW_THRESHOLD ? "low" : "available";
-    const prevStatus =
-      prevRemain === 0 ? "out" : prevRemain <= LOW_THRESHOLD ? "low" : "available";
-
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === id ? { ...it, remain: newRemain, status: newStatus } : it,
-      ),
-    );
-    try {
-      await fetch(`/api/inventory/${id}/adjust`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ delta, remain: newRemain, status: newStatus }),
-      });
-    } catch {
-      // rollback if request failed
-      setItems((prev) =>
-        prev.map((it) =>
-          it.id === id ? { ...it, remain: prevRemain, status: prevStatus } : it,
-        ),
-      );
-    }
-  };
 
   return (
     <div className="inv-layout">
@@ -119,7 +87,7 @@ export default function Inventory() {
           <Link to="#" className="nav-item">
             สถานะคลัง
           </Link>
-          <Link to="/budget" className="nav-item">
+          <Link to="#" className="nav-item">
             งบประมาณ
           </Link>
         </nav>
@@ -165,21 +133,6 @@ export default function Inventory() {
                 <div className="inv-meta">
                   <span>คงเหลือ: {it.remain}</span>
                   <span>สถานะ: {statusLabel(it.status)}</span>
-                </div>
-                <div className="inv-controls">
-                  <button
-                    className="inv-btn minus"
-                    onClick={() => adjustRemain(it.id, -1)}
-                    disabled={it.remain <= 0}
-                  >
-                    −
-                  </button>
-                  <button
-                    className="inv-btn plus"
-                    onClick={() => adjustRemain(it.id, +1)}
-                  >
-                    +
-                  </button>
                 </div>
               </div>
             </article>

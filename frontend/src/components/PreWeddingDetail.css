@@ -1,7 +1,3 @@
-/* =========================
-   LAYOUT หลัก
-========================= */
-
 .pre-container {
   display: flex;
   min-height: 100vh;
@@ -29,11 +25,6 @@
   padding: 12px 0;
   color: #ccc;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.menu li:hover {
-  color: white;
 }
 
 .logout {
@@ -42,16 +33,12 @@
   padding: 10px;
   border-radius: 20px;
   color: white;
-  cursor: pointer;
 }
 
-/* =========================
-   MAIN
-========================= */
-
+/* Main */
 .pre-content {
   flex: 1;
-  padding: 40px;
+  padding: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -60,9 +47,9 @@
 .pre-card {
   background: linear-gradient(145deg, #1b1b1b, #202020);
   width: 100%;
-  max-width: 1200px;
-  border-radius: 25px;
-  padding: 40px;
+  max-width: 1350px;
+  border-radius: 30px;
+  padding: 60px;
   position: relative;
 }
 
@@ -82,14 +69,14 @@
 /* Layout */
 .pre-body {
   display: flex;
-  gap: 60px;
-  align-items: flex-start;
+  gap: 80px;
+  align-items: center;
 }
 
 .pre-image {
-  width: 400px;
-  height: 600px;
-  object-fit: cover;
+  width: 450px;
+  height: 650px; /* ให้สูง */
+  object-fit: cover; /* ครอปให้เต็ม */
   border-radius: 20px;
 }
 
@@ -100,7 +87,7 @@
 }
 
 .pre-text h2 {
-  font-size: 28px;
+  font-size: 32px;
   margin-bottom: 15px;
 }
 
@@ -127,217 +114,4 @@
   border-radius: 20px;
   color: white;
   cursor: pointer;
-}
-
-/* =========================
-   MODAL
-========================= */
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-box {
-  background: #1c1c1c;
-  padding: 40px;
-  border-radius: 20px;
-  width: 800px;
-  max-width: 95%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-.modal-box h2 {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-/* =========================
-   FORM
-========================= */
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  font-size: 14px;
-  margin-bottom: 8px;
-  display: block;
-  color: #ccc;
-}
-
-/* option buttons */
-.option-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.option-btn {
-  background: linear-gradient(90deg, #7c3aed, #a855f7);
-  border: none;
-  padding: 8px 15px;
-  border-radius: 20px;
-  color: white;
-  cursor: pointer;
-  font-size: 13px;
-  transition: 0.2s ease;
-}
-
-.option-btn:hover {
-  transform: scale(1.05);
-}
-
-.option-btn.active {
-  background: white;
-  color: #7c3aed;
-  font-weight: bold;
-}
-
-/* =========================
-   DATE PICKER (เลื่อนลงล่าง)
-========================= */
-
-.date-range {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.date-range input {
-  padding: 8px;
-  border-radius: 10px;
-  border: none;
-}
-
-.date-range span {
-  color: white;
-}
-
-/* =========================
-   SELECT
-========================= */
-
-.budget-select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 20px;
-  border: none;
-  background: white;
-  color: black;
-}
-
-/* =========================
-   INPUT 2 COLUMN
-========================= */
-
-.row-2 {
-  display: flex;
-  gap: 15px;
-}
-
-.row-2 input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 15px;
-  border: none;
-  outline: none;
-}
-
-/* =========================
-   BUTTONS
-========================= */
-
-.submit-btn {
-  background: linear-gradient(90deg, #7c3aed, #a855f7);
-  border: none;
-  padding: 12px;
-  border-radius: 25px;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.submit-btn:hover:not(:disabled) {
-  transform: scale(1.03);
-}
-
-.submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.close-btn {
-  background: #555;
-  border: none;
-  padding: 8px;
-  border-radius: 15px;
-  color: white;
-  cursor: pointer;
-}
-
-/* =========================
-   SUCCESS POPUP
-========================= */
-
-.success-box {
-  text-align: center;
-}
-
-.success-icon {
-  font-size: 60px;
-  color: #22c55e;
-  margin: 20px 0;
-}
-
-/* =========================
-   ANIMATION
-========================= */
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* ปุ่มแสดงวันที่ (สีขาวด้านบน) */
-.date-display {
-  background: white;
-  color: #7c3aed;
-  font-weight: bold;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-/* popup อยู่ด้านล่างจริง */
-.date-popup {
-  margin-top: 12px;
-  background: #2a2a2a;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  animation: slideDown 0.2s ease;
-}
-
-/* animation ลงล่าง */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
