@@ -1,3 +1,6 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first"); // บังคับ IPv4 (Railway ไม่รองรับ IPv6)
+
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
