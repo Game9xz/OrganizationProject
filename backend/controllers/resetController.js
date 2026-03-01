@@ -3,13 +3,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
-// ตั้งค่า transporter สำหรับส่ง email
+// ตั้งค่า transporter สำหรับส่ง email (รองรับ Google Workspace เช่น @ku.th)
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
 });
 
 // สร้าง OTP 6 หลัก

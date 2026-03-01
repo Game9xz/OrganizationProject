@@ -22,23 +22,34 @@ const Login = () => {
     setLoading(false);
 
     if (result.success) {
-      // Login สำเร็จ
-      console.log("Login successful:", result.data);
+      // ✅ กรณี Login สำเร็จ
+      Swal.fire({
+        icon: "success",
+        title: "เข้าสู่ระบบสำเร็จ!",
+        text: "กำลังนำคุณไปยังหน้าแรก...",
+        timer: 1500, // แสดง 1.5 วินาทีแล้วหายไปเอง
+        showConfirmButton: false,
+      }).then(() => {
+        const userData = result.data.user || result.data || {};
+        if (rememberMe) {
+          localStorage.setItem("user", JSON.stringify(userData));
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(userData));
+        }
+        navigate("/homepage", { replace: true });
+      });
 
-      // เก็บข้อมูล user ลง storage ตามที่ HomePage ต้องการ
-      const userData = result.data.user || result.data || {};
-      if (rememberMe) {
-        localStorage.setItem("user", JSON.stringify(userData));
-      } else {
-        sessionStorage.setItem("user", JSON.stringify(userData));
-      }
-
-      // นำทางไปหน้า homepage
-      console.log("กำลังจะไป homepage");
-      navigate("/homepage", { replace: true });
     } else {
-      // Login ไม่สำเร็จ
-      setError(result.error);
+      // ❌ กรณี Login ไม่สำเร็จ
+      setError(result.error); // ยังเก็บไว้แสดงในฟอร์มได้ (ถ้าต้องการ)
+
+      Swal.fire({
+        icon: "error",
+        title: "เข้าสู่ระบบไม่สำเร็จ",
+        text: result.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+        confirmButtonColor: "#d33", // สีปุ่มตกลงเป็นสีแดง
+        confirmButtonText: "ลองอีกครั้ง"
+      });
     }
   };
 
