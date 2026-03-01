@@ -18,6 +18,9 @@ import CocktailPackageDetail from "./components/CocktailPackageDetail";
 import OrdinationPackageDetail from "./components/OrdinationPackageDetail";
 import HomePage from "./components/HomePage.jsx";
 import Inventory from "./components/Inventory.jsx";
+import ForgotPassword from "./auth/ForgotPassword.jsx";
+import VerifyOTP from "./auth/VerifyOTP.jsx";
+import ResetPassword from "./auth/ResetPassword.jsx";
 
 function App() {
   return (
@@ -48,6 +51,9 @@ function App() {
         element={<OrdinationPackageDetail />}
       />
       <Route path="/inventory" element={<Inventory />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verify-otp" element={<VerifyOTP />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
   );
 }
