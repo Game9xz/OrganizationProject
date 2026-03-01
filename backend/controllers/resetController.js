@@ -5,6 +5,8 @@ import nodemailer from "nodemailer";
 
 // ตั้งค่า transporter สำหรับส่ง email (รองรับ Google Workspace เช่น @ku.th)
 import dns from "dns";
+dns.setDefaultResultOrder("ipv4first"); // บังคับ IPv4 (Railway ไม่รองรับ IPv6)
+
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -19,9 +21,6 @@ const transporter = nodemailer.createTransport({
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
-    dnsLookup: (hostname, options, callback) => {
-        dns.lookup(hostname, { family: 4 }, callback);
-    },
 });
 
 // สร้าง OTP 6 หลัก
