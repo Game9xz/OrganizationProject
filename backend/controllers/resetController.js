@@ -1,18 +1,40 @@
-import nodemailer from "nodemailer";
 import db from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+// ส่ง email ผ่าน Brevo HTTP API
+const sendOTPEmail = async (email, otp) => {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "api-key": process.env.BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+            sender: {
+                email: process.env.BREVO_SENDER_EMAIL,
+                name: "Event Organizer",
+            },
+            to: [{ email }],
+            subject: "รหัส OTP สำหรับรีเซ็ตรหัสผ่าน",
+            htmlContent: `
+                <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 32px;">
+                    <h2>🔐 รีเซ็ตรหัสผ่าน</h2>
+                    <p>ใช้รหัส OTP ด้านล่างเพื่อยืนยันตัวตน</p>
+                    <h1 style="letter-spacing: 6px;">${otp}</h1>
+                    <p>รหัสจะหมดอายุใน 5 นาที</p>
+                </div>
+            `,
+        }),
+    });
 
-const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS,
-    },
-});
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Brevo API Error: ${JSON.stringify(error)}`);
+    }
+
+    return response.json();
+};
 
 // สร้าง OTP 6 หลัก
 const generateOTP = () => {
@@ -28,7 +50,6 @@ export const requestOTP = async (req, res) => {
     }
 
     try {
-        // เช็คว่ามี user อยู่จริง
         const [users] = await db.query(
             "SELECT user_id FROM user WHERE email = ?",
             [email]
@@ -38,33 +59,16 @@ export const requestOTP = async (req, res) => {
             return res.status(404).json({ message: "ไม่พบ email นี้ในระบบ" });
         }
 
-        // สร้าง OTP
         const otp = generateOTP();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // หมดอายุใน 5 นาที
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-        // ลบ OTP เก่าของ email นี้
         await db.query("DELETE FROM otp_codes WHERE email = ?", [email]);
-
-        // บันทึก OTP ใหม่
         await db.query(
             "INSERT INTO otp_codes (email, otp_code, expires_at) VALUES (?, ?, ?)",
             [email, otp, expiresAt]
         );
 
-        // ส่ง email
-        await transporter.sendMail({
-            from: `"Event Organizer" <${process.env.BREVO_USER}>`,
-            to: email,
-            subject: "รหัส OTP สำหรับรีเซ็ตรหัสผ่าน",
-            html: `
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 32px;">
-          <h2>🔐 รีเซ็ตรหัสผ่าน</h2>
-          <p>ใช้รหัส OTP ด้านล่างเพื่อยืนยันตัวตน</p>
-          <h1 style="letter-spacing: 6px;">${otp}</h1>
-          <p>รหัสจะหมดอายุใน 5 นาที</p>
-        </div>
-      `,
-        });
+        await sendOTPEmail(email, otp);
 
         res.status(200).json({ message: "ส่ง OTP ไปที่ email เรียบร้อยแล้ว" });
     } catch (err) {
@@ -73,7 +77,7 @@ export const requestOTP = async (req, res) => {
     }
 };
 
-// POST /api/reset/verify-otp
+// POST /api/reset/verify-otp (เหมือนเดิม)
 export const verifyOTP = async (req, res) => {
     const { email, otp } = req.body;
 
@@ -91,48 +95,38 @@ export const verifyOTP = async (req, res) => {
             return res.status(400).json({ message: "OTP ไม่ถูกต้องหรือหมดอายุ" });
         }
 
-        // สร้าง reset token (ใช้ได้ 10 นาที)
         const resetToken = jwt.sign(
             { email, purpose: "reset_password" },
             process.env.JWT_SECRET,
             { expiresIn: "10m" }
         );
 
-        // ลบ OTP ที่ใช้แล้ว
         await db.query("DELETE FROM otp_codes WHERE email = ?", [email]);
 
-        res.status(200).json({
-            message: "ยืนยัน OTP สำเร็จ",
-            resetToken,
-        });
+        res.status(200).json({ message: "ยืนยัน OTP สำเร็จ", resetToken });
     } catch (err) {
         console.error("Verify OTP Error:", err);
         res.status(500).json({ error: err.message });
     }
 };
 
-// POST /api/reset/reset-password
+// POST /api/reset/reset-password (เหมือนเดิม)
 export const resetPassword = async (req, res) => {
     const { resetToken, newPassword } = req.body;
 
     if (!resetToken || !newPassword) {
-        return res
-            .status(400)
-            .json({ message: "กรุณากรอก token และ password ใหม่" });
+        return res.status(400).json({ message: "กรุณากรอก token และ password ใหม่" });
     }
 
     try {
-        // Verify reset token
         const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
 
         if (decoded.purpose !== "reset_password") {
             return res.status(400).json({ message: "Token ไม่ถูกต้อง" });
         }
 
-        // Hash password ใหม่
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update password ใน DB
         const [result] = await db.query(
             "UPDATE user SET password = ? WHERE email = ?",
             [hashedPassword, decoded.email]
@@ -145,9 +139,7 @@ export const resetPassword = async (req, res) => {
         res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
     } catch (err) {
         if (err.name === "TokenExpiredError") {
-            return res
-                .status(400)
-                .json({ message: "Token หมดอายุ กรุณาขอ OTP ใหม่" });
+            return res.status(400).json({ message: "Token หมดอายุ กรุณาขอ OTP ใหม่" });
         }
         console.error("Reset Password Error:", err);
         res.status(500).json({ error: err.message });
