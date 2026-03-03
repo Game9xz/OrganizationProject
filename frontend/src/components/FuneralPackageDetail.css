@@ -1,3 +1,7 @@
+/* =========================
+   LAYOUT
+========================= */
+
 .funeralpkg-container {
   display: flex;
   min-height: 100vh;
@@ -6,7 +10,10 @@
   font-family: "Segoe UI", sans-serif;
 }
 
-/* Sidebar */
+/* =========================
+   SIDEBAR
+========================= */
+
 .sidebar {
   width: 220px;
   background: #1a1a1a;
@@ -25,6 +32,11 @@
   padding: 12px 0;
   color: #ccc;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.menu li:hover {
+  color: white;
 }
 
 .logout {
@@ -33,9 +45,13 @@
   padding: 10px;
   border-radius: 20px;
   color: white;
+  cursor: pointer;
 }
 
-/* Main */
+/* =========================
+   MAIN
+========================= */
+
 .funeralpkg-content {
   flex: 1;
   padding: 40px;
@@ -79,6 +95,7 @@
 }
 
 .funeralpkg-text {
+  flex: 1;
   max-width: 600px;
   line-height: 1.8;
 }
@@ -107,4 +124,218 @@
   border-radius: 20px;
   color: white;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.funeralpkg-btn:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: #1c1c1c;
+  padding: 40px;
+  border-radius: 20px;
+  width: 800px;
+  max-width: 95%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-box h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  color: #ccc;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* option buttons */
+
+.option-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.option-btn {
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.option-btn:hover {
+  transform: scale(1.05);
+}
+
+.option-btn.active {
+  background: white;
+  color: #7c3aed;
+  font-weight: bold;
+}
+
+/* =========================
+   DATE SYSTEM
+========================= */
+
+.date-popup {
+  margin-top: 12px;
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  animation: slideDown 0.2s ease;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-range input {
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+}
+
+.date-range span {
+  color: white;
+}
+
+/* =========================
+   SELECT
+========================= */
+
+.budget-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  background: white;
+  color: black;
+}
+
+/* =========================
+   INPUT
+========================= */
+
+.modal-box input {
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+}
+
+/* 2 column layout */
+
+.row-2 {
+  display: flex;
+  gap: 15px;
+}
+
+.row-2 input {
+  flex: 1;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.submit-btn {
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border: none;
+  padding: 12px;
+  border-radius: 25px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: scale(1.03);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.close-btn {
+  background: #555;
+  border: none;
+  padding: 8px;
+  border-radius: 15px;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.close-btn:hover {
+  background: #777;
+}
+
+/* =========================
+   SUCCESS
+========================= */
+
+.success-box {
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 60px;
+  color: #22c55e;
+  margin: 20px 0;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
