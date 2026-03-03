@@ -106,7 +106,7 @@ export default function HomePage() {
           <EventCard
             img="/funeral.jpg"
             title="Funeral"
-            price="13,500 THB"
+            price="59,999 THB"
             link="/event/funeral"
           />
           <EventCard
@@ -118,7 +118,7 @@ export default function HomePage() {
           <EventCard
             img="/ordination.jpg"
             title="Ordination"
-            price="50,000 THB"
+            price="79,999 THB"
             link="/event/ordination"
           />
         </div>
@@ -139,7 +139,7 @@ function EventCard({ img, title, price, link }) {
       <img src={img} alt={title} />
       <div className="event-info">
         <h4>{title}</h4>
-        <span className="price">เริ่มต้น {price}</span>
+        <span className="price">ราคา {price}</span>
 
         {/* ปุ่มกดไปหน้ารายละเอียด */}
         <Link to={link}>

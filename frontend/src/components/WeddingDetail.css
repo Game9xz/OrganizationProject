@@ -107,11 +107,14 @@
   color: #a78bfa;
   font-weight: bold;
   margin-bottom: 15px;
+  font-size: 34px;
 }
 
-.wed-text ul {
-  margin: 15px 0 25px;
+.limit-title {
+  color: red;
+  font-weight: bold;
 }
+
 
 /* ปุ่มสนใจ */
 .wed-btn {
@@ -312,4 +315,14 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.location-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  background: white !important;
+  color: black !important;
 }

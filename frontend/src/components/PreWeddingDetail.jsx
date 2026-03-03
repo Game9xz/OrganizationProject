@@ -5,34 +5,33 @@ import "./PreWeddingDetail.css";
 export default function PreWeddingDetail() {
   const navigate = useNavigate();
 
-  // Modal
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Date
   const [selectedDateType, setSelectedDateType] = useState("");
   const [showDateInput, setShowDateInput] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Guest
-  const [selectedGuest, setSelectedGuest] = useState("");
+  // 🔥 จำนวนแขกแบบพิมพ์
+  const [guestCount, setGuestCount] = useState("");
 
-  // Form
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
-  const [budget, setBudget] = useState("");
+  const [location, setLocation] = useState("");
 
   const isFormComplete =
     selectedDateType &&
-    selectedGuest &&
-    budget &&
+    guestCount &&
     name &&
     phone &&
     email &&
     lineId &&
+    location &&
+    guestCount >= 10 &&
+    guestCount <= 15 &&
     (selectedDateType !== "custom" || (startDate && endDate));
 
   return (
@@ -76,7 +75,11 @@ export default function PreWeddingDetail() {
 
             <div className="pre-text">
               <h2>Pre - Wedding Package</h2>
-              <p className="price">แพ็กเกจพรีเวดดิ้ง 13,000 บาท</p>
+
+              <p className="price">
+                แพ็กเกจพรีเวดดิ้ง ราคา 12,999 บาท
+              </p>
+
               <p>
                 พร้อมทีมดูแล และ ช่างภาพมืออาชีพ ทั้งสถานที่ อาหาร และการตกแต่ง
               </p>
@@ -87,7 +90,15 @@ export default function PreWeddingDetail() {
                 <li>สามารถถ่ายรูปได้ตั้งแต่ 08.00-18.00 น.</li>
                 <li>ดินเนอร์สุดโรแมนติกสำหรับ 2 ท่าน</li>
                 <li>ส่วนลดพิเศษ 15% สำหรับอาหารและเครื่องดื่ม</li>
-                <li>ห้องพักวิลล่า 1 ห้องนอน อัปเกรด 3,000 บาท</li>
+                <li>ห้องพักวิลล่า 1 ห้องนอน</li>
+              </ul>
+
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
+              <ul>
+                <li>จำนวนแขกขั้นต่ำ 10 ไม่เกิน 15 คน</li>
               </ul>
 
               <button
@@ -164,7 +175,6 @@ export default function PreWeddingDetail() {
                 </button>
               </div>
 
-              {/* Date popup */}
               {showDateInput && (
                 <div className="date-popup">
                   <div className="date-range">
@@ -193,43 +203,34 @@ export default function PreWeddingDetail() {
               )}
             </div>
 
-            {/* จำนวนแขก */}
+            {/* จำนวนแขกแบบพิมพ์ */}
             <div className="form-group">
-              <label>จำนวนแขก</label>
-
-              <div className="option-row">
-                {[
-                  "ต่ำกว่า 100 คน",
-                  "101-300 คน",
-                  "301-500 คน",
-                  "500 คนขึ้นไป",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    className={`option-btn ${
-                      selectedGuest === item ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedGuest(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <label>จำนวนแขก (10 - 15 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+                className="location-input"
+              />
+              {guestCount &&
+                (guestCount < 10 || guestCount > 15) && (
+                  <p style={{ color: "red", fontSize: "13px", marginTop: "5px" }}>
+                    จำนวนแขกต้องอยู่ระหว่าง 10 - 15 คน
+                  </p>
+                )}
             </div>
 
-            {/* งบประมาณ */}
+            {/* สถานที่ */}
             <div className="form-group">
-              <label>งบประมาณ</label>
-              <select
-                className="budget-select"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              >
-                <option value="">เลือกงบประมาณ</option>
-                <option>ต่ำกว่า 50,000 บาท</option>
-                <option>50,000 - 100,000 บาท</option>
-                <option>100,000 บาทขึ้นไป</option>
-              </select>
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="location-input"
+              />
             </div>
 
             {/* ข้อมูลติดต่อ */}
@@ -281,7 +282,7 @@ export default function PreWeddingDetail() {
         </div>
       )}
 
-      {/* SUCCESS MODAL */}
+      {/* SUCCESS */}
       {showSuccess && (
         <div className="modal-overlay">
           <div className="modal-box success-box">

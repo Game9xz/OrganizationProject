@@ -16,10 +16,7 @@ export default function OrdinationPackageDetail() {
   const [endDate, setEndDate] = useState("");
 
   // Guest
-  const [selectedGuest, setSelectedGuest] = useState("");
-
-  // Budget
-  const [budget, setBudget] = useState("");
+  const [guestCount, setGuestCount] = useState("");
 
   // Contact
   const [name, setName] = useState("");
@@ -27,15 +24,34 @@ export default function OrdinationPackageDetail() {
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
 
+  // Location
+  const [location, setLocation] = useState("");
+
+  /* ===============================
+     VALIDATION
+  =============================== */
+
+  const isGuestValid =
+    guestCount !== "" &&
+    !isNaN(Number(guestCount)) &&
+    Number(guestCount) >= 100 &&
+    Number(guestCount) <= 350;
+
+  const isDateValid =
+    selectedDateType === "custom"
+      ? startDate !== "" && endDate !== ""
+      : selectedDateType === "3m" ||
+        selectedDateType === "6m" ||
+        selectedDateType === "1y";
+
   const isFormComplete =
-    selectedDateType &&
-    selectedGuest &&
-    budget &&
-    name &&
-    phone &&
-    email &&
-    lineId &&
-    (selectedDateType !== "custom" || (startDate && endDate));
+    isDateValid &&
+    isGuestValid &&
+    name.trim() !== "" &&
+    phone.trim() !== "" &&
+    email.trim() !== "" &&
+    lineId.trim() !== "" &&
+    location.trim() !== "";
 
   return (
     <div className="ordpkg-container">
@@ -80,7 +96,7 @@ export default function OrdinationPackageDetail() {
               <h2>Ordination Ceremony</h2>
 
               <p className="price">
-                แพ็กเกจงานบวชครบวงจร ราคาเริ่มต้น 50,000 บาท
+                แพ็กเกจงานบวชครบวงจร ราคา 79,999 บาท
               </p>
 
               <p>
@@ -98,6 +114,14 @@ export default function OrdinationPackageDetail() {
                 <li>โต๊ะจีน / บุฟเฟต์</li>
                 <li>ระบบเครื่องเสียง</li>
                 <li>ทีมงานดูแลตลอดงาน</li>
+              </ul>
+
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
+              <ul>
+                <li>จำนวนแขกขั้นต่ำ 100 ไม่เกิน 350 คน</li>
               </ul>
 
               <button
@@ -144,6 +168,8 @@ export default function OrdinationPackageDetail() {
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 3 เดือน
@@ -156,6 +182,8 @@ export default function OrdinationPackageDetail() {
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 6 เดือน
@@ -168,6 +196,8 @@ export default function OrdinationPackageDetail() {
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 1 ปี
@@ -183,9 +213,7 @@ export default function OrdinationPackageDetail() {
                       min={new Date().toISOString().split("T")[0]}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
-
                     <span>ถึง</span>
-
                     <input
                       type="date"
                       value={endDate}
@@ -193,7 +221,7 @@ export default function OrdinationPackageDetail() {
                       onChange={(e) => {
                         setEndDate(e.target.value);
                         if (startDate && e.target.value) {
-                          setShowDateInput(false);
+                          setShowDateInput(false); // ✅ ปิด popup เมื่อเลือกครบ
                         }
                       }}
                     />
@@ -204,41 +232,36 @@ export default function OrdinationPackageDetail() {
 
             {/* จำนวนแขก */}
             <div className="form-group">
-              <label>จำนวนแขก</label>
-
-              <div className="option-row">
-                {[
-                  "ต่ำกว่า 100 คน",
-                  "101-300 คน",
-                  "301-500 คน",
-                  "500 คนขึ้นไป",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    className={`option-btn ${
-                      selectedGuest === item ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedGuest(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              <label>จำนวนแขก (100 - 350 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    setGuestCount("");
+                  } else {
+                    setGuestCount(Number(value));
+                  }
+                }}
+              />
+              {guestCount !== "" && !isGuestValid && (
+                <p style={{ color: "red", fontSize: "13px" }}>
+                  จำนวนแขกต้องอยู่ระหว่าง 100 - 350 คน
+                </p>
+              )}
             </div>
 
-            {/* งบประมาณ */}
+            {/* สถานที่ */}
             <div className="form-group">
-              <label>งบประมาณ</label>
-              <select
-                className="budget-select"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              >
-                <option value="">เลือกงบประมาณ</option>
-                <option>ต่ำกว่า 50,000 บาท</option>
-                <option>50,000 - 100,000 บาท</option>
-                <option>100,000 บาทขึ้นไป</option>
-              </select>
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
             </div>
 
             {/* ข้อมูลติดต่อ */}
@@ -290,7 +313,7 @@ export default function OrdinationPackageDetail() {
         </div>
       )}
 
-      {/* SUCCESS */}
+      {/* SUCCESS MODAL */}
       {showSuccess && (
         <div className="modal-overlay">
           <div className="modal-box success-box">

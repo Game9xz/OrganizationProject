@@ -360,3 +360,26 @@
     flex-direction: column;
   }
 }
+
+.location-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  background: white;
+  color: black;
+}
+
+/* ทำข้อจำกัดเป็นสีแดง */
+.limit-title {
+  color: red;
+  font-weight: bold;
+}
+
+/* ขยายราคา */
+.price {
+  font-size: 26px;
+  font-weight: bold;
+  color: #a78bfa;
+}
