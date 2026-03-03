@@ -227,6 +227,8 @@
   padding: 8px;
   border-radius: 10px;
   border: none;
+  background: #ffffff !important; /* 🔥 บังคับ */
+  color: #000000 !important;
 }
 
 .date-range span {
@@ -239,22 +241,38 @@
 
 .budget-select {
   width: 100%;
-  padding: 10px;
-  border-radius: 20px;
+  padding: 12px;
+  border-radius: 25px;
   border: none;
-  background: white;
-  color: black;
+  background: #ffffff !important;
+  color: #000000 !important;
 }
 
 /* =========================
-   INPUT
+   INPUT (FORCE WHITE)
 ========================= */
 
-.modal-box input {
-  padding: 10px;
-  border-radius: 12px;
+.modal-box input,
+.modal-box select,
+.modal-box textarea {
+  padding: 12px;
+  border-radius: 25px;
   border: none;
   outline: none;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: none !important;
+}
+
+/* placeholder */
+.modal-box input::placeholder {
+  color: #777 !important;
+}
+
+/* autofill fix */
+.modal-box input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #000000 !important;
 }
 
 /* 2 column layout */
@@ -338,4 +356,17 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ทำข้อจำกัดเป็นสีแดง */
+.limit-title {
+  color: red;
+  font-weight: bold;
+}
+
+/* ขยายราคาขึ้น */
+.price {
+  font-size: 26px;
+  font-weight: bold;
+  color: #a78bfa;
 }

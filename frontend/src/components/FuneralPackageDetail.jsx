@@ -8,29 +8,42 @@ export default function FuneralPackageDetail() {
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // ✅ เพิ่ม state วันที่ (ตัวที่คุณลืม)
+  // Date
   const [selectedDateType, setSelectedDateType] = useState("");
   const [showDateInput, setShowDateInput] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const [selectedGuest, setSelectedGuest] = useState("");
-  const [budget, setBudget] = useState("");
+  // 🔥 เปลี่ยนเป็นพิมพ์จำนวนคน
+  const [guestCount, setGuestCount] = useState("");
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
+  const [location, setLocation] = useState("");
+
+  /* ================= VALIDATION ================= */
+
+  const isGuestValid =
+    guestCount !== "" &&
+    !isNaN(Number(guestCount)) &&
+    Number(guestCount) >= 200 &&
+    Number(guestCount) <= 350;
+
+  const isDateValid =
+    selectedDateType === "custom"
+      ? startDate && endDate
+      : selectedDateType !== "";
 
   const isFormComplete =
-    selectedDateType &&
-    selectedGuest &&
-    budget &&
-    name &&
-    phone &&
-    email &&
-    lineId &&
-    (selectedDateType !== "custom" || (startDate && endDate));
+    isDateValid &&
+    isGuestValid &&
+    name.trim() !== "" &&
+    phone.trim() !== "" &&
+    email.trim() !== "" &&
+    lineId.trim() !== "" &&
+    location.trim() !== "";
 
   return (
     <div className="funeralpkg-container">
@@ -70,13 +83,30 @@ export default function FuneralPackageDetail() {
               <h2>Funeral Ceremony</h2>
 
               <p className="price">
-                แพ็กเกจจัดงานศพครบวงจร ราคาเริ่มต้น 13,500 บาท
+                แพ็กเกจจัดงานศพครบวงจร ราคาเริ่มต้น 59,999 บาท
               </p>
 
               <p>
-                งานศพหลากหลายรูปแบบ ให้ท่านเลือกได้ตามงบประมาณ
-                พร้อมทีมงานดูแลครบทุกขั้นตอน
+                งานศพ มีสินค้าและบริการให้ท่านครบครัน รวมไปถึงของใช้ที่จำเป็นในงานศพ
               </p>
+
+              <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
+
+              <ul>
+                <li>หีบฐาน 3 ชั้น</li>
+                <li>ดอกไม้หน้าศพแบบโค้ง 3 ชั้น</li>
+                <li>อุปกรณ์เชิญวิญญาณ</li>
+                <li>ชุดดอกไม้รดน้ำศพ</li>
+                <li>ดอกไม้จันทร์</li>
+              </ul>
+
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
+              <ul>
+                <li>จำนวนแขกขั้นต่ำ 200 ไม่เกิน 350 คน</li>
+              </ul>
 
               <button
                 className="funeralpkg-btn"
@@ -160,9 +190,7 @@ export default function FuneralPackageDetail() {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
-
                     <span>ถึง</span>
-
                     <input
                       type="date"
                       value={endDate}
@@ -179,43 +207,32 @@ export default function FuneralPackageDetail() {
               )}
             </div>
 
-            {/* จำนวนแขก */}
+            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
             <div className="form-group">
-              <label>จำนวนแขก</label>
+              <label>จำนวนแขก (200 - 350 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+              />
 
-              <div className="option-row">
-                {[
-                  "ต่ำกว่า 100 คน",
-                  "101-300 คน",
-                  "301-500 คน",
-                  "500 คนขึ้นไป",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    className={`option-btn ${
-                      selectedGuest === item ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedGuest(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              {guestCount !== "" && !isGuestValid && (
+                <p style={{ color: "red", fontSize: "13px" }}>
+                  จำนวนแขกต้องอยู่ระหว่าง 200 - 350 คน
+                </p>
+              )}
             </div>
 
-            {/* งบประมาณ */}
+            {/* สถานที่ */}
             <div className="form-group">
-              <label>งบประมาณ</label>
-              <select
-                className="budget-select"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              >
-                <option value="">เลือกงบประมาณ</option>
-                <option>ต่ำกว่า 50,000 บาท</option>
-                <option>50,000 - 100,000 บาท</option>
-                <option>100,000 บาทขึ้นไป</option>
-              </select>
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
             </div>
 
             {/* ข้อมูลติดต่อ */}

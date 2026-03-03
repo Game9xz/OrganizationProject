@@ -16,24 +16,40 @@ export default function WeddingDetail() {
   const [endDate, setEndDate] = useState("");
 
   // Guest
-  const [selectedGuest, setSelectedGuest] = useState("");
+  const [guestCount, setGuestCount] = useState("");
 
   // Form
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
-  const [budget, setBudget] = useState("");
+  const [location, setLocation] = useState("");
+
+  /* ===============================
+     VALIDATION
+  =============================== */
+
+  const isGuestValid =
+    guestCount !== "" &&
+    !isNaN(Number(guestCount)) &&
+    Number(guestCount) >= 250 &&
+    Number(guestCount) <= 450;
+
+  const isDateValid =
+    selectedDateType === "custom"
+      ? startDate !== "" && endDate !== ""
+      : selectedDateType === "3m" ||
+        selectedDateType === "6m" ||
+        selectedDateType === "1y";
 
   const isFormComplete =
-    selectedDateType &&
-    selectedGuest &&
-    budget &&
-    name &&
-    phone &&
-    email &&
-    lineId &&
-    (selectedDateType !== "custom" || (startDate && endDate));
+    isDateValid &&
+    isGuestValid &&
+    name.trim() !== "" &&
+    phone.trim() !== "" &&
+    email.trim() !== "" &&
+    lineId.trim() !== "" &&
+    location.trim() !== "";
 
   return (
     <div className="wed-container">
@@ -74,7 +90,7 @@ export default function WeddingDetail() {
               <h2>Wedding Package</h2>
 
               <p className="price">
-                แพ็กเกจจัดงานแต่งงาน ราคาเริ่มต้น 95,000 บาท
+                แพ็กเกจจัดงานแต่งงาน ราคา 95,500 บาท
               </p>
 
               <p>
@@ -83,17 +99,25 @@ export default function WeddingDetail() {
               </p>
 
               <ul>
-                <li>อาหารสำหรับแขก 150 ท่าน</li>
+                <li>อาหารสำหรับแขก 250 - 450 ท่าน</li>
                 <li>การตกแต่งเวที VIP และโต๊ะในงาน</li>
                 <li>กล่องรับซอง (สำหรับยืม)</li>
                 <li>ชั้นวางของชำร่วย</li>
                 <li>ช่อดอกไม้บูเก้</li>
                 <li>มาลัยคล้องคอบ่าวสาว</li>
                 <li>น้ำดื่ม, น้ำอัดลม บริการฟรีตลอดทั้งงาน</li>
-                <li>ฟรี ค่าธรรมเนียมนำเข้าเครื่องดื่มแอลกอฮอล์ (ยกเว้นเบียร์)</li>
+                <li>ฟรี ค่าธรรมเนียมนำเข้าเครื่องดื่มแอลกอฮอล์</li>
                 <li>บริการที่จอดรถสำหรับแขก VIP</li>
-                <li>เครื่องฉายโปรเจคเตอร์ พร้อมฉาก</li>
+                <li>เครื่องฉายโปรเจคเตอร์</li>
                 <li>บริการเครื่องเสียงแบบมาตรฐาน</li>
+              </ul>
+
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
+              <ul>
+                <li>จำนวนแขกขั้นต่ำ 250 ไม่เกิน 450 คน</li>
               </ul>
 
               <button
@@ -116,7 +140,6 @@ export default function WeddingDetail() {
             {/* Date */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
-
               <div className="option-row">
                 <button
                   className={`option-btn ${
@@ -140,17 +163,22 @@ export default function WeddingDetail() {
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 3 เดือน
                 </button>
-                 <button
+
+                <button
                   className={`option-btn ${
                     selectedDateType === "6m" ? "active" : ""
                   }`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 6 เดือน
@@ -163,6 +191,8 @@ export default function WeddingDetail() {
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 1 ปี
@@ -183,7 +213,9 @@ export default function WeddingDetail() {
                       value={endDate}
                       onChange={(e) => {
                         setEndDate(e.target.value);
-                        if (startDate) setShowDateInput(false);
+                        if (startDate && e.target.value) {
+                          setShowDateInput(false);
+                        }
                       }}
                     />
                   </div>
@@ -193,42 +225,39 @@ export default function WeddingDetail() {
 
             {/* Guest */}
             <div className="form-group">
-              <label>จำนวนแขก</label>
-              <div className="option-row">
-                {["ต่ำกว่า 100 คน",
-                  "101-300 คน",
-                  "301-500 คน",
-                  "500 คนขึ้นไป",]
-                .map(
-                  (item) => (
-                    <button
-                      key={item}
-                      className={`option-btn ${
-                        selectedGuest === item ? "active" : ""
-                      }`}
-                      onClick={() => setSelectedGuest(item)}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
-              </div>
+              <label>จำนวนแขก (250 - 450 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    setGuestCount("");
+                  } else {
+                    setGuestCount(Number(value));
+                  }
+                }}
+                className="location-input"
+              />
+
+              {guestCount !== "" && !isGuestValid && (
+                <p style={{ color: "red", fontSize: "13px" }}>
+                  จำนวนแขกต้องอยู่ระหว่าง 250 - 450 คน
+                </p>
+              )}
             </div>
 
-            {/* Budget */}
+            {/* Location */}
             <div className="form-group">
-              <label>งบประมาณ</label>
-              <select
-                className="budget-select"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              >
-                <option value="">เลือกงบประมาณ</option>
-                <option>ต่ำกว่า 40,000 บาท</option>
-                <option>40,000 - 150,000 บาท</option>
-                <option>150,000 - 300,000 บาท</option>
-                <option>300,000 บาทขึ้นไป</option>
-              </select>
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="location-input"
+              />
             </div>
 
             {/* Contact */}

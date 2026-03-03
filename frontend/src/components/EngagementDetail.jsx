@@ -5,37 +5,48 @@ import "./EngagementDetail.css";
 export default function EngagementDetail() {
   const navigate = useNavigate();
 
-  // ================= MODAL =================
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // ================= DATE =================
+  // DATE
   const [selectedDateType, setSelectedDateType] = useState("");
   const [showDateInput, setShowDateInput] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // ================= FORM =================
-  const [selectedGuest, setSelectedGuest] = useState("");
-  const [budget, setBudget] = useState("");
+  // 🔥 เปลี่ยนเป็นพิมพ์จำนวนแขก
+  const [guestCount, setGuestCount] = useState("");
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
+  const [location, setLocation] = useState("");
+
+  /* ================= VALIDATION ================= */
+
+  const isGuestValid =
+    guestCount !== "" &&
+    !isNaN(Number(guestCount)) &&
+    Number(guestCount) >= 50 &&
+    Number(guestCount) <= 150;
+
+  const isDateValid =
+    selectedDateType === "custom"
+      ? startDate && endDate
+      : selectedDateType !== "";
 
   const isFormComplete =
-    selectedDateType &&
-    selectedGuest &&
-    budget &&
-    name &&
-    phone &&
-    email &&
-    lineId &&
-    (selectedDateType !== "custom" || (startDate && endDate));
+    isDateValid &&
+    isGuestValid &&
+    name.trim() !== "" &&
+    phone.trim() !== "" &&
+    email.trim() !== "" &&
+    lineId.trim() !== "" &&
+    location.trim() !== "";
 
   return (
     <div className="eng-container">
-      {/* Sidebar */}
       <aside className="sidebar">
         <div className="brand">
           <h3>SE EVENT</h3>
@@ -55,7 +66,6 @@ export default function EngagementDetail() {
         <button className="logout">Log out</button>
       </aside>
 
-      {/* ================= MAIN ================= */}
       <main className="eng-content">
         <div className="eng-card">
           <button
@@ -76,18 +86,30 @@ export default function EngagementDetail() {
               <h2>Engagement Ceremony Package</h2>
 
               <p className="price">
-                แพ็กเกจงานหมั้นเริ่มเพียง 40,000 บาท
+                แพ็กเกจงานหมั้น ราคา 49,999 บาท
               </p>
 
               <p>
                 พร้อมทีมดูแลพิธีการแบบครบวงจร ทั้งสถานที่ อาหาร และการตกแต่ง
               </p>
 
+              <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
+
+              <ul> <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li> 
+              <li>การจัดอาสนะ: ชุดโซฟาสำหรับประธานและญาติผู้ใหญ่บนเวที</li> 
+              <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (เช่น 30-50 ท่าน)</li> 
+              <li>ป้ายชื่อบ่าวสาว: Backdrop บนเวทีพร้อมโลโก้ชื่อคู่บ่าวสาว</li> 
+              <li>การตกแต่งดอกไม้: สแตนด์ดอกไม้บนเวที 1 คู่, ดอกไม้ตกแต่งโต๊ะลงทะเบียน</li> 
+              <li>พานแหวนหมั้น: พานดอกไม้สำหรับวางแหวนหมั้น</li> 
+              <li>ห้องพัก: ห้องพัก 1 คืนสำหรับบ่าวสาวพร้อมอาหารเช้า</li> 
+              <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li> </ul>
+
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
               <ul>
-                <li>แพ็กเกจเริ่มต้น 40,000 บาท (30 ท่าน)</li>
-                <li>แพ็กเกจมาตรฐาน 50,000 บาท (50 ท่าน)</li>
-                <li>แพ็กเกจพิธีครบชุด 60,000 บาท (50 ท่าน)</li>
-                <li>บริการตกแต่งสถานที่ อาหาร และอุปกรณ์ครบ</li>
+                <li>จำนวนแขกขั้นต่ำ 50 ไม่เกิน 150 คน</li>
               </ul>
 
               <button
@@ -178,7 +200,7 @@ export default function EngagementDetail() {
                       value={endDate}
                       onChange={(e) => {
                         setEndDate(e.target.value);
-                        if (startDate) {
+                        if (startDate && e.target.value) {
                           setShowDateInput(false);
                         }
                       }}
@@ -188,40 +210,34 @@ export default function EngagementDetail() {
               )}
             </div>
 
-            {/* GUEST */}
+            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
             <div className="form-group">
-              <label>จำนวนแขก</label>
+              <label>จำนวนแขก (50 - 150 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+                className="location-input"
+              />
 
-              <div className="option-row">
-                {["ต่ำกว่า 50 คน", "50-100 คน", "100 คนขึ้นไป"].map(
-                  (item) => (
-                    <button
-                      key={item}
-                      className={`option-btn ${
-                        selectedGuest === item ? "active" : ""
-                      }`}
-                      onClick={() => setSelectedGuest(item)}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
-              </div>
+              {guestCount !== "" && !isGuestValid && (
+                <p style={{ color: "red", fontSize: "13px" }}>
+                  จำนวนแขกต้องอยู่ระหว่าง 50 - 150 คน
+                </p>
+              )}
             </div>
 
-            {/* BUDGET */}
+            {/* LOCATION */}
             <div className="form-group">
-              <label>งบประมาณ</label>
-              <select
-                className="budget-select"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              >
-                <option value="">เลือกงบประมาณ</option>
-                <option>ต่ำกว่า 50,000 บาท</option>
-                <option>50,000 - 100,000 บาท</option>
-                <option>100,000 บาทขึ้นไป</option>
-              </select>
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="location-input"
+              />
             </div>
 
             {/* INFO */}

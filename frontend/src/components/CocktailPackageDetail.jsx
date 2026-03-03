@@ -5,7 +5,6 @@ import "./CocktailPackageDetail.css";
 export default function CocktailPackageDetail() {
   const navigate = useNavigate();
 
-  // Modal
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -15,29 +14,39 @@ export default function CocktailPackageDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Guest
-  const [selectedGuest, setSelectedGuest] = useState("");
+  // 🔥 เปลี่ยนเป็นพิมพ์จำนวนแขก
+  const [guestCount, setGuestCount] = useState("");
 
-  // Form
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
-  const [budget, setBudget] = useState("");
+  const [location, setLocation] = useState("");
+
+  /* ================= VALIDATION ================= */
+
+  const isGuestValid =
+    guestCount !== "" &&
+    !isNaN(Number(guestCount)) &&
+    Number(guestCount) >= 100 &&
+    Number(guestCount) <= 150;
+
+  const isDateValid =
+    selectedDateType === "custom"
+      ? startDate && endDate
+      : selectedDateType !== "";
 
   const isFormComplete =
-    selectedDateType &&
-    selectedGuest &&
-    budget &&
-    name &&
-    phone &&
-    email &&
-    lineId &&
-    (selectedDateType !== "custom" || (startDate && endDate));
+    isDateValid &&
+    isGuestValid &&
+    name.trim() !== "" &&
+    phone.trim() !== "" &&
+    email.trim() !== "" &&
+    lineId.trim() !== "" &&
+    location.trim() !== "";
 
   return (
     <div className="cocktailpkg-container">
-      {/* Sidebar */}
       <aside className="sidebar">
         <div className="brand">
           <h3>SE EVENT</h3>
@@ -57,7 +66,6 @@ export default function CocktailPackageDetail() {
         <button className="logout">Log out</button>
       </aside>
 
-      {/* Main */}
       <main className="cocktailpkg-content">
         <div className="cocktailpkg-card">
           <button
@@ -78,12 +86,11 @@ export default function CocktailPackageDetail() {
               <h2>Cocktail Party Package</h2>
 
               <p className="price">
-                แพ็กเกจจัดเลี้ยงค็อกเทล ระดับพรีเมียม ราคาเริ่มต้นเพียง 20,000 บาท
+                แพ็กเกจจัดเลี้ยงค็อกเทล ระดับพรีเมียม ราคา 29,999 บาท
               </p>
 
               <p>
-                โดยทีมงานมืออาชีพ พร้อมอาหารสไตล์ค็อกเทล เหมาะสำหรับงานแต่งงาน
-                งานเลี้ยงบริษัท งานประชุม และงานสังสรรค์ต่างๆ
+                โดยทีมงานมืออาชีพ พร้อมอาหารสไตล์ค็อกเทล
               </p>
 
               <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
@@ -92,9 +99,17 @@ export default function CocktailPackageDetail() {
                 <li>อาหารว่าง Thai</li>
                 <li>อาหารว่าง Inter</li>
                 <li>ของหวาน</li>
-                <li>น้ำดื่ม น้ำอัดลม บริการตลอดงาน</li>
+                <li>น้ำดื่มและน้ำอัดลม</li>
                 <li>ตกแต่งสถานที่</li>
-                <li>บริการเครื่องเสียงมาตรฐาน</li>
+                <li>ระบบเครื่องเสียงมาตรฐาน</li>
+              </ul>
+
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
+              <ul>
+                <li>จำนวนแขกขั้นต่ำ 100 ไม่เกิน 150 คน</li>
               </ul>
 
               <button
@@ -114,7 +129,7 @@ export default function CocktailPackageDetail() {
           <div className="modal-box large">
             <h2>ลงทะเบียน</h2>
 
-            {/* วันที่ */}
+            {/* DATE */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
 
@@ -195,46 +210,35 @@ export default function CocktailPackageDetail() {
               )}
             </div>
 
-            {/* จำนวนแขก */}
+            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
             <div className="form-group">
-              <label>จำนวนแขก</label>
+              <label>จำนวนแขก (100 - 150 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => setGuestCount(e.target.value)}
+              />
 
-              <div className="option-row">
-                {[
-                  "ต่ำกว่า 100 คน",
-                  "101-300 คน",
-                  "301-500 คน",
-                  "500 คนขึ้นไป",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    className={`option-btn ${
-                      selectedGuest === item ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedGuest(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
+              {guestCount !== "" && !isGuestValid && (
+                <p style={{ color: "red", fontSize: "13px" }}>
+                  จำนวนแขกต้องอยู่ระหว่าง 100 - 150 คน
+                </p>
+              )}
             </div>
 
-            {/* งบประมาณ */}
+            {/* LOCATION */}
             <div className="form-group">
-              <label>งบประมาณ</label>
-              <select
-                className="budget-select"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              >
-                <option value="">เลือกงบประมาณ</option>
-                <option>ต่ำกว่า 50,000 บาท</option>
-                <option>50,000 - 100,000 บาท</option>
-                <option>100,000 บาทขึ้นไป</option>
-              </select>
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
             </div>
 
-            {/* ข้อมูลติดต่อ */}
+            {/* INFO */}
             <div className="row-2">
               <input
                 type="text"
@@ -289,7 +293,6 @@ export default function CocktailPackageDetail() {
           <div className="modal-box success-box">
             <h2>ลงทะเบียนเสร็จสิ้น</h2>
             <div className="success-icon">✔</div>
-            <p>ติดต่อสอบถามได้ที่</p>
             <p>📧 cpe_group8@ku.th</p>
             <p>📞 089-999-9999</p>
 

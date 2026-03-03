@@ -341,3 +341,25 @@
     transform: translateY(0);
   }
 }
+
+.location-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  background: white;
+  color: black;
+}
+
+/* ทำหัวข้อข้อจำกัดเป็นสีแดง */
+.limit-title {
+  color: red;
+  font-weight: bold;
+}
+
+/* ขยายขนาดราคา */
+.price {
+  font-size: 30px;
+  font-weight: bold;
+}
