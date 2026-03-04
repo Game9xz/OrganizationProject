@@ -5,6 +5,9 @@ import "./FuneralPackageDetail.css";
 export default function FuneralPackageDetail() {
   const navigate = useNavigate();
 
+  // 🔥 กำหนดราคาแพ็กเกจงานศพที่นี่
+  const packagePrice = 59999;
+
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -14,7 +17,7 @@ export default function FuneralPackageDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // 🔥 เปลี่ยนเป็นพิมพ์จำนวนคน
+  // จำนวนแขก
   const [guestCount, setGuestCount] = useState("");
 
   const [name, setName] = useState("");
@@ -44,6 +47,63 @@ export default function FuneralPackageDetail() {
     email.trim() !== "" &&
     lineId.trim() !== "" &&
     location.trim() !== "";
+
+  /* ================= SUBMIT TO DATABASE ================= */
+  const handleSubmit = async () => {
+    try {
+      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+      let event_timeframe = null;
+      let event_date = null;
+
+      if (selectedDateType === "custom") {
+        event_date = `${startDate} - ${endDate}`;
+      } else if (selectedDateType === "3m") {
+        event_timeframe = "ภายใน 3 เดือน";
+      } else if (selectedDateType === "6m") {
+        event_timeframe = "ภายใน 6 เดือน";
+      } else if (selectedDateType === "1y") {
+        event_timeframe = "ภายใน 1 ปี";
+      }
+
+      // 2. สร้าง Payload
+      const payload = {
+        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
+        package_id: 3, // 🔥 สมมติแพ็กเกจนี้ id = 3 (งานศพ)
+        guest_count: guestCount,
+        duration: "ตามแพ็กเกจ", 
+        budget: packagePrice, // ส่งราคา 59999 เข้าไป
+        full_name: name,
+        contact_email: email,
+        phone: phone,
+        line_id: lineId,
+        location: location,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        event_date: event_date,
+        event_timeframe: event_timeframe
+      };
+
+      // 3. ยิง API บันทึกลงฐานข้อมูล
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+        setShowSuccess(true);
+      } else {
+        const data = await response.json();
+        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    }
+  };
 
   return (
     <div className="funeralpkg-container">
@@ -82,8 +142,9 @@ export default function FuneralPackageDetail() {
             <div className="funeralpkg-text">
               <h2>Funeral Ceremony</h2>
 
+              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
-                แพ็กเกจจัดงานศพครบวงจร ราคาเริ่มต้น 59,999 บาท
+                แพ็กเกจจัดงานศพครบวงจร ราคาเริ่มต้น {packagePrice.toLocaleString()} บาท
               </p>
 
               <p>
@@ -266,10 +327,11 @@ export default function FuneralPackageDetail() {
               />
             </div>
 
+            {/* 🔥 เรียกใช้ handleSubmit แทน */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
-              onClick={() => setShowSuccess(true)}
+              onClick={handleSubmit}
             >
               ลงทะเบียน
             </button>

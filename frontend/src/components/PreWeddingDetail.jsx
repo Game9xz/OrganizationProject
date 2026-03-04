@@ -5,6 +5,9 @@ import "./PreWeddingDetail.css";
 export default function PreWeddingDetail() {
   const navigate = useNavigate();
 
+  // 🔥 กำหนดราคาแพ็กเกจพรีเวดดิ้งที่นี่
+  const packagePrice = 12999;
+
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -13,7 +16,7 @@ export default function PreWeddingDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // 🔥 จำนวนแขกแบบพิมพ์
+  // จำนวนแขกแบบพิมพ์
   const [guestCount, setGuestCount] = useState("");
 
   const [name, setName] = useState("");
@@ -22,6 +25,7 @@ export default function PreWeddingDetail() {
   const [lineId, setLineId] = useState("");
   const [location, setLocation] = useState("");
 
+  /* ================= VALIDATION ================= */
   const isFormComplete =
     selectedDateType &&
     guestCount &&
@@ -33,6 +37,63 @@ export default function PreWeddingDetail() {
     guestCount >= 10 &&
     guestCount <= 15 &&
     (selectedDateType !== "custom" || (startDate && endDate));
+
+  /* ================= SUBMIT TO DATABASE ================= */
+  const handleSubmit = async () => {
+    try {
+      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+      let event_timeframe = null;
+      let event_date = null;
+
+      if (selectedDateType === "custom") {
+        event_date = `${startDate} - ${endDate}`;
+      } else if (selectedDateType === "3m") {
+        event_timeframe = "ภายใน 3 เดือน";
+      } else if (selectedDateType === "6m") {
+        event_timeframe = "ภายใน 6 เดือน";
+      } else if (selectedDateType === "1y") {
+        event_timeframe = "ภายใน 1 ปี";
+      }
+
+      // 2. สร้าง Payload
+      const payload = {
+        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
+        package_id: 5, // 🔥 สมมติแพ็กเกจนี้ id = 5 (Pre-Wedding)
+        guest_count: Number(guestCount),
+        duration: "08.00-18.00 น.", // ตามรายละเอียดแพ็กเกจ
+        budget: packagePrice, // ส่งราคา 12999 เข้าไป
+        full_name: name,
+        contact_email: email,
+        phone: phone,
+        line_id: lineId,
+        location: location,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        event_date: event_date,
+        event_timeframe: event_timeframe
+      };
+
+      // 3. ยิง API บันทึกลงฐานข้อมูล
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+        setShowSuccess(true);
+      } else {
+        const data = await response.json();
+        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    }
+  };
 
   return (
     <div className="pre-container">
@@ -76,8 +137,9 @@ export default function PreWeddingDetail() {
             <div className="pre-text">
               <h2>Pre - Wedding Package</h2>
 
+              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
-                แพ็กเกจพรีเวดดิ้ง ราคา 12,999 บาท
+                แพ็กเกจพรีเวดดิ้ง ราคา {packagePrice.toLocaleString()} บาท
               </p>
 
               <p>
@@ -145,6 +207,8 @@ export default function PreWeddingDetail() {
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 3 เดือน
@@ -157,6 +221,8 @@ export default function PreWeddingDetail() {
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 6 เดือน
@@ -169,6 +235,8 @@ export default function PreWeddingDetail() {
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
                   }}
                 >
                   ภายใน 1 ปี
@@ -264,10 +332,11 @@ export default function PreWeddingDetail() {
               />
             </div>
 
+            {/* 🔥 เรียกใช้ handleSubmit แทนการโชว์ Modal ทันที */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
-              onClick={() => setShowSuccess(true)}
+              onClick={handleSubmit}
             >
               ลงทะเบียน
             </button>

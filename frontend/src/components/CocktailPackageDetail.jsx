@@ -5,6 +5,9 @@ import "./CocktailPackageDetail.css";
 export default function CocktailPackageDetail() {
   const navigate = useNavigate();
 
+  // 🔥 กำหนดราคาแพ็กเกจไว้ที่นี่ (แก้ที่เดียว อัปเดตทั้งหน้าจอและ Database)
+  const packagePrice = 29999;
+
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -14,7 +17,7 @@ export default function CocktailPackageDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // 🔥 เปลี่ยนเป็นพิมพ์จำนวนแขก
+  // จำนวนแขก
   const [guestCount, setGuestCount] = useState("");
 
   const [name, setName] = useState("");
@@ -44,6 +47,63 @@ export default function CocktailPackageDetail() {
     email.trim() !== "" &&
     lineId.trim() !== "" &&
     location.trim() !== "";
+
+  /* ================= SUBMIT TO DATABASE ================= */
+  const handleSubmit = async () => {
+    try {
+      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+      let event_timeframe = null;
+      let event_date = null;
+
+      if (selectedDateType === "custom") {
+        event_date = `${startDate} - ${endDate}`;
+      } else if (selectedDateType === "3m") {
+        event_timeframe = "ภายใน 3 เดือน";
+      } else if (selectedDateType === "6m") {
+        event_timeframe = "ภายใน 6 เดือน";
+      } else if (selectedDateType === "1y") {
+        event_timeframe = "ภายใน 1 ปี";
+      }
+
+      // 2. สร้าง Payload
+      const payload = {
+        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน (ปรับเป็น ID ผู้ใช้จริงภายหลัง)
+        package_id: 1, // หมายเหตุ: สมมติแพ็กเกจนี้ id = 1
+        guest_count: guestCount,
+        duration: "ตามแพ็กเกจ",
+        budget: packagePrice, // 🔥 ส่งราคา 29999 เข้าไปใน Database
+        full_name: name,
+        contact_email: email,
+        phone: phone,
+        line_id: lineId,
+        location: location,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        event_date: event_date,
+        event_timeframe: event_timeframe
+      };
+
+      // 3. ยิง API บันทึกลงฐานข้อมูล
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+        setShowSuccess(true);
+      } else {
+        const data = await response.json();
+        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    }
+  };
 
   return (
     <div className="cocktailpkg-container">
@@ -85,8 +145,9 @@ export default function CocktailPackageDetail() {
             <div className="cocktailpkg-text">
               <h2>Cocktail Party Package</h2>
 
+              {/* 🔥 ดึงราคามาแสดงผลแบบมีลูกน้ำ (29,999) อัตโนมัติ */}
               <p className="price">
-                แพ็กเกจจัดเลี้ยงค็อกเทล ระดับพรีเมียม ราคา 29,999 บาท
+                แพ็กเกจจัดเลี้ยงค็อกเทล ระดับพรีเมียม ราคา {packagePrice.toLocaleString()} บาท
               </p>
 
               <p>
@@ -210,7 +271,7 @@ export default function CocktailPackageDetail() {
               )}
             </div>
 
-            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
+            {/* จำนวนแขกแบบพิมพ์ */}
             <div className="form-group">
               <label>จำนวนแขก (100 - 150 คน)</label>
               <input
@@ -269,10 +330,11 @@ export default function CocktailPackageDetail() {
               />
             </div>
 
+            {/* เรียกใช้ handleSubmit แทนที่จะเปิด modal success เฉยๆ */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
-              onClick={() => setShowSuccess(true)}
+              onClick={handleSubmit} 
             >
               ลงทะเบียน
             </button>

@@ -5,6 +5,9 @@ import "./WeddingDetail.css";
 export default function WeddingDetail() {
   const navigate = useNavigate();
 
+  // 🔥 กำหนดราคาแพ็กเกจงานแต่งที่นี่
+  const packagePrice = 95500;
+
   // Modal
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -51,6 +54,63 @@ export default function WeddingDetail() {
     lineId.trim() !== "" &&
     location.trim() !== "";
 
+  /* ================= SUBMIT TO DATABASE ================= */
+  const handleSubmit = async () => {
+    try {
+      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+      let event_timeframe = null;
+      let event_date = null;
+
+      if (selectedDateType === "custom") {
+        event_date = `${startDate} - ${endDate}`;
+      } else if (selectedDateType === "3m") {
+        event_timeframe = "ภายใน 3 เดือน";
+      } else if (selectedDateType === "6m") {
+        event_timeframe = "ภายใน 6 เดือน";
+      } else if (selectedDateType === "1y") {
+        event_timeframe = "ภายใน 1 ปี";
+      }
+
+      // 2. สร้าง Payload
+      const payload = {
+        user_id: 1, // หมายเหตุ: สมมติค่า User ID เป็น 1 ไว้ก่อน
+        package_id: 6, // 🔥 สมมติแพ็กเกจนี้ id = 6 (Wedding)
+        guest_count: Number(guestCount),
+        duration: "ทั้งวัน", // งานแต่งแบบครบวงจร
+        budget: packagePrice, // ส่งราคา 95500 เข้าไป
+        full_name: name,
+        contact_email: email,
+        phone: phone,
+        line_id: lineId,
+        location: location,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        event_date: event_date,
+        event_timeframe: event_timeframe
+      };
+
+      // 3. ยิง API บันทึกลงฐานข้อมูล
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+        setShowSuccess(true);
+      } else {
+        const data = await response.json();
+        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    }
+  };
+
   return (
     <div className="wed-container">
       {/* Sidebar */}
@@ -89,8 +149,9 @@ export default function WeddingDetail() {
             <div className="wed-text">
               <h2>Wedding Package</h2>
 
+              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
-                แพ็กเกจจัดงานแต่งงาน ราคา 95,500 บาท
+                แพ็กเกจจัดงานแต่งงาน ราคา {packagePrice.toLocaleString()} บาท
               </p>
 
               <p>
@@ -205,12 +266,14 @@ export default function WeddingDetail() {
                     <input
                       type="date"
                       value={startDate}
+                      min={new Date().toISOString().split("T")[0]}
                       onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span>ถึง</span>
                     <input
                       type="date"
                       value={endDate}
+                      min={startDate}
                       onChange={(e) => {
                         setEndDate(e.target.value);
                         if (startDate && e.target.value) {
@@ -291,10 +354,11 @@ export default function WeddingDetail() {
               />
             </div>
 
+            {/* 🔥 เรียกใช้ handleSubmit ตรงนี้ */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
-              onClick={() => setShowSuccess(true)}
+              onClick={handleSubmit}
             >
               ลงทะเบียน
             </button>
