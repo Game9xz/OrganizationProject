@@ -5,6 +5,9 @@ import "./EngagementDetail.css";
 export default function EngagementDetail() {
   const navigate = useNavigate();
 
+  // 🔥 กำหนดราคาแพ็กเกจงานหมั้นที่นี่
+  const packagePrice = 49999;
+
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -14,7 +17,7 @@ export default function EngagementDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // 🔥 เปลี่ยนเป็นพิมพ์จำนวนแขก
+  // จำนวนแขก
   const [guestCount, setGuestCount] = useState("");
 
   const [name, setName] = useState("");
@@ -44,6 +47,63 @@ export default function EngagementDetail() {
     email.trim() !== "" &&
     lineId.trim() !== "" &&
     location.trim() !== "";
+
+  /* ================= SUBMIT TO DATABASE ================= */
+  const handleSubmit = async () => {
+    try {
+      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+      let event_timeframe = null;
+      let event_date = null;
+
+      if (selectedDateType === "custom") {
+        event_date = `${startDate} - ${endDate}`;
+      } else if (selectedDateType === "3m") {
+        event_timeframe = "ภายใน 3 เดือน";
+      } else if (selectedDateType === "6m") {
+        event_timeframe = "ภายใน 6 เดือน";
+      } else if (selectedDateType === "1y") {
+        event_timeframe = "ภายใน 1 ปี";
+      }
+
+      // 2. สร้าง Payload
+      const payload = {
+        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
+        package_id: 2, // 🔥 สมมติแพ็กเกจนี้ id = 2 (งานหมั้น)
+        guest_count: guestCount,
+        duration: "ประมาณ 4 ชั่วโมง", // ตามรายละเอียดแพ็กเกจ
+        budget: packagePrice, // ส่งราคา 49999 เข้าไป
+        full_name: name,
+        contact_email: email,
+        phone: phone,
+        line_id: lineId,
+        location: location,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        event_date: event_date,
+        event_timeframe: event_timeframe
+      };
+
+      // 3. ยิง API บันทึกลงฐานข้อมูล
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+        setShowSuccess(true);
+      } else {
+        const data = await response.json();
+        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    }
+  };
 
   return (
     <div className="eng-container">
@@ -85,8 +145,9 @@ export default function EngagementDetail() {
             <div className="eng-text">
               <h2>Engagement Ceremony Package</h2>
 
+              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
-                แพ็กเกจงานหมั้น ราคา 49,999 บาท
+                แพ็กเกจงานหมั้น ราคา {packagePrice.toLocaleString()} บาท
               </p>
 
               <p>
@@ -95,14 +156,16 @@ export default function EngagementDetail() {
 
               <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
 
-              <ul> <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li> 
-              <li>การจัดอาสนะ: ชุดโซฟาสำหรับประธานและญาติผู้ใหญ่บนเวที</li> 
-              <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (เช่น 30-50 ท่าน)</li> 
-              <li>ป้ายชื่อบ่าวสาว: Backdrop บนเวทีพร้อมโลโก้ชื่อคู่บ่าวสาว</li> 
-              <li>การตกแต่งดอกไม้: สแตนด์ดอกไม้บนเวที 1 คู่, ดอกไม้ตกแต่งโต๊ะลงทะเบียน</li> 
-              <li>พานแหวนหมั้น: พานดอกไม้สำหรับวางแหวนหมั้น</li> 
-              <li>ห้องพัก: ห้องพัก 1 คืนสำหรับบ่าวสาวพร้อมอาหารเช้า</li> 
-              <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li> </ul>
+              <ul> 
+                <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li> 
+                <li>การจัดอาสนะ: ชุดโซฟาสำหรับประธานและญาติผู้ใหญ่บนเวที</li> 
+                <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (เช่น 30-50 ท่าน)</li> 
+                <li>ป้ายชื่อบ่าวสาว: Backdrop บนเวทีพร้อมโลโก้ชื่อคู่บ่าวสาว</li> 
+                <li>การตกแต่งดอกไม้: สแตนด์ดอกไม้บนเวที 1 คู่, ดอกไม้ตกแต่งโต๊ะลงทะเบียน</li> 
+                <li>พานแหวนหมั้น: พานดอกไม้สำหรับวางแหวนหมั้น</li> 
+                <li>ห้องพัก: ห้องพัก 1 คืนสำหรับบ่าวสาวพร้อมอาหารเช้า</li> 
+                <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li> 
+              </ul>
 
               <p className="limit-title">
                 ข้อจำกัดในแพ็กเกจนี้!
@@ -271,10 +334,11 @@ export default function EngagementDetail() {
               />
             </div>
 
+            {/* 🔥 เรียกใช้ handleSubmit แทน */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
-              onClick={() => setShowSuccess(true)}
+              onClick={handleSubmit}
             >
               ลงทะเบียน
             </button>
