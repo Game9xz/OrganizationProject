@@ -2,6 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "./WeddingDetail.css";
 
+// 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
+const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+
 export default function WeddingDetail() {
   const navigate = useNavigate();
 
@@ -89,8 +92,8 @@ export default function WeddingDetail() {
         event_timeframe: event_timeframe
       };
 
-      // 3. ยิง API บันทึกลงฐานข้อมูล
-      const response = await fetch("http://localhost:8080/api/bookings", {
+      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API)
+      const response = await fetch(`${BASE_API}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -305,7 +308,7 @@ export default function WeddingDetail() {
               />
 
               {guestCount !== "" && !isGuestValid && (
-                <p style={{ color: "red", fontSize: "13px" }}>
+                <p style={{ color: "red", fontSize: "13px", marginTop: "5px" }}>
                   จำนวนแขกต้องอยู่ระหว่าง 250 - 450 คน
                 </p>
               )}
