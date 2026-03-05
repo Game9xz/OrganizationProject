@@ -11,6 +11,8 @@ const BACKEND_URL = "http://localhost:8080"; // กำหนด URL ของห
 
 export default function Inventory() {
   const navigate = useNavigate();
+  
+  // 1. State สำหรับเก็บข้อมูลสินค้าและสถิติ (ดึงจาก Backend)
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({
     totalKinds: 0,
@@ -19,26 +21,33 @@ export default function Inventory() {
     outCount: 0
   });
 
+  // 2. State สำหรับเปิด-ปิด Modal เพิ่มสินค้า (ของเพื่อน)
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newItem, setNewItem] = useState({
+    name: "",
+    remain: 0,
+    imageFile: null,
+    previewUrl: "",
+  });
+
   const logout = () => {
     localStorage.removeItem("se_remember");
     navigate("/login");
   };
 
+  // ฟังก์ชันแปลงสถานะสต็อก
   const getStatusLabel = (remain) => {
     if (remain === 0) return "สินค้าหมด";
     if (remain > 0 && remain <= 5) return "ใกล้หมด";
     return "มีอยู่ในคลัง";
   };
 
-  // ✅ ฟังก์ชันดึงรูป: วิ่งไปหาที่ http://localhost:8080/uploads/...
+  // ฟังก์ชันดึงรูปจาก Backend ให้ถูกต้อง
   const getValidImage = (url) => {
     if (!url || url === "null" || url.trim() === "") return fallbackImage;
     if (url.startsWith("http")) return url;
     
-    // จัดการเรื่องเครื่องหมาย / ข้างหน้า
     const cleanPath = url.startsWith('/') ? url : `/${url}`;
-    
-    // เช็คว่าใน Database มีคำว่า /uploads/ บันทึกไว้หรือยัง ถ้ายังให้เติมเข้าไป
     if (cleanPath.includes('/uploads/')) {
       return `${BACKEND_URL}${cleanPath}`;
     } else {
@@ -46,6 +55,7 @@ export default function Inventory() {
     }
   };
 
+  // ดึงข้อมูลจาก Backend
   const fetchProducts = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/products`);
@@ -80,6 +90,7 @@ export default function Inventory() {
     fetchStats();
   }, []);
 
+  // ฟังก์ชันกดบวก-ลบ จำนวนสินค้า
   const adjustRemain = async (id, delta) => {
     const current = items.find((it) => it.product_id === id);
     if (!current) return;
@@ -87,12 +98,14 @@ export default function Inventory() {
     const prevRemain = current.available_stock || 0;
     const newRemain = Math.max(0, prevRemain + delta);
 
+    // อัปเดตหน้าเว็บทันที (Optimistic update)
     setItems((prev) =>
       prev.map((it) =>
         it.product_id === id ? { ...it, available_stock: newRemain } : it
       )
     );
 
+    // ส่งไปอัปเดตที่หลังบ้าน
     try {
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: "PUT",
@@ -107,6 +120,7 @@ export default function Inventory() {
       }
     } catch (error) {
       console.error("Error updating stock:", error);
+      // ถ้า Error ให้คืนค่าเดิม
       setItems((prev) =>
         prev.map((it) =>
           it.product_id === id ? { ...it, available_stock: prevRemain } : it
@@ -114,6 +128,70 @@ export default function Inventory() {
       );
     }
   };
+
+  // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า (โค้ดเพื่อนที่ปรับแก้ให้เข้ากับ Backend) ---------
+
+  const handleOpenAdd = () => {
+    setNewItem({ name: "", remain: 0, imageFile: null, previewUrl: "" });
+    setIsAddOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setIsAddOpen(false);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setNewItem((p) => ({ ...p, imageFile: file, previewUrl: url }));
+    }
+  };
+
+  const handleSaveNew = async () => {
+    const name = newItem.name.trim();
+    const remain = Number(newItem.remain) || 0;
+    if (!name) {
+      alert("กรุณากรอกชื่อสินค้า");
+      return;
+    }
+
+    // สร้างข้อมูลชั่วคราวเพื่อให้หน้าเว็บแสดงผลทันที (รอข้อมูลจริงจาก Backend)
+    const tempId = Math.max(0, ...items.map((i) => i.product_id || 0)) + 1;
+    const optimistic = {
+      product_id: tempId,
+      product_name: name,
+      available_stock: remain,
+      image_url: newItem.previewUrl || fallbackImage,
+    };
+    
+    setItems((prev) => [optimistic, ...prev]);
+    closeAddModal();
+
+    // ส่งข้อมูลไป Backend
+    try {
+      const form = new FormData();
+      form.append("name", name);
+      form.append("remain", String(remain));
+      if (newItem.imageFile) form.append("image", newItem.imageFile);
+
+      // ใช้ API_BASE_URL แทน /api/inventory เฉยๆ เพื่อให้เชื่อมหลังบ้านได้
+      const res = await fetch(`${API_BASE_URL}`, {
+        method: "POST",
+        body: form,
+      });
+      
+      if (res.ok) {
+        // ถ้าเซฟสำเร็จ โหลดข้อมูลใหม่ทั้งหมดเพื่อให้ ID และรูปภาพตรงกับ Database
+        fetchProducts();
+        fetchStats();
+      }
+    } catch (error) {
+      console.error("Error adding product:", error);
+    }
+  };
+
+  // -----------------------------------------------------------------------------------
 
   return (
     <div className="inv-layout">
@@ -148,6 +226,11 @@ export default function Inventory() {
       <main className="inv-content">
         <header className="inv-header">
           <h1 className="inv-title">คลังอุปกรณ์</h1>
+          <div className="inv-actions">
+            <button className="inv-add-btn" onClick={handleOpenAdd}>
+              + เพิ่มสินค้าใหม่
+            </button>
+          </div>
           <div className="inv-stats">
             <div className="stat blue">
               <div className="stat-label">สินค้าทั้งหมด</div>
@@ -210,6 +293,54 @@ export default function Inventory() {
             </article>
           ))}
         </section>
+
+        {isAddOpen && (
+          <div className="inv-modal-overlay">
+            <div className="inv-modal">
+              <div className="inv-modal-title">เพิ่มสินค้าใหม่</div>
+              <div className="inv-form">
+                <label className="inv-field">
+                  <span>ชื่อสินค้า</span>
+                  <input
+                    className="inv-input"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem((p) => ({ ...p, name: e.target.value }))}
+                    placeholder="เช่น โต๊ะจัดเลี้ยง"
+                  />
+                </label>
+                <label className="inv-field">
+                  <span>จำนวนเริ่มต้น</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="inv-input"
+                    value={newItem.remain}
+                    onChange={(e) =>
+                      setNewItem((p) => ({ ...p, remain: Math.max(0, Number(e.target.value || 0)) }))
+                    }
+                  />
+                </label>
+                <label className="inv-field">
+                  <span>รูปภาพ</span>
+                  <input type="file" accept="image/*" onChange={handleFileChange} />
+                </label>
+                {newItem.previewUrl && (
+                  <div className="inv-preview">
+                    <img src={newItem.previewUrl} alt="preview" style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}/>
+                  </div>
+                )}
+              </div>
+              <div className="inv-modal-actions">
+                <button className="inv-cancel" onClick={closeAddModal}>
+                  ยกเลิก
+                </button>
+                <button className="inv-save" onClick={handleSaveNew}>
+                  เพิ่มสินค้า
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
