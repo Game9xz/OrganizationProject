@@ -2,6 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "./FuneralPackageDetail.css";
 
+// 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
+const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+
 export default function FuneralPackageDetail() {
   const navigate = useNavigate();
 
@@ -83,8 +86,8 @@ export default function FuneralPackageDetail() {
         event_timeframe: event_timeframe
       };
 
-      // 3. ยิง API บันทึกลงฐานข้อมูล
-      const response = await fetch("http://localhost:8080/api/bookings", {
+      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
+      const response = await fetch(`${BASE_API}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

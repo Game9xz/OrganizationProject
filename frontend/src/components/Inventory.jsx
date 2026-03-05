@@ -6,8 +6,14 @@ import "./Workrecord.css";
 // ลิ้งก์รูปสำรอง (ถ้าไม่มีรูปจริงๆ จะขึ้นรูปนี้)
 const fallbackImage = "https://placehold.co/480x320/2a2a2a/ffffff?text=No+Image";
 
-const API_BASE_URL = "http://localhost:8080/api/inventory";
-const BACKEND_URL = "http://localhost:8080"; // กำหนด URL ของหลังบ้าน
+// 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
+const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+
+// 2. ต่อท้ายด้วย /inventory สำหรับยิง API ในหน้านี้
+const API_BASE_URL = `${BASE_API}/inventory`;
+
+// 3. ตัดคำว่า /api ออก เพื่อเอาไว้ดึงรูปภาพจากโฟลเดอร์ uploads
+const BACKEND_URL = BASE_API.replace('/api', '');
 
 export default function Inventory() {
   const navigate = useNavigate();
@@ -21,7 +27,7 @@ export default function Inventory() {
     outCount: 0
   });
 
-  // 2. State สำหรับเปิด-ปิด Modal เพิ่มสินค้า (ของเพื่อน)
+  // 2. State สำหรับเปิด-ปิด Modal เพิ่มสินค้า
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newItem, setNewItem] = useState({
     name: "",
@@ -129,7 +135,7 @@ export default function Inventory() {
     }
   };
 
-  // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า (โค้ดเพื่อนที่ปรับแก้ให้เข้ากับ Backend) ---------
+  // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า ---------
 
   const handleOpenAdd = () => {
     setNewItem({ name: "", remain: 0, imageFile: null, previewUrl: "" });
