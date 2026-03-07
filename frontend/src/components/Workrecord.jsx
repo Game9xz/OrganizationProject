@@ -524,6 +524,8 @@ export default function WorkRecord() {
     room: "",
     date: "",
     budget: "",
+    staffWages: "",
+    venueCost: "",
     participants: "",
     status: "undetermined",
   });
@@ -553,6 +555,8 @@ export default function WorkRecord() {
     location: "",
     date: "",
     budget: "",
+    staffWages: "",
+    venueCost: "",
     participants: "",
     status: "preparing",
   });
@@ -565,6 +569,8 @@ export default function WorkRecord() {
       location: "",
       date: "",
       budget: "",
+      staffWages: "",
+      venueCost: "",
       participants: "",
       status: "preparing",
     });
@@ -679,6 +685,8 @@ export default function WorkRecord() {
       room: event.room || "",
       date: event.date || "",
       budget: event.budget || "",
+      staffWages: event.staffWages || "",
+      venueCost: event.venueCost || "",
       participants: event.people || "",
       status: event.status || "undetermined",
     });
@@ -715,6 +723,8 @@ export default function WorkRecord() {
                 room: editWork.room,
                 date: editWork.date,
                 budget: editWork.budget,
+                staffWages: editWork.staffWages,
+                venueCost: editWork.venueCost,
                 people: editWork.participants,
                 status: editWork.status,
               }
@@ -733,6 +743,8 @@ export default function WorkRecord() {
                 room: editWork.room,
                 date: editWork.date,
                 budget: editWork.budget,
+                staffWages: editWork.staffWages,
+                venueCost: editWork.venueCost,
                 people: editWork.participants,
                 status: editWork.status,
               }
@@ -785,14 +797,26 @@ export default function WorkRecord() {
       </div>
 
       <div className="card-footer">
-        <div className="footer-left">
-          <div className="stat-item">
-            <IconUser />
-            <span>{event.people}</span>
+        <div className="footer-left" style={{ flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="stat-item">
+              <IconUser />
+              <span>{event.people}</span>
+            </div>
+            <div className="stat-item">
+              <IconWallet />
+              <span>{event.budget}</span>
+            </div>
           </div>
-          <div className="stat-item">
-            <IconWallet />
-            <span>{event.budget}</span>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="stat-item">
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>ค่าจ้าง:</span>
+              <span>{event.staffWages ? `${event.staffWages} บาท` : "-"}</span>
+            </div>
+            <div className="stat-item">
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>ค่าสถานที่:</span>
+              <span>{event.venueCost ? `${event.venueCost} บาท` : "-"}</span>
+            </div>
           </div>
         </div>
 
@@ -1113,6 +1137,37 @@ export default function WorkRecord() {
                 </div>
               </div>
 
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>ค่าจ้างพนักงาน</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="staffWages"
+                      value={newWork.staffWages}
+                      onChange={handleCreateInputChange}
+                      className="form-input"
+                      placeholder="35,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>ค่าสถานที่</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="venueCost"
+                      value={newWork.venueCost}
+                      onChange={handleCreateInputChange}
+                      className="form-input"
+                      placeholder="100,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>สถานะ</label>
                 <div className="select-wrapper">
@@ -1255,6 +1310,37 @@ export default function WorkRecord() {
                     placeholder="500,000"
                   />
                   <span className="budget-unit">บาท</span>
+                </div>
+              </div>
+
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>ค่าจ้างพนักงาน</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="staffWages"
+                      value={editWork.staffWages}
+                      onChange={handleEditInputChange}
+                      className="form-input"
+                      placeholder="35,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>ค่าสถานที่</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="venueCost"
+                      value={editWork.venueCost}
+                      onChange={handleEditInputChange}
+                      className="form-input"
+                      placeholder="100,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
                 </div>
               </div>
 
