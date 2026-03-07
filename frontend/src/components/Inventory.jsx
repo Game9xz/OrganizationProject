@@ -249,19 +249,43 @@ export default function Inventory() {
                   <span>คงเหลือ: {it.remain}</span>
                   <span>สถานะ: {statusLabel(it.status)}</span>
                 </div>
-                <div className="inv-controls">
+                <div className="inv-actions-row">
+                  <div className="inv-controls">
+                    <button
+                      className="inv-btn minus"
+                      onClick={() => adjustRemain(it.id, -1)}
+                      disabled={it.remain <= 0}
+                    >
+                      −
+                    </button>
+                    <button
+                      className="inv-btn plus"
+                      onClick={() => adjustRemain(it.id, +1)}
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    className="inv-btn minus"
-                    onClick={() => adjustRemain(it.id, -1)}
-                    disabled={it.remain <= 0}
+                    className="inv-delete"
+                    onClick={async () => {
+                      const prev = items;
+                      setItems((p) => p.filter((x) => x.id !== it.id));
+                      try {
+                        await fetch(`/api/inventory/${it.id}`, { method: "DELETE" });
+                      } catch {
+                        setItems(prev);
+                      }
+                    }}
+                    aria-label="ลบสินค้า"
+                    title="ลบสินค้า"
                   >
-                    −
-                  </button>
-                  <button
-                    className="inv-btn plus"
-                    onClick={() => adjustRemain(it.id, +1)}
-                  >
-                    +
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    </svg>
                   </button>
                 </div>
               </div>
