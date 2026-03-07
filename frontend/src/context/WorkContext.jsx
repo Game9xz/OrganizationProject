@@ -13,6 +13,8 @@ export const WorkProvider = ({ children }) => {
       category: "งานแต่ง",
       people: "200 คน",
       budget: "500,000 บาท",
+      staffWages: "35,000",
+      venueCost: "100,000",
       isTarget: true,
       status: "preparing", // กำลังจัดเตรียม
     },
@@ -26,6 +28,8 @@ export const WorkProvider = ({ children }) => {
       category: "งานแต่ง",
       people: "200 คน",
       budget: "500,000 บาท",
+      staffWages: "35,000",
+      venueCost: "150,000",
       status: "completed", // เสร็จสิ้น
     },
     {
@@ -77,6 +81,8 @@ export const WorkProvider = ({ children }) => {
       category: "สัมมนา",
       people: "150 คน",
       budget: "800,000 บาท",
+      staffWages: "50,000",
+      venueCost: "200,000",
       status: "in_progress", // กำลังดำเนินการ
     },
   ]);

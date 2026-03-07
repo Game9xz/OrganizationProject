@@ -514,6 +514,23 @@ export default function WorkRecord() {
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [isDateOpen, setIsDateOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editWork, setEditWork] = useState({
+    id: null,
+    eventType: "",
+    title: "",
+    category: "",
+    location: "",
+    room: "",
+    date: "",
+    budget: "",
+    staffWages: "",
+    venueCost: "",
+    participants: "",
+    status: "undetermined",
+  });
+  const [editSelectedDate, setEditSelectedDate] = useState(null);
+  const [isEditDateOpen, setIsEditDateOpen] = useState(false);
 
   const logout = () => {
     localStorage.removeItem("se_remember");
@@ -538,6 +555,8 @@ export default function WorkRecord() {
     location: "",
     date: "",
     budget: "",
+    staffWages: "",
+    venueCost: "",
     participants: "",
     status: "undetermined",
   });
@@ -550,6 +569,8 @@ export default function WorkRecord() {
       location: "",
       date: "",
       budget: "",
+      staffWages: "",
+      venueCost: "",
       participants: "",
       status: "undetermined",
     });
@@ -625,11 +646,83 @@ export default function WorkRecord() {
   };
 
   const handleEditClick = (event, eventType) => {
-    // Navigate to detail page for editing with event data and timeline
-    const timeline = createEventTimeline(event.id);
-    navigate(`/workrecord/detail/${event.id}`, {
-      state: { event, eventType, timeline },
+    setEditWork({
+      id: event.id,
+      eventType,
+      title: event.title || "",
+      category: event.category || "",
+      location: event.location || "",
+      room: event.room || "",
+      date: event.date || "",
+      budget: event.budget || "",
+      staffWages: event.staffWages || "",
+      venueCost: event.venueCost || "",
+      participants: event.people || "",
+      status: event.status || "undetermined",
     });
+    setEditSelectedDate(parseThaiBEDate(event.date));
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditWork((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveEditWork = () => {
+    if (!editWork.title || !editWork.category) {
+      alert("กรุณากรอกชื่องานและประเภทงาน");
+      return;
+    }
+    if (editWork.eventType === "wedding") {
+      setWeddingEvents((prev) =>
+        prev.map((e) =>
+          e.id === editWork.id
+            ? {
+                ...e,
+                title: editWork.title,
+                category: editWork.category,
+                location: editWork.location,
+                room: editWork.room,
+                date: editWork.date,
+                budget: editWork.budget,
+                staffWages: editWork.staffWages,
+                venueCost: editWork.venueCost,
+                people: editWork.participants,
+                status: editWork.status,
+              }
+            : e,
+        ),
+      );
+    } else {
+      setPartyEvents((prev) =>
+        prev.map((e) =>
+          e.id === editWork.id
+            ? {
+                ...e,
+                title: editWork.title,
+                category: editWork.category,
+                location: editWork.location,
+                room: editWork.room,
+                date: editWork.date,
+                budget: editWork.budget,
+                staffWages: editWork.staffWages,
+                venueCost: editWork.venueCost,
+                people: editWork.participants,
+                status: editWork.status,
+              }
+            : e,
+        ),
+      );
+    }
+    setIsEditModalOpen(false);
   };
 
   const handleDeleteClick = (event, eventType) => {
@@ -674,14 +767,26 @@ export default function WorkRecord() {
       </div>
 
       <div className="card-footer">
-        <div className="footer-left">
-          <div className="stat-item">
-            <IconUser />
-            <span>{event.people}</span>
+        <div className="footer-left" style={{ flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="stat-item">
+              <IconUser />
+              <span>{event.people}</span>
+            </div>
+            <div className="stat-item">
+              <IconWallet />
+              <span>{event.budget}</span>
+            </div>
           </div>
-          <div className="stat-item">
-            <IconWallet />
-            <span>{event.budget}</span>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="stat-item">
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>ค่าจ้าง:</span>
+              <span>{event.staffWages ? `${event.staffWages} บาท` : "-"}</span>
+            </div>
+            <div className="stat-item">
+              <span style={{ fontSize: '12px', color: '#6b7280' }}>ค่าสถานที่:</span>
+              <span>{event.venueCost ? `${event.venueCost} บาท` : "-"}</span>
+            </div>
           </div>
         </div>
 
@@ -1002,6 +1107,37 @@ export default function WorkRecord() {
                 </div>
               </div>
 
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>ค่าจ้างพนักงาน</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="staffWages"
+                      value={newWork.staffWages}
+                      onChange={handleCreateInputChange}
+                      className="form-input"
+                      placeholder="35,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>ค่าสถานที่</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="venueCost"
+                      value={newWork.venueCost}
+                      onChange={handleCreateInputChange}
+                      className="form-input"
+                      placeholder="100,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>สถานะ</label>
                 <div className="select-wrapper">
@@ -1028,6 +1164,182 @@ export default function WorkRecord() {
               </button>
               <button className="btn-save" onClick={handleSaveNewWork}>
                 สร้างงาน
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseEditModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">แก้ไข</h2>
+
+            <div className="modal-form">
+              <div className="form-group">
+                <label>ชื่องาน</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={editWork.title}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                  placeholder="ชื่องาน"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>ประเภทงาน</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={editWork.category}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                  placeholder="ประเภทงาน"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>สถานที่จัดงาน</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={editWork.location}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                  placeholder="สถานที่จัดงาน"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>ห้อง</label>
+                <input
+                  type="text"
+                  name="room"
+                  value={editWork.room || ""}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                  placeholder="ห้อง"
+                />
+              </div>
+
+              <div className="form-group-row">
+                <div className="form-group date-group">
+                  <label>วันที่</label>
+                  <div className="date-input-wrapper">
+                    <span
+                      className="calendar-icon-left"
+                      onClick={() => setIsEditDateOpen(true)}
+                    >
+                      <IconCalendar />
+                    </span>
+                    <DatePicker
+                      selected={editSelectedDate}
+                      onChange={(date) => {
+                        setEditSelectedDate(date);
+                        setEditWork((prev) => ({
+                          ...prev,
+                          date: formatThaiBE(date),
+                        }));
+                        setIsEditDateOpen(false);
+                      }}
+                      open={isEditDateOpen}
+                      onInputClick={() => setIsEditDateOpen(true)}
+                      onClickOutside={() => setIsEditDateOpen(false)}
+                      locale={th}
+                      placeholderText={editWork.date || "14/2/2568"}
+                      className="form-input with-icon-left"
+                      dateFormat="dd/MM/yyyy"
+                      showPopperArrow={false}
+                    />
+                  </div>
+                </div>
+                <div className="form-group participants-group">
+                  <label>จำนวนคน</label>
+                  <input
+                    type="text"
+                    name="participants"
+                    value={editWork.participants}
+                    onChange={handleEditInputChange}
+                    className="form-input"
+                    placeholder="200"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>งบประมาณ</label>
+                <div className="budget-input-wrapper">
+                  <input
+                    type="text"
+                    name="budget"
+                    value={editWork.budget}
+                    onChange={handleEditInputChange}
+                    className="form-input"
+                    placeholder="500,000"
+                  />
+                  <span className="budget-unit">บาท</span>
+                </div>
+              </div>
+
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>ค่าจ้างพนักงาน</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="staffWages"
+                      value={editWork.staffWages}
+                      onChange={handleEditInputChange}
+                      className="form-input"
+                      placeholder="35,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>ค่าสถานที่</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="venueCost"
+                      value={editWork.venueCost}
+                      onChange={handleEditInputChange}
+                      className="form-input"
+                      placeholder="100,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>สถานะ</label>
+                <div className="select-wrapper">
+                  <select
+                    name="status"
+                    value={editWork.status}
+                    onChange={handleEditInputChange}
+                    className="form-input form-select"
+                  >
+                    <option value="preparing">กำลังจัดเตรียม</option>
+                    <option value="in_progress">กำลังดำเนินการ</option>
+                    <option value="completed">เสร็จสิ้น</option>
+                  </select>
+                  <span className="select-arrow-black">
+                    <IconChevronDown />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={handleCloseEditModal}>
+                ยกเลิก
+              </button>
+              <button className="btn-save" onClick={handleSaveEditWork}>
+                บันทึก
               </button>
             </div>
           </div>
