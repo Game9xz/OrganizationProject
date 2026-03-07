@@ -1,8 +1,11 @@
 import db from "../config/db.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 // POST /api/users/register
 export const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // validate เบื้องต้น
   if (!username || !email || !password) {
@@ -26,9 +29,9 @@ export const registerUser = async (req, res) => {
 
     // insert user ใหม่
     const [result] = await db.query(
-      `INSERT INTO user (username, email, password)
-       VALUES (?, ?, ?)`,
-      [username, email, password],
+      `INSERT INTO user (username, email, password, role)
+       VALUES (?, ?, ?, ?)`,
+      [username, email, hashedPassword, "user"],
     );
 
     res.status(201).json({
@@ -46,18 +49,6 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  if (email === "admin@test.com" && password === "123") {
-    return res.status(200).json({
-      message: "Login สำเร็จ (Admin)",
-      user: {
-        user_id: 0,
-        username: "admin",
-        email: "admin@test.com",
-        role: "admin",
-      },
-    });
-  }
-
   if (!email || !password) {
     return res.status(400).json({
       message: "กรุณากรอก email และ password",
@@ -66,7 +57,7 @@ export const loginUser = async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      "SELECT user_id, username, email, password FROM user WHERE email = ?",
+      "SELECT user_id, username, email, password, role FROM user WHERE email = ?",
       [email],
     );
 
@@ -78,15 +69,27 @@ export const loginUser = async (req, res) => {
 
     const user = rows[0];
 
-    // ยังไม่ hash → เทียบตรง ๆ
-    if (user.password !== password) {
+    // เช็ค hash
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
       return res.status(401).json({
         message: "Email หรือ Password ไม่ถูกต้อง",
       });
     }
 
+    // 🔥 สร้าง JWT
+    const token = jwt.sign(
+      { user_id: user.user_id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      },
+    );
+
     res.status(200).json({
-      message: "Login สำเร็จ!!",
+      message: "Login สำเร็จ",
+      token,
       user: {
         user_id: user.user_id,
         username: user.username,
@@ -112,7 +115,7 @@ export const getUserById = async (req, res) => {
 
   try {
     const [rows] = await db.query(
-      `SELECT user_id, username, email, created_at
+      `SELECT user_id, username, email, created_at, role
        FROM user
        WHERE user_id = ?`,
       [id],

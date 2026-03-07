@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginForm from "./auth/LoginForm";
+import LoginForm from "./auth/LoginForm.jsx";
 import SignUpForm from "./auth/SignUpForm";
 import Home from "./components/Home";
 import Workrecord from "./components/Workrecord";
@@ -20,6 +20,9 @@ import HomePage from "./components/HomePage.jsx";
 import Inventory from "./components/Inventory.jsx";
 import Budget from "./components/Budget.jsx";
 import BudgetDetail from "./components/BudgetDetail.jsx";
+import ForgotPassword from "./auth/ForgotPassword.jsx";
+import VerifyOTP from "./auth/VerifyOTP.jsx";
+import ResetPassword from "./auth/ResetPassword.jsx";
 
 function App() {
   return (
@@ -52,6 +55,9 @@ function App() {
       <Route path="/inventory" element={<Inventory />} />
       <Route path="/budget" element={<Budget />} />
       <Route path="/budget/:type" element={<BudgetDetail />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verify-otp" element={<VerifyOTP />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
   );
 }

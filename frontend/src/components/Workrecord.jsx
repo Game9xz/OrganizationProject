@@ -537,7 +537,7 @@ export default function WorkRecord() {
     navigate("/login");
   };
 
-  const { weddingEvents, setWeddingEvents, partyEvents, setPartyEvents, deleteEvent, addEvent } =
+  const { weddingEvents, partyEvents, deleteEvent, addEvent } =
     useWorkContext();
 
   const [deleteModal, setDeleteModal] = useState({
@@ -558,7 +558,7 @@ export default function WorkRecord() {
     staffWages: "",
     venueCost: "",
     participants: "",
-    status: "preparing",
+    status: "undetermined",
   });
 
   const handleOpenCreateModal = (e) => {
@@ -572,7 +572,7 @@ export default function WorkRecord() {
       staffWages: "",
       venueCost: "",
       participants: "",
-      status: "preparing",
+      status: "undetermined",
     });
     setIsCreateModalOpen(true);
   };
@@ -643,36 +643,6 @@ export default function WorkRecord() {
       [type]: prev[type] === value ? "" : value,
     }));
     setActiveDropdown(null);
-  };
-
-  const parseThaiBEDate = (str) => {
-    if (!str || typeof str !== "string") return null;
-    const m = str.match(/(\d+)\s+([ก-๙]+)\s+(\d{4})/);
-    const months = {
-      "มกราคม": 0,
-      "กุมภาพันธ์": 1,
-      "มีนาคม": 2,
-      "เมษายน": 3,
-      "พฤษภาคม": 4,
-      "มิถุนายน": 5,
-      "กรกฎาคม": 6,
-      "สิงหาคม": 7,
-      "กันยายน": 8,
-      "ตุลาคม": 9,
-      "พฤศจิกายน": 10,
-      "ธันวาคม": 11,
-    };
-    if (m) {
-      const d = parseInt(m[1], 10);
-      const monthName = m[2];
-      const yBE = parseInt(m[3], 10);
-      const y = yBE - 543;
-      const mi = months[monthName];
-      if (Number.isInteger(d) && Number.isInteger(y) && mi >= 0) {
-        return new Date(y, mi, d);
-      }
-    }
-    return null;
   };
 
   const handleEditClick = (event, eventType) => {
@@ -888,7 +858,7 @@ export default function WorkRecord() {
           <Link to="#" className="nav-item">
             สถานะคลัง
           </Link>
-          <Link to="/budget" className="nav-item">
+          <Link to="#" className="nav-item">
             งบประมาณ
           </Link>
         </nav>
@@ -1177,8 +1147,8 @@ export default function WorkRecord() {
                     onChange={handleCreateInputChange}
                     className="form-input form-select"
                   >
-                    <option value="preparing">กำลังจัดเตรียม</option>
-                    <option value="in_progress">กำลังดำเนินการ</option>
+                    <option value="undetermined">กำลังจัดเตรียม</option>
+                    <option value="inprogress">กำลังดำเนินการ</option>
                     <option value="completed">เสร็จสิ้น</option>
                   </select>
                   <span className="select-arrow-black">

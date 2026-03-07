@@ -1,12 +1,30 @@
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [user, setUser] = useState(null);
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    // เช็คก่อนใน localStorage
+    let storedUser = localStorage.getItem("user");
+
+    // ถ้าไม่มี ให้ไปดูใน sessionStorage
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   return (
     <div className="home-container">
       {/* Sidebar */}
@@ -21,8 +39,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <nav className="nav-menu">
@@ -50,17 +68,28 @@ export default function HomePage() {
           </div>
 
           <div className="nav-item">ออกแบบ</div>
-          <div className={isActive("/inventory") ? "nav-item active" : "nav-item"} onClick={() => navigate("/inventory")}>คลัง</div>
-          <div className="nav-item">สถานะคลัง</div>
           <div
-            className={isActive("/budget") ? "nav-item active" : "nav-item"}
-            onClick={() => navigate("/budget")}
+            className={isActive("/inventory") ? "nav-item active" : "nav-item"}
+            onClick={() => navigate("/inventory")}
           >
-            งบประมาณ
+            คลัง
           </div>
+          <div className="nav-item">สถานะคลัง</div>
+          <div className="nav-item">งบประมาณ</div>
         </nav>
 
-        <button className="logout">Log out</button>
+        <button
+          className="logout"
+          onClick={() => {
+            localStorage.removeItem("user");
+            sessionStorage.removeItem("user");
+            localStorage.removeItem("token");
+            sessionStorage.removeItem("token");
+            navigate("/login");
+          }}
+        >
+          Log out
+        </button>
       </aside>
 
       {/* Main content */}
@@ -77,7 +106,7 @@ export default function HomePage() {
           <EventCard
             img="/funeral.jpg"
             title="Funeral"
-            price="13,500 THB"
+            price="59,999 THB"
             link="/event/funeral"
           />
           <EventCard
@@ -89,7 +118,7 @@ export default function HomePage() {
           <EventCard
             img="/ordination.jpg"
             title="Ordination"
-            price="50,000 THB"
+            price="79,999 THB"
             link="/event/ordination"
           />
         </div>
@@ -110,7 +139,7 @@ function EventCard({ img, title, price, link }) {
       <img src={img} alt={title} />
       <div className="event-info">
         <h4>{title}</h4>
-        <span className="price">เริ่มต้น {price}</span>
+        <span className="price">ราคา {price}</span>
 
         {/* ปุ่มกดไปหน้ารายละเอียด */}
         <Link to={link}>

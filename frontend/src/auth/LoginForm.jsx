@@ -17,32 +17,39 @@ const Login = () => {
     setError("");
     setLoading(true);
 
-    const result = await loginUser(email, password);
+    const result = await loginUser(email, password, rememberMe);
 
     setLoading(false);
 
     if (result.success) {
-      // Login สำเร็จ
-      console.log("Login successful:", result.data);
-
-      // เก็บข้อมูล user ใน localStorage (ถ้าเลือก Remember me)
-      if (rememberMe) {
-        localStorage.setItem("user", JSON.stringify(result.data.user));
-      } else {
-        sessionStorage.setItem("user", JSON.stringify(result.data.user));
-      }
-
-      // TODO: นำทางไปหน้าอื่น หรือ update state
+      // ✅ กรณี Login สำเร็จ
       Swal.fire({
-        title: "เข้าสู่ระบบสำเร็จ!",
         icon: "success",
-        confirmButtonText: "หน้าแรก",
+        title: "เข้าสู่ระบบสำเร็จ!",
+        text: "กำลังนำคุณไปยังหน้าแรก...",
+        timer: 1500, // แสดง 1.5 วินาทีแล้วหายไปเอง
+        showConfirmButton: false,
       }).then(() => {
-        navigate("/homepage");
+        const userData = result.data.user || result.data || {};
+        if (rememberMe) {
+          localStorage.setItem("user", JSON.stringify(userData));
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(userData));
+        }
+        navigate("/homepage", { replace: true });
       });
+
     } else {
-      // Login ไม่สำเร็จ
-      setError(result.error);
+      // ❌ กรณี Login ไม่สำเร็จ
+      setError(result.error); // ยังเก็บไว้แสดงในฟอร์มได้ (ถ้าต้องการ)
+
+      Swal.fire({
+        icon: "error",
+        title: "เข้าสู่ระบบไม่สำเร็จ",
+        text: result.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+        confirmButtonColor: "#d33", // สีปุ่มตกลงเป็นสีแดง
+        confirmButtonText: "ลองอีกครั้ง"
+      });
     }
   };
 
@@ -108,7 +115,7 @@ const Login = () => {
             </div>
 
             <div className="forgot-password">
-              <a href="#">Forgotten Password | รับรหัสผ่าน</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); navigate("/forgot-password"); }}>Forgotten Password | รับรหัสผ่าน</a>
             </div>
 
             <button type="submit" className="submit-btn" disabled={loading}>
