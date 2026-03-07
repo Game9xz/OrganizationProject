@@ -135,6 +135,29 @@ export default function Inventory() {
     }
   };
 
+  const deleteProduct = async (id) => {
+    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?")) return;
+
+    // Optimistic delete
+    setItems((prev) => prev.filter((it) => it.product_id !== id));
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        fetchStats();
+      } else {
+        throw new Error("Failed to delete");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      // Re-fetch if failed
+      fetchProducts();
+    }
+  };
+
   // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า ---------
 
   const handleOpenAdd = () => {
@@ -280,17 +303,25 @@ export default function Inventory() {
                   <span>คงเหลือ: {it.available_stock}</span>
                   <span>สถานะ: {getStatusLabel(it.available_stock)}</span>
                 </div>
-                <div className="inv-controls">
+                <div className="inv-actions-row">
+                  <div className="inv-controls">
+                    <button
+                      className="inv-btn minus"
+                      onClick={() => adjustRemain(it.product_id, -1)}
+                      disabled={it.available_stock <= 0}
+                    >
+                      −
+                    </button>
+                    <button
+                      className="inv-btn plus"
+                      onClick={() => adjustRemain(it.product_id, +1)}
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    className="inv-btn minus"
-                    onClick={() => adjustRemain(it.product_id, -1)}
-                    disabled={it.available_stock <= 0}
-                  >
-                    −
-                  </button>
-                  <button
-                    className="inv-btn plus"
-                    onClick={() => adjustRemain(it.product_id, +1)}
+                    className="inv-delete-btn"
+                    onClick={() => deleteProduct(it.product_id)}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="3 6 5 6 21 6" />

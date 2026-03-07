@@ -136,19 +136,17 @@
   font-size: 12px;
   color: #d1d5db;
 }
-.inv-controls {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
 .inv-actions-row {
-  margin-top: 8px;
+  margin-top: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.inv-controls {
+  display: flex;
+  gap: 8px;
+}
 .inv-btn {
-  flex: 0 0 auto;
   width: 32px;
   height: 28px;
   border: none;
@@ -163,19 +161,23 @@
 .inv-btn.minus { background: #ef4444; color: #fff; }
 .inv-btn.plus { background: #34d399; color: #0b1e16; }
 .inv-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.inv-delete {
+.inv-delete-btn {
   width: 32px;
   height: 28px;
   border: none;
   border-radius: 8px;
-  background: #1f2937;
-  color: #fff;
+  background: #374151;
+  color: #f87171;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 }
-.inv-delete:hover { background: #374151; }
+.inv-delete-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
 
 /* Modal */
 .inv-modal-overlay {
