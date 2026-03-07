@@ -419,7 +419,7 @@ const createEventTimeline = (eventId) => {
         time: "15.00 น.",
         items: [
           {
-            title: "ตัดเค้ก",
+            title: "ตัดเค้กงานวันเกิด",
             timeRange: "เริ่มต้น 15:00 - 15:30 น.",
             type: "normal",
           },
