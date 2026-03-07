@@ -1,8 +1,120 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import "./OrdinationPackageDetail.css";
+
+// 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
+const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 export default function OrdinationPackageDetail() {
   const navigate = useNavigate();
+
+  // 🔥 กำหนดราคาแพ็กเกจงานบวชที่นี่
+  const packagePrice = 79999;
+
+  // Modal
+  const [showModal, setShowModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Date
+  const [selectedDateType, setSelectedDateType] = useState("");
+  const [showDateInput, setShowDateInput] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Guest
+  const [guestCount, setGuestCount] = useState("");
+
+  // Contact
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [lineId, setLineId] = useState("");
+
+  // Location
+  const [location, setLocation] = useState("");
+
+  /* ===============================
+     VALIDATION
+  =============================== */
+
+  const isGuestValid =
+    guestCount !== "" &&
+    !isNaN(Number(guestCount)) &&
+    Number(guestCount) >= 100 &&
+    Number(guestCount) <= 350;
+
+  const isDateValid =
+    selectedDateType === "custom"
+      ? startDate !== "" && endDate !== ""
+      : selectedDateType === "3m" ||
+        selectedDateType === "6m" ||
+        selectedDateType === "1y";
+
+  const isFormComplete =
+    isDateValid &&
+    isGuestValid &&
+    name.trim() !== "" &&
+    phone.trim() !== "" &&
+    email.trim() !== "" &&
+    lineId.trim() !== "" &&
+    location.trim() !== "";
+
+  /* ================= SUBMIT TO DATABASE ================= */
+  const handleSubmit = async () => {
+    try {
+      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+      let event_timeframe = null;
+      let event_date = null;
+
+      if (selectedDateType === "custom") {
+        event_date = `${startDate} - ${endDate}`;
+      } else if (selectedDateType === "3m") {
+        event_timeframe = "ภายใน 3 เดือน";
+      } else if (selectedDateType === "6m") {
+        event_timeframe = "ภายใน 6 เดือน";
+      } else if (selectedDateType === "1y") {
+        event_timeframe = "ภายใน 1 ปี";
+      }
+
+      // 2. สร้าง Payload
+      const payload = {
+        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
+        package_id: 4, // 🔥 สมมติแพ็กเกจนี้ id = 4 (งานบวช)
+        guest_count: guestCount,
+        duration: "ทั้งวัน", // งานบวชตามรายละเอียดคือตั้งแต่เช้าจนจบงาน
+        budget: packagePrice, // ส่งราคา 79999 เข้าไป
+        full_name: name,
+        contact_email: email,
+        phone: phone,
+        line_id: lineId,
+        location: location,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        event_date: event_date,
+        event_timeframe: event_timeframe
+      };
+
+      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
+      const response = await fetch(`${BASE_API}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+        setShowSuccess(true);
+      } else {
+        const data = await response.json();
+        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+      }
+    } catch (error) {
+      console.error("Submit Error:", error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    }
+  };
 
   return (
     <div className="ordpkg-container">
@@ -29,7 +141,6 @@ export default function OrdinationPackageDetail() {
       {/* Main */}
       <main className="ordpkg-content">
         <div className="ordpkg-card">
-          {/* Back Button */}
           <button
             className="back-btn"
             onClick={() => navigate("/event/ordination")}
@@ -38,19 +149,18 @@ export default function OrdinationPackageDetail() {
           </button>
 
           <div className="ordpkg-body">
-            {/* Image */}
             <img
               src="/ordination2.jpg"
               alt="Ordination Package"
               className="ordpkg-image"
             />
 
-            {/* Text */}
             <div className="ordpkg-text">
               <h2>Ordination Ceremony</h2>
 
+              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
-                แพ็กเกจงานบวชครบวงจร ราคาเริ่มต้น 50,000 บาท
+                แพ็กเกจงานบวชครบวงจร ราคา {packagePrice.toLocaleString()} บาท
               </p>
 
               <p>
@@ -70,11 +180,226 @@ export default function OrdinationPackageDetail() {
                 <li>ทีมงานดูแลตลอดงาน</li>
               </ul>
 
-              <button className="ordpkg-btn">สนใจแพ็กเกจ</button>
+              <p className="limit-title">
+                ข้อจำกัดในแพ็กเกจนี้!
+              </p>
+
+              <ul>
+                <li>จำนวนแขกขั้นต่ำ 100 ไม่เกิน 350 คน</li>
+              </ul>
+
+              <button
+                className="ordpkg-btn"
+                onClick={() => setShowModal(true)}
+              >
+                สนใจแพ็กเกจ
+              </button>
             </div>
           </div>
         </div>
       </main>
+
+      {/* ================= MODAL ================= */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-box large">
+            <h2>ลงทะเบียน</h2>
+
+            {/* วันที่ */}
+            <div className="form-group">
+              <label>วันที่กำหนดจัดงาน</label>
+
+              <div className="option-row">
+                <button
+                  className={`option-btn ${
+                    selectedDateType === "custom" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedDateType("custom");
+                    setShowDateInput(true);
+                  }}
+                >
+                  📅{" "}
+                  {startDate && endDate
+                    ? `${startDate} - ${endDate}`
+                    : "ระบุวันที่"}
+                </button>
+
+                <button
+                  className={`option-btn ${
+                    selectedDateType === "3m" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedDateType("3m");
+                    setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
+                  }}
+                >
+                  ภายใน 3 เดือน
+                </button>
+
+                <button
+                  className={`option-btn ${
+                    selectedDateType === "6m" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedDateType("6m");
+                    setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
+                  }}
+                >
+                  ภายใน 6 เดือน
+                </button>
+
+                <button
+                  className={`option-btn ${
+                    selectedDateType === "1y" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedDateType("1y");
+                    setShowDateInput(false);
+                    setStartDate("");
+                    setEndDate("");
+                  }}
+                >
+                  ภายใน 1 ปี
+                </button>
+              </div>
+
+              {showDateInput && (
+                <div className="date-popup">
+                  <div className="date-range">
+                    <input
+                      type="date"
+                      value={startDate}
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                    <span>ถึง</span>
+                    <input
+                      type="date"
+                      value={endDate}
+                      min={startDate}
+                      onChange={(e) => {
+                        setEndDate(e.target.value);
+                        if (startDate && e.target.value) {
+                          setShowDateInput(false); // ✅ ปิด popup เมื่อเลือกครบ
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* จำนวนแขก */}
+            <div className="form-group">
+              <label>จำนวนแขก (100 - 350 คน)</label>
+              <input
+                type="number"
+                placeholder="ระบุจำนวนแขก"
+                value={guestCount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    setGuestCount("");
+                  } else {
+                    setGuestCount(Number(value));
+                  }
+                }}
+              />
+              {guestCount !== "" && !isGuestValid && (
+                <p style={{ color: "red", fontSize: "13px" }}>
+                  จำนวนแขกต้องอยู่ระหว่าง 100 - 350 คน
+                </p>
+              )}
+            </div>
+
+            {/* สถานที่ */}
+            <div className="form-group">
+              <label>สถานที่จัดงาน</label>
+              <input
+                type="text"
+                placeholder="ระบุสถานที่จัดงาน"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+
+            {/* ข้อมูลติดต่อ */}
+            <div className="row-2">
+              <input
+                type="text"
+                placeholder="ชื่อ - นามสกุล"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="เบอร์โทร"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+
+            <div className="row-2">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Line ID"
+                value={lineId}
+                onChange={(e) => setLineId(e.target.value)}
+              />
+            </div>
+
+            {/* 🔥 เรียกใช้ handleSubmit แทน */}
+            <button
+              className="submit-btn"
+              disabled={!isFormComplete}
+              onClick={handleSubmit}
+            >
+              ลงทะเบียน
+            </button>
+
+            <button
+              className="close-btn"
+              onClick={() => setShowModal(false)}
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SUCCESS MODAL */}
+      {showSuccess && (
+        <div className="modal-overlay">
+          <div className="modal-box success-box">
+            <h2>ลงทะเบียนเสร็จสิ้น</h2>
+            <div className="success-icon">✔</div>
+            <p>ติดต่อสอบถามได้ที่</p>
+            <p>📧 cpe_group8@ku.th</p>
+            <p>📞 089-999-9999</p>
+
+            <button
+              className="submit-btn"
+              onClick={() => {
+                setShowSuccess(false);
+                setShowModal(false);
+              }}
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
