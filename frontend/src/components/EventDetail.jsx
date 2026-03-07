@@ -66,8 +66,10 @@ export default function EventDetail() {
         <div className="package-grid">
           <div className="package-card">
             <img src="/prewedding.jpg" alt="Pre Wedding" />
-            <h4>Pre Wedding Package</h4>
-            <span className="price">เริ่มต้น 13,000 THB</span>
+            <h4>Pre Wedding Package
+              แพ็กเกจพรีเวดดิ้ง สถานที่ พร้อมช่างภาพ
+            </h4>
+            <span className="price">ราคา 12,999 THB</span>
             <Link to="/event/wedding/prewedding" className="detail-btn">
               ดูรายละเอียด
             </Link>
@@ -75,8 +77,10 @@ export default function EventDetail() {
 
           <div className="package-card">
             <img src="/engagement.jpg" alt="Engagement" />
-            <h4>Engagement Ceremony Package</h4>
-            <span className="price">เริ่มต้น 40,000 THB</span>
+            <h4>Engagement Ceremony Package
+              แพ็กเกจงานหมั้นครบวงจร รวมทุกพิธีสำคัญ
+            </h4>
+            <span className="price">ราคา 49,999 THB</span>
             <button
               className="detail-btn"
               onClick={() => navigate("/event/wedding/engagement")}
@@ -87,8 +91,10 @@ export default function EventDetail() {
 
           <div className="package-card">
             <img src="/wedding-package.jpg" alt="Wedding Package" />
-            <h4>Wedding Package</h4>
-            <span className="price">เริ่มต้น 95,000 THB</span>
+            <h4>Wedding Package
+              แพ็กเกจงานแต่งงานครบทุกความต้องการ
+            </h4>
+            <span className="price">ราคา 95,500 THB</span>
             <button
               className="detail-btn"
               onClick={() => navigate("/event/wedding/weddingpackage")}

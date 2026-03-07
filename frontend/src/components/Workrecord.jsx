@@ -514,28 +514,13 @@ export default function WorkRecord() {
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [isDateOpen, setIsDateOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editWork, setEditWork] = useState({
-    id: null,
-    eventType: "",
-    title: "",
-    category: "",
-    location: "",
-    room: "",
-    date: "",
-    budget: "",
-    participants: "",
-    status: "undetermined",
-  });
-  const [editSelectedDate, setEditSelectedDate] = useState(null);
-  const [isEditDateOpen, setIsEditDateOpen] = useState(false);
 
   const logout = () => {
     localStorage.removeItem("se_remember");
     navigate("/login");
   };
 
-  const { weddingEvents, setWeddingEvents, partyEvents, setPartyEvents, deleteEvent, addEvent } =
+  const { weddingEvents, partyEvents, deleteEvent, addEvent } =
     useWorkContext();
 
   const [deleteModal, setDeleteModal] = useState({
@@ -554,7 +539,7 @@ export default function WorkRecord() {
     date: "",
     budget: "",
     participants: "",
-    status: "preparing",
+    status: "undetermined",
   });
 
   const handleOpenCreateModal = (e) => {
@@ -566,7 +551,7 @@ export default function WorkRecord() {
       date: "",
       budget: "",
       participants: "",
-      status: "preparing",
+      status: "undetermined",
     });
     setIsCreateModalOpen(true);
   };
@@ -639,108 +624,12 @@ export default function WorkRecord() {
     setActiveDropdown(null);
   };
 
-  const parseThaiBEDate = (str) => {
-    if (!str || typeof str !== "string") return null;
-    const m = str.match(/(\d+)\s+([ก-๙]+)\s+(\d{4})/);
-    const months = {
-      "มกราคม": 0,
-      "กุมภาพันธ์": 1,
-      "มีนาคม": 2,
-      "เมษายน": 3,
-      "พฤษภาคม": 4,
-      "มิถุนายน": 5,
-      "กรกฎาคม": 6,
-      "สิงหาคม": 7,
-      "กันยายน": 8,
-      "ตุลาคม": 9,
-      "พฤศจิกายน": 10,
-      "ธันวาคม": 11,
-    };
-    if (m) {
-      const d = parseInt(m[1], 10);
-      const monthName = m[2];
-      const yBE = parseInt(m[3], 10);
-      const y = yBE - 543;
-      const mi = months[monthName];
-      if (Number.isInteger(d) && Number.isInteger(y) && mi >= 0) {
-        return new Date(y, mi, d);
-      }
-    }
-    return null;
-  };
-
   const handleEditClick = (event, eventType) => {
-    setEditWork({
-      id: event.id,
-      eventType,
-      title: event.title || "",
-      category: event.category || "",
-      location: event.location || "",
-      room: event.room || "",
-      date: event.date || "",
-      budget: event.budget || "",
-      participants: event.people || "",
-      status: event.status || "undetermined",
+    // Navigate to detail page for editing with event data and timeline
+    const timeline = createEventTimeline(event.id);
+    navigate(`/workrecord/detail/${event.id}`, {
+      state: { event, eventType, timeline },
     });
-    setEditSelectedDate(parseThaiBEDate(event.date));
-    setIsEditModalOpen(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setIsEditModalOpen(false);
-  };
-
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditWork((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSaveEditWork = () => {
-    if (!editWork.title || !editWork.category) {
-      alert("กรุณากรอกชื่องานและประเภทงาน");
-      return;
-    }
-    if (editWork.eventType === "wedding") {
-      setWeddingEvents((prev) =>
-        prev.map((e) =>
-          e.id === editWork.id
-            ? {
-                ...e,
-                title: editWork.title,
-                category: editWork.category,
-                location: editWork.location,
-                room: editWork.room,
-                date: editWork.date,
-                budget: editWork.budget,
-                people: editWork.participants,
-                status: editWork.status,
-              }
-            : e,
-        ),
-      );
-    } else {
-      setPartyEvents((prev) =>
-        prev.map((e) =>
-          e.id === editWork.id
-            ? {
-                ...e,
-                title: editWork.title,
-                category: editWork.category,
-                location: editWork.location,
-                room: editWork.room,
-                date: editWork.date,
-                budget: editWork.budget,
-                people: editWork.participants,
-                status: editWork.status,
-              }
-            : e,
-        ),
-      );
-    }
-    setIsEditModalOpen(false);
   };
 
   const handleDeleteClick = (event, eventType) => {
@@ -864,7 +753,7 @@ export default function WorkRecord() {
           <Link to="#" className="nav-item">
             สถานะคลัง
           </Link>
-          <Link to="/budget" className="nav-item">
+          <Link to="#" className="nav-item">
             งบประมาณ
           </Link>
         </nav>
@@ -1122,8 +1011,8 @@ export default function WorkRecord() {
                     onChange={handleCreateInputChange}
                     className="form-input form-select"
                   >
-                    <option value="preparing">กำลังจัดเตรียม</option>
-                    <option value="in_progress">กำลังดำเนินการ</option>
+                    <option value="undetermined">กำลังจัดเตรียม</option>
+                    <option value="inprogress">กำลังดำเนินการ</option>
                     <option value="completed">เสร็จสิ้น</option>
                   </select>
                   <span className="select-arrow-black">
@@ -1139,151 +1028,6 @@ export default function WorkRecord() {
               </button>
               <button className="btn-save" onClick={handleSaveNewWork}>
                 สร้างงาน
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isEditModalOpen && (
-        <div className="modal-overlay" onClick={handleCloseEditModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">แก้ไข</h2>
-
-            <div className="modal-form">
-              <div className="form-group">
-                <label>ชื่องาน</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={editWork.title}
-                  onChange={handleEditInputChange}
-                  className="form-input"
-                  placeholder="ชื่องาน"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>ประเภทงาน</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={editWork.category}
-                  onChange={handleEditInputChange}
-                  className="form-input"
-                  placeholder="ประเภทงาน"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>สถานที่จัดงาน</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={editWork.location}
-                  onChange={handleEditInputChange}
-                  className="form-input"
-                  placeholder="สถานที่จัดงาน"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>ห้อง</label>
-                <input
-                  type="text"
-                  name="room"
-                  value={editWork.room || ""}
-                  onChange={handleEditInputChange}
-                  className="form-input"
-                  placeholder="ห้อง"
-                />
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group date-group">
-                  <label>วันที่</label>
-                  <div className="date-input-wrapper">
-                    <span
-                      className="calendar-icon-left"
-                      onClick={() => setIsEditDateOpen(true)}
-                    >
-                      <IconCalendar />
-                    </span>
-                    <DatePicker
-                      selected={editSelectedDate}
-                      onChange={(date) => {
-                        setEditSelectedDate(date);
-                        setEditWork((prev) => ({
-                          ...prev,
-                          date: formatThaiBE(date),
-                        }));
-                        setIsEditDateOpen(false);
-                      }}
-                      open={isEditDateOpen}
-                      onInputClick={() => setIsEditDateOpen(true)}
-                      onClickOutside={() => setIsEditDateOpen(false)}
-                      locale={th}
-                      placeholderText={editWork.date || "14/2/2568"}
-                      className="form-input with-icon-left"
-                      dateFormat="dd/MM/yyyy"
-                      showPopperArrow={false}
-                    />
-                  </div>
-                </div>
-                <div className="form-group participants-group">
-                  <label>จำนวนคน</label>
-                  <input
-                    type="text"
-                    name="participants"
-                    value={editWork.participants}
-                    onChange={handleEditInputChange}
-                    className="form-input"
-                    placeholder="200"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>งบประมาณ</label>
-                <div className="budget-input-wrapper">
-                  <input
-                    type="text"
-                    name="budget"
-                    value={editWork.budget}
-                    onChange={handleEditInputChange}
-                    className="form-input"
-                    placeholder="500,000"
-                  />
-                  <span className="budget-unit">บาท</span>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>สถานะ</label>
-                <div className="select-wrapper">
-                  <select
-                    name="status"
-                    value={editWork.status}
-                    onChange={handleEditInputChange}
-                    className="form-input form-select"
-                  >
-                    <option value="preparing">กำลังจัดเตรียม</option>
-                    <option value="in_progress">กำลังดำเนินการ</option>
-                    <option value="completed">เสร็จสิ้น</option>
-                  </select>
-                  <span className="select-arrow-black">
-                    <IconChevronDown />
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={handleCloseEditModal}>
-                ยกเลิก
-              </button>
-              <button className="btn-save" onClick={handleSaveEditWork}>
-                บันทึก
               </button>
             </div>
           </div>
