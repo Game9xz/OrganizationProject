@@ -7,7 +7,6 @@ export const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // validate เบื้องต้น
   if (!username || !email || !password) {
     return res.status(400).json({
       message: "กรุณากรอกข้อมูลให้ครบ",
@@ -15,7 +14,7 @@ export const registerUser = async (req, res) => {
   }
 
   try {
-    // เช็ก email ซ้ำ
+
     const [existing] = await db.query(
       "SELECT user_id FROM user WHERE email = ?",
       [email],
