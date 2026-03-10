@@ -47,7 +47,7 @@ export default function Budget() {
           <Link to="/workrecord/status" className="nav-item">สถานะงาน</Link>
           <Link to="#" className="nav-item">ออกแบบ</Link>
           <Link to="/inventory" className="nav-item">คลัง</Link>
-          <Link to="#" className="nav-item">สถานะคลัง</Link>
+          <Link to="/inventory/status" className="nav-item">สถานะคลัง</Link>
           <Link to="/budget" className="nav-item active">งบประมาณ</Link>
         </nav>
 

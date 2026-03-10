@@ -135,50 +135,8 @@ export default function Inventory() {
     }
   };
 
-  // ---------- ฟังก์ชันลบสินค้า (อัปเดตใหม่ ป้องกัน Error HTML) ----------
-  const deleteProduct = async (id) => {
-    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?")) return;
-
-    // เก็บ state เดิมไว้ก่อน เผื่อลบไม่สำเร็จจะได้ดึงกลับมาได้ทันที
-    const previousItems = [...items];
-
-    // Optimistic delete: ซ่อนการ์ดออกไปจากหน้าจอก่อนเพื่อให้ดูรวดเร็ว
-    setItems((prev) => prev.filter((it) => it.product_id !== id));
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        // ลบสำเร็จ อัปเดตตัวเลข 4 กล่องด้านบน
-        fetchStats();
-      } else {
-        // เช็คว่า Backend ส่งอะไรกลับมา
-        const contentType = res.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            // ถ้าเป็น JSON ปกติ
-            const errorData = await res.json();
-            throw new Error(errorData.error || errorData.message || "เกิดข้อผิดพลาดในการลบ");
-        } else {
-            // ถ้าเป็น HTML (หา Route ไม่เจอ หรือ Server Error)
-            const textData = await res.text();
-            console.error("Server Error Response (HTML):", textData); // <--- ปริ้นท์ HTML ลง Console
-            throw new Error(`เซิร์ฟเวอร์ตอบกลับผิดปกติ (Status: ${res.status}) ดูสาเหตุได้ที่ Console F12`);
-        }
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      // แจ้งเตือนให้ผู้ใช้รู้ว่าทำไมถึงลบไม่ได้
-      alert(`${error.message}`); 
-      
-      // คืนค่าข้อมูลกลับมาแสดงเหมือนเดิม เพราะลบที่ฐานข้อมูลไม่สำเร็จ
-      setItems(previousItems);
-    }
-  };
-  // ----------------------------------------------------------------
-
   // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า ---------
+
   const handleOpenAdd = () => {
     setNewItem({ name: "", remain: 0, imageFile: null, previewUrl: "" });
     setIsAddOpen(true);
@@ -204,7 +162,7 @@ export default function Inventory() {
       return;
     }
 
-    // สร้างข้อมูลชั่วคราวเพื่อให้หน้าเว็บแสดงผลทันที
+    // สร้างข้อมูลชั่วคราวเพื่อให้หน้าเว็บแสดงผลทันที (รอข้อมูลจริงจาก Backend)
     const tempId = Math.max(0, ...items.map((i) => i.product_id || 0)) + 1;
     const optimistic = {
       product_id: tempId,
@@ -223,35 +181,27 @@ export default function Inventory() {
       form.append("remain", String(remain));
       if (newItem.imageFile) form.append("image", newItem.imageFile);
 
+      // ใช้ API_BASE_URL แทน /api/inventory เฉยๆ เพื่อให้เชื่อมหลังบ้านได้
       const res = await fetch(`${API_BASE_URL}`, {
         method: "POST",
         body: form,
       });
       
       if (res.ok) {
+        // ถ้าเซฟสำเร็จ โหลดข้อมูลใหม่ทั้งหมดเพื่อให้ ID และรูปภาพตรงกับ Database
         fetchProducts();
         fetchStats();
-      } else {
-         const contentType = res.headers.get("content-type");
-         if (contentType && contentType.includes("application/json")) {
-             const errorData = await res.json();
-             console.error("Add Error:", errorData);
-             alert(errorData.error || "เกิดข้อผิดพลาดในการเพิ่มสินค้า");
-         } else {
-             const textData = await res.text();
-             console.error("Add Error (HTML):", textData);
-             alert(`เซิร์ฟเวอร์ตอบกลับผิดปกติ (Status: ${res.status}) ดูสาเหตุได้ที่ Console F12`);
-         }
       }
     } catch (error) {
       console.error("Error adding product:", error);
     }
   };
+
   // -----------------------------------------------------------------------------------
 
   return (
     <div className="inv-layout">
-      <aside className="wr-sidebar">
+      <aside className="ws-sidebar">
         <div className="brand-logo">
           <svg className="cat-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
@@ -267,13 +217,27 @@ export default function Inventory() {
         <div className="brand-sub">Group8.SE@ku.th</div>
 
         <nav className="nav-menu">
-          <Link to="/homepage" className="nav-item">หน้าแรก</Link>
-          <Link to="/workrecord" className="nav-item">บันทึกงาน</Link>
-          <Link to="/workrecord/status" className="nav-item">สถานะงาน</Link>
-          <Link to="#" className="nav-item">ออกแบบ</Link>
-          <Link to="/inventory" className="nav-item active">คลัง</Link>
-          <Link to="#" className="nav-item">สถานะคลัง</Link>
-          <Link to="/budget" className="nav-item">งบประมาณ</Link>
+          <Link to="/homepage" className="nav-item">
+            หน้าแรก
+          </Link>
+          <Link to="/workrecord" className="nav-item">
+            บันทึกงาน
+          </Link>
+          <Link to="/workrecord/status" className="nav-item">
+            สถานะงาน
+          </Link>
+          <Link to="#" className="nav-item">
+            ออกแบบ
+          </Link>
+          <Link to="/inventory" className="nav-item active">
+            คลัง
+          </Link>
+          <Link to="/inventory/status" className="nav-item">
+            สถานะคลัง
+          </Link>
+          <Link to="/budget" className="nav-item">
+            งบประมาณ
+          </Link>
         </nav>
 
         <button className="logout-btn" onClick={logout}>Log out</button>
@@ -330,33 +294,19 @@ export default function Inventory() {
                   <span>คงเหลือ: {it.available_stock}</span>
                   <span>สถานะ: {getStatusLabel(it.available_stock)}</span>
                 </div>
-                <div className="inv-actions-row">
-                  <div className="inv-controls">
-                    <button
-                      className="inv-btn minus"
-                      onClick={() => adjustRemain(it.product_id, -1)}
-                      disabled={it.available_stock <= 0}
-                    >
-                      −
-                    </button>
-                    <button
-                      className="inv-btn plus"
-                      onClick={() => adjustRemain(it.product_id, +1)}
-                    >
-                      +
-                    </button>
-                  </div>
+                <div className="inv-controls">
                   <button
-                    className="inv-delete-btn"
-                    onClick={() => deleteProduct(it.product_id)}
+                    className="inv-btn minus"
+                    onClick={() => adjustRemain(it.product_id, -1)}
+                    disabled={it.available_stock <= 0}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                      <path d="M10 11v6" />
-                      <path d="M14 11v6" />
-                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                    </svg>
+                    −
+                  </button>
+                  <button
+                    className="inv-btn plus"
+                    onClick={() => adjustRemain(it.product_id, +1)}
+                  >
+                    +
                   </button>
                 </div>
               </div>

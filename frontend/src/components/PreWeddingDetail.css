@@ -363,3 +363,26 @@
   font-size: 30px;
   font-weight: bold;
 }
+
+.brand{
+  margin-bottom:32px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.cat-logo{
+  width:40px;
+  height:40px;
+  background:white;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:8px;
+}
+
+.cat-icon{
+  width:26px;
+  height:26px;
+}

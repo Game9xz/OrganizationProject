@@ -18,6 +18,7 @@ import CocktailPackageDetail from "./components/CocktailPackageDetail";
 import OrdinationPackageDetail from "./components/OrdinationPackageDetail";
 import HomePage from "./components/HomePage.jsx";
 import Inventory from "./components/Inventory.jsx";
+import InventoryStatus from "./components/InventoryStatus";
 import Budget from "./components/Budget.jsx";
 import BudgetDetail from "./components/BudgetDetail.jsx";
 import ForgotPassword from "./auth/ForgotPassword.jsx";
@@ -53,6 +54,7 @@ function App() {
         element={<OrdinationPackageDetail />}
       />
       <Route path="/inventory" element={<Inventory />} />
+      <Route path="/inventory/status" element={<InventoryStatus />} />
       <Route path="/budget" element={<Budget />} />
       <Route path="/budget/:type" element={<BudgetDetail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

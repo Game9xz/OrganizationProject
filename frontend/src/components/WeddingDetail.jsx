@@ -119,6 +119,28 @@ export default function WeddingDetail() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="brand">
+
+          <div className="cat-logo">
+            <svg
+              viewBox="0 0 100 100"
+              xmlns="http://www.w3.org/2000/svg"
+              className="cat-icon"
+            >
+              <g transform="scale(1.45) translate(-15,-15)">
+                <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
+                <path d="M66 38 L62 24 L50 35 Z" fill="#000" />
+                <path
+                  d="M20 60 C20 40, 40 35, 50 35 C60 35, 80 40, 80 60 C80 75, 70 85, 50 85 C30 85, 20 75, 20 60 Z"
+                  fill="#000"
+                />
+                <circle cx="42" cy="58" r="6" fill="#fff" />
+                <circle cx="58" cy="58" r="6" fill="#fff" />
+                <circle cx="42" cy="58" r="2.5" fill="#000" />
+                <circle cx="58" cy="58" r="2.5" fill="#000" />
+              </g>
+            </svg>
+          </div>
+
           <h3>SE EVENT</h3>
           <span>Group8@ku.th</span>
         </div>
@@ -201,7 +223,6 @@ export default function WeddingDetail() {
           <div className="modal-box">
             <h2>ลงทะเบียน</h2>
 
-            {/* Date */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
               <div className="option-row">
@@ -289,7 +310,6 @@ export default function WeddingDetail() {
               )}
             </div>
 
-            {/* Guest */}
             <div className="form-group">
               <label>จำนวนแขก (250 - 450 คน)</label>
               <input
@@ -314,7 +334,6 @@ export default function WeddingDetail() {
               )}
             </div>
 
-            {/* Location */}
             <div className="form-group">
               <label>สถานที่จัดงาน</label>
               <input
@@ -326,7 +345,6 @@ export default function WeddingDetail() {
               />
             </div>
 
-            {/* Contact */}
             <div className="row-2">
               <input
                 type="text"
@@ -376,7 +394,6 @@ export default function WeddingDetail() {
         </div>
       )}
 
-      {/* SUCCESS */}
       {showSuccess && (
         <div className="modal-overlay">
           <div className="modal-box success-box">
