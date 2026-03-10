@@ -351,10 +351,10 @@ export default function WorkRecord() {
       location: event.location || "",
       room: event.room || "",
       date: event.event_date || "",
-      budget: String(event.budget || ""),
-      participants: String(event.people_count || ""),
-      staff_cost: String(event.staff_cost || ""),
-      venue_cost: String(event.venue_cost || ""),
+      budget: String(event.budget ?? ""),
+      participants: String(event.people_count ?? ""),
+      staff_cost: String(event.staff_cost ?? ""),
+      venue_cost: String(event.venue_cost ?? ""),
       status: event.status || "กำลังจัดเตรียม",
     });
     if (event.event_date) {
@@ -390,16 +390,23 @@ export default function WorkRecord() {
     }
 
     const eventPayload = {
-      ...editWork,
+      title: editWork.title,
+      category: editWork.category,
+      location: editWork.location,
+      room: editWork.room,
       event_date: editDate
         ? editDate.toISOString().split("T")[0]
-        : editWork.date,
-
+        : editWork.date
+          ? String(editWork.date).split("T")[0]
+          : null,
       people_count: Number(editWork.participants) || 0,
-      budget: Number(editWork.budget.replace(/,/g, "")) || 0,
-      staff_cost: Number(editWork.staff_cost.replace(/,/g, "")) || 0,
-      venue_cost: Number(editWork.venue_cost.replace(/,/g, "")) || 0,
+      budget: Number(String(editWork.budget).replace(/,/g, "")) || 0,
+      staff_cost: Number(String(editWork.staff_cost).replace(/,/g, "")) || 0,
+      venue_cost: Number(String(editWork.venue_cost).replace(/,/g, "")) || 0,
+      status: editWork.status,
     };
+
+    console.log("EDIT PAYLOAD (before updateEvent):", eventPayload);
 
     await updateEvent(editWork.event_id, eventPayload);
     setIsEditModalOpen(false);

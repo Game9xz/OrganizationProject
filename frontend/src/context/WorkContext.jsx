@@ -58,13 +58,17 @@ export const WorkProvider = ({ children }) => {
         category: newEvent.category || null,
         location: newEvent.location || null,
         room: newEvent.room || null,
-        event_date: newEvent.event_date || null,
-        people_count: Number(newEvent.participants || newEvent.people_count) || 0,
-        budget: Number(String(newEvent.budget).replace(/[^0-9]/g, "")) || 0,
-        staff_cost: Number(String(newEvent.staff_cost || "").replace(/[^0-9]/g, "")) || 0,
-        venue_cost: Number(String(newEvent.venue_cost || "").replace(/[^0-9]/g, "")) || 0,
+        event_date: newEvent.event_date
+          ? String(newEvent.event_date).split("T")[0]
+          : null,
+        people_count: parseFloat(String(newEvent.participants ?? newEvent.people_count ?? 0).replace(/,/g, "")) || 0,
+        budget: parseFloat(String(newEvent.budget ?? 0).replace(/,/g, "")) || 0,
+        staff_cost: parseFloat(String(newEvent.staff_cost ?? 0).replace(/,/g, "")) || 0,
+        venue_cost: parseFloat(String(newEvent.venue_cost ?? 0).replace(/,/g, "")) || 0,
         status: newEvent.status || "ยังไม่ได้กำหนด",
       };
+
+      console.log("PAYLOAD SENT:", payload);
 
       const res = await fetch(`${BASE_API}/events`, {
         method: "POST",
@@ -126,18 +130,24 @@ export const WorkProvider = ({ children }) => {
   // =====================
   const updateEvent = async (id, updatedData) => {
     try {
+      // Normalize event_date: prefer event_date, fallback to date, strip time component
+      const rawDate = updatedData.event_date || updatedData.date || null;
+      const eventDate = rawDate ? String(rawDate).split("T")[0] : null;
+
       const payload = {
         title: updatedData.title,
         category: updatedData.category || null,
         location: updatedData.location || null,
         room: updatedData.room || null,
-        event_date: updatedData.date || updatedData.event_date || null,
-        people_count: Number(updatedData.participants || updatedData.people_count) || 0,
-        budget: Number(String(updatedData.budget).replace(/[^0-9]/g, "")) || 0,
-        staff_cost: Number(String(updatedData.staff_cost || "").replace(/[^0-9]/g, "")) || 0,
-        venue_cost: Number(String(updatedData.venue_cost || "").replace(/[^0-9]/g, "")) || 0,
+        event_date: eventDate,
+        people_count: parseFloat(String(updatedData.participants ?? updatedData.people_count ?? 0).replace(/,/g, "")) || 0,
+        budget: parseFloat(String(updatedData.budget ?? 0).replace(/,/g, "")) || 0,
+        staff_cost: parseFloat(String(updatedData.staff_cost ?? 0).replace(/,/g, "")) || 0,
+        venue_cost: parseFloat(String(updatedData.venue_cost ?? 0).replace(/,/g, "")) || 0,
         status: updatedData.status || "ยังไม่ได้กำหนด",
       };
+
+      console.log("UPDATE PAYLOAD:", payload);
 
       const res = await fetch(`${BASE_API}/events/${id}`, {
         method: "PUT",
