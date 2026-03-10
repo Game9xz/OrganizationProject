@@ -6,7 +6,8 @@ import {
   getAllProducts, 
   getInventoryStats, 
   updateStockQuantity,
-  addProduct // เพิ่มการนำเข้า addProduct จาก Controller
+  addProduct, // เพิ่มการนำเข้า addProduct จาก Controller
+  deleteProduct
 } from "../controllers/InventoryController.js";
 
 const router = express.Router();
@@ -39,6 +40,7 @@ router.get("/stats", getInventoryStats);
 
 // Route สำหรับอัปเดตจำนวนสินค้า
 router.put("/products/:id", updateStockQuantity);
+router.delete('/products/:id', deleteProduct);
 
 // Route ใหม่: สำหรับเพิ่มสินค้า 
 // (ต้องใช้ upload.single("image") เพราะ Frontend ของคุณส่งไฟล์มาในคีย์ชื่อ "image")

@@ -120,3 +120,33 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+/* =====================================================
+   DELETE PRODUCT
+   DELETE /api/inventory/products/:id
+===================================================== */
+export const deleteProduct = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      `DELETE FROM products WHERE product_id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "ไม่พบสินค้าที่ต้องการลบ" });
+    }
+
+    res.status(200).json({ 
+      message: "ลบสินค้าสำเร็จ", 
+      deleted_product_id: id 
+    });
+
+  } catch (err) {
+    // ดักจับ Error กรณีติด Foreign Key (ถูกนำไปใช้งานอยู่ ลบไม่ได้)
+    if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(400).json({ error: "ไม่สามารถลบได้เนื่องจากสินค้านี้ถูกจัดอยู่ในแพ็กเกจหรือถูกจองไปแล้ว" });
+    }
+    res.status(500).json({ error: err.message });
+  }
+};
