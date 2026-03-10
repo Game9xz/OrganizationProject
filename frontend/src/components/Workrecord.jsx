@@ -156,351 +156,18 @@ const IconChevronDown = () => (
   </svg>
 );
 
-// Helper function to create event timeline
-const createEventTimeline = (eventId) => {
-  const timelines = {
-    1: [
-      // งานแต่ง คุณกาญจนา
-      {
-        time: "06.00 น.",
-        items: [
-          {
-            title: "พิธีเช้าตักบาตร",
-            timeRange: "เริ่มต้น 06:00 - 08:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "09.00 น.",
-        items: [
-          {
-            title: "พิธีแห่ขันหมาก",
-            timeRange: "เริ่มต้น 09:00 - 10:30 น.",
-            type: "normal",
-          },
-          {
-            title: "พิธีการสู่ขอ และนับสินสอด",
-            timeRange: "เริ่มต้น 10:30 - 11:00 น.",
-            type: "normal",
-          },
-          {
-            title: "พิธีหลั่งน้ำพระพุทธมนต์",
-            timeRange: "เริ่มต้น 11:30 - 12:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "12.00 น.",
-        items: [
-          {
-            title: "รับประทานอาหารกลางวัน",
-            timeRange: "เริ่มต้น 12:00 - 14:00 น.",
-            type: "normal",
-          },
-          {
-            title: "พักผ่อน",
-            timeRange: "เริ่มต้น 12:00 - 15:00 น.",
-            type: "warning",
-          },
-        ],
-      },
-      {
-        time: "15.00 น.",
-        items: [
-          {
-            title: "เตรียมตัว",
-            timeRange: "เริ่มต้น 15:30 - 18:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "18.00 น.",
-        items: [
-          {
-            title: "พิธีเย็น",
-            timeRange: "เริ่มต้น 18:00 - 18:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-    ],
-    2: [
-      // งานแต่ง คุณเอ & คุณบี
-      {
-        time: "06.00 น.",
-        items: [
-          {
-            title: "พิธีเช้าตักบาตร",
-            timeRange: "เริ่มต้น 06:30 - 08:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "09.00 น.",
-        items: [
-          {
-            title: "พิธีแห่ขันหมาก",
-            timeRange: "เริ่มต้น 09:00 - 10:00 น.",
-            type: "normal",
-          },
-          {
-            title: "การประกอบพิธี",
-            timeRange: "เริ่มต้น 10:30 - 11:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "12.00 น.",
-        items: [
-          {
-            title: "เลี้ยงอาหารกลางวัน",
-            timeRange: "เริ่มต้น 12:00 - 13:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "15.00 น.",
-        items: [
-          {
-            title: "เตรียมเย็น",
-            timeRange: "เริ่มต้น 15:00 - 16:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "18.00 น.",
-        items: [
-          {
-            title: "สังสรรค์คืนค่ำ",
-            timeRange: "เริ่มต้น 18:30 - 20:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-    ],
-    3: [
-      // งานแต่ง คุณเจ้านาย
-      {
-        time: "06.00 น.",
-        items: [
-          {
-            title: "เตรียมการ",
-            timeRange: "เริ่มต้น 07:00 - 08:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "09.00 น.",
-        items: [
-          {
-            title: "พิธีหลัก",
-            timeRange: "เริ่มต้น 09:30 - 11:00 น.",
-            type: "normal",
-          },
-          {
-            title: "ถ่ายรูป",
-            timeRange: "เริ่มต้น 11:00 - 11:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "12.00 น.",
-        items: [
-          {
-            title: "อาหารกลางวัน",
-            timeRange: "เริ่มต้น 12:00 - 13:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "15.00 น.",
-        items: [
-          {
-            title: "ลงพื้น",
-            timeRange: "เริ่มต้น 15:00 - 17:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      { time: "18.00 น.", items: [] },
-    ],
-    4: [
-      // งานแต่ง คุณเจได
-      {
-        time: "06.00 น.",
-        items: [
-          {
-            title: "เตรียมพื้นที่",
-            timeRange: "เริ่มต้น 06:00 - 07:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "09.00 น.",
-        items: [
-          {
-            title: "พิธีวิวาห์",
-            timeRange: "เริ่มต้น 09:00 - 10:00 น.",
-            type: "normal",
-          },
-          {
-            title: "ฉากหลัง",
-            timeRange: "เริ่มต้น 10:00 - 11:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "12.00 น.",
-        items: [
-          {
-            title: "ปลุกเสก",
-            timeRange: "เริ่มต้น 12:30 - 13:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "15.00 น.",
-        items: [
-          {
-            title: "แพทย์เยี่ยม",
-            timeRange: "เริ่มต้น 15:30 - 16:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "18.00 น.",
-        items: [
-          {
-            title: "ดูหน้า",
-            timeRange: "เริ่มต้น 18:00 - 19:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-    ],
-    5: [
-      // งานวันเกิดสุดพิเศษ
-      { time: "06.00 น.", items: [] },
-      {
-        time: "09.00 น.",
-        items: [
-          {
-            title: "ตั้งค่าสถานที่",
-            timeRange: "เริ่มต้น 09:00 - 11:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "12.00 น.",
-        items: [
-          {
-            title: "เสิร์ฟอาหาร",
-            timeRange: "เริ่มต้น 12:00 - 13:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "15.00 น.",
-        items: [
-          {
-            title: "ตัดเค้ก",
-            timeRange: "เริ่มต้น 15:00 - 15:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "18.00 น.",
-        items: [
-          {
-            title: "การแสดงสด",
-            timeRange: "เริ่มต้น 18:00 - 20:00 น.",
-            type: "normal",
-          },
-        ],
-      },
-    ],
-    6: [
-      // สัมมนาผู้นำองค์กร 2024
-      { time: "06.00 น.", items: [] },
-      {
-        time: "09.00 น.",
-        items: [
-          {
-            title: "ลงทะเบียน",
-            timeRange: "เริ่มต้น 08:30 - 09:00 น.",
-            type: "normal",
-          },
-          {
-            title: "สปีชอาร์ต",
-            timeRange: "เริ่มต้น 09:00 - 10:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "12.00 น.",
-        items: [
-          {
-            title: "อาหารกลางวัน",
-            timeRange: "เริ่มต้น 12:00 - 13:00 น.",
-            type: "normal",
-          },
-          {
-            title: "Workshop",
-            timeRange: "เริ่มต้น 13:00 - 14:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "15.00 น.",
-        items: [
-          {
-            title: "อภิปรายกลุ่ม",
-            timeRange: "เริ่มต้น 15:00 - 16:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-      {
-        time: "18.00 น.",
-        items: [
-          {
-            title: "เลี้ยงค่ำ",
-            timeRange: "เริ่มต้น 18:00 - 19:30 น.",
-            type: "normal",
-          },
-        ],
-      },
-    ],
-  };
-
-  return (
-    timelines[eventId] || [
-      { time: "06.00 น.", items: [] },
-      { time: "09.00 น.", items: [] },
-      { time: "12.00 น.", items: [] },
-      { time: "15.00 น.", items: [] },
-      { time: "18.00 น.", items: [] },
-    ]
-  );
+// Helper: format date for display
+const formatEventDate = (dateStr) => {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const year = d.getFullYear() + 543;
+    const dayMonth = format(d, "d MMMM", { locale: th });
+    return `${dayMonth} ${year}`;
+  } catch {
+    return dateStr;
+  }
 };
 
 export default function WorkRecord() {
@@ -532,26 +199,33 @@ export default function WorkRecord() {
     navigate("/login");
   };
 
-  const { weddingEvents, partyEvents, deleteEvent, addEvent } =
-    useWorkContext();
+  const { events, deleteEvent, addEvent, updateEvent } = useWorkContext();
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     eventId: null,
-    eventType: null,
   });
 
   // Modal State for Create Work
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Modal State for Edit Work
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editWork, setEditWork] = useState(null);
+  const [editDate, setEditDate] = useState(null);
+  const [isEditDateOpen, setIsEditDateOpen] = useState(false);
+
   const [newWork, setNewWork] = useState({
     title: "",
     category: "",
     location: "",
+    room: "",
     date: "",
     budget: "",
     participants: "",
-    status: "undetermined",
+    staff_cost: "",
+    venue_cost: "",
+    status: "กำลังจัดเตรียม",
   });
 
   const handleOpenCreateModal = (e) => {
@@ -560,11 +234,15 @@ export default function WorkRecord() {
       title: "",
       category: "",
       location: "",
+      room: "",
       date: "",
       budget: "",
       participants: "",
-      status: "undetermined",
+      staff_cost: "",
+      venue_cost: "",
+      status: "กำลังจัดเตรียม",
     });
+    setSelectedDate(null);
     setIsCreateModalOpen(true);
   };
 
@@ -574,21 +252,52 @@ export default function WorkRecord() {
 
   const handleCreateInputChange = (e) => {
     const { name, value } = e.target;
+    let newValue = value;
+
+    // Auto-format numbers with commas for budget, staff_cost, and venue_cost
+    if (["budget", "staff_cost", "venue_cost"].includes(name)) {
+      // Remove non-digit characters
+      const rawValue = value.replace(/\D/g, "");
+      // Format with commas
+      newValue = rawValue ? Number(rawValue).toLocaleString("en-US") : "";
+    }
+
     setNewWork((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
-  const handleSaveNewWork = () => {
+  const handleSaveNewWork = async () => {
     if (!newWork.title || !newWork.category) {
       alert("กรุณากรอกชื่องานและประเภทงาน");
       return;
     }
 
-    addEvent(newWork);
+    // Convert selectedDate to ISO format for the API
+    const eventPayload = {
+      title: newWork.title,
+      category: newWork.category,
+      location: newWork.location,
+      room: newWork.room,
+
+      event_date: selectedDate
+        ? selectedDate.toISOString().split("T")[0]
+        : null,
+
+      people_count: Number(newWork.participants) || 0,
+
+      budget: Number(newWork.budget.replace(/,/g, "")) || 0,
+      staff_cost: Number(newWork.staff_cost.replace(/,/g, "")) || 0,
+      venue_cost: Number(newWork.venue_cost.replace(/,/g, "")) || 0,
+
+      status: newWork.status,
+    };
+
+    await addEvent(eventPayload);
     setIsCreateModalOpen(false);
   };
+
   const formatThaiBE = (d) => {
     if (!d) return "";
     const year = d.getFullYear() + 543;
@@ -596,13 +305,14 @@ export default function WorkRecord() {
     return `${dayMonth} ${year}`;
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     const { eventId } = deleteModal;
-    deleteEvent(eventId);
+    await deleteEvent(eventId);
     cancelDelete();
   };
+
   const filterEvent = (event) => {
-    const matchesSearch = event.title
+    const matchesSearch = (event.title || "")
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesLocation =
@@ -613,16 +323,13 @@ export default function WorkRecord() {
     return matchesSearch && matchesLocation && matchesRoom && matchesCategory;
   };
 
-  const filteredWeddingEvents = weddingEvents.filter(filterEvent);
-  const filteredPartyEvents = partyEvents.filter(filterEvent);
-
-  const totalWorks = filteredWeddingEvents.length + filteredPartyEvents.length;
+  const filteredEvents = events.filter(filterEvent);
+  const totalWorks = filteredEvents.length;
 
   // Dropdown Helpers
-  const allEvents = [...weddingEvents, ...partyEvents];
-  const uniqueLocations = [...new Set(allEvents.map((e) => e.location))];
-  const uniqueRooms = [...new Set(allEvents.map((e) => e.room))];
-  const uniqueCategories = [...new Set(allEvents.map((e) => e.category))];
+  const uniqueLocations = [...new Set(events.map((e) => e.location).filter(Boolean))];
+  const uniqueRooms = [...new Set(events.map((e) => e.room).filter(Boolean))];
+  const uniqueCategories = [...new Set(events.map((e) => e.category).filter(Boolean))];
 
   const toggleDropdown = (name) => {
     setActiveDropdown(activeDropdown === name ? null : name);
@@ -636,19 +343,72 @@ export default function WorkRecord() {
     setActiveDropdown(null);
   };
 
-  const handleEditClick = (event, eventType) => {
-    // Navigate to detail page for editing with event data and timeline
-    const timeline = createEventTimeline(event.id);
-    navigate(`/workrecord/detail/${event.id}`, {
-      state: { event, eventType, timeline },
+  const handleEditClick = (event) => {
+    setEditWork({
+      event_id: event.event_id,
+      title: event.title || "",
+      category: event.category || "",
+      location: event.location || "",
+      room: event.room || "",
+      date: event.event_date || "",
+      budget: String(event.budget || ""),
+      participants: String(event.people_count || ""),
+      staff_cost: String(event.staff_cost || ""),
+      venue_cost: String(event.venue_cost || ""),
+      status: event.status || "กำลังจัดเตรียม",
     });
+    if (event.event_date) {
+      setEditDate(new Date(event.event_date));
+    } else {
+      setEditDate(null);
+    }
+    setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = (event, eventType) => {
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    // Auto-format numbers with commas for budget, staff_cost, and venue_cost
+    if (["budget", "staff_cost", "venue_cost"].includes(name)) {
+      // Remove non-digit characters
+      const rawValue = value.replace(/\D/g, "");
+      // Format with commas
+      newValue = rawValue ? Number(rawValue).toLocaleString("en-US") : "";
+    }
+
+    setEditWork((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+  };
+
+  const handleSaveEditWork = async () => {
+    if (!editWork.title) {
+      alert("กรุณากรอกชื่องาน");
+      return;
+    }
+
+    const eventPayload = {
+      ...editWork,
+      event_date: editDate
+        ? editDate.toISOString().split("T")[0]
+        : editWork.date,
+
+      people_count: Number(editWork.participants) || 0,
+      budget: Number(editWork.budget.replace(/,/g, "")) || 0,
+      staff_cost: Number(editWork.staff_cost.replace(/,/g, "")) || 0,
+      venue_cost: Number(editWork.venue_cost.replace(/,/g, "")) || 0,
+    };
+
+    await updateEvent(editWork.event_id, eventPayload);
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteClick = (event) => {
     setDeleteModal({
       isOpen: true,
-      eventId: event.id,
-      eventType: eventType,
+      eventId: event.event_id,
     });
   };
 
@@ -656,44 +416,48 @@ export default function WorkRecord() {
     setDeleteModal({
       isOpen: false,
       eventId: null,
-      eventType: null,
     });
   };
 
-  const renderCard = (event, eventType) => (
+  const renderCard = (event) => (
     <div
-      key={event.id}
+      key={event.event_id}
       className="work-card"
       onClick={() => {
-        const timeline = createEventTimeline(event.id);
-        navigate(`/workrecord/detail/${event.id}`, {
-          state: { event, eventType, timeline },
+        navigate(`/workrecord/detail/${event.event_id}`, {
+          state: { event },
         });
       }}
       style={{ cursor: "pointer" }}
     >
       <div className="card-title">{event.title}</div>
-      <div className="card-desc">{event.desc}</div>
+      <div className="card-desc">{event.category || ""}</div>
 
       <div className="card-row">
         <IconCalendar />
-        <span>{event.date}</span>
+        <span>{formatEventDate(event.event_date)}</span>
       </div>
 
       <div className="card-row">
         <IconPin />
-        <span>{event.location}</span>
+        <span>{event.location || "-"}</span>
       </div>
 
       <div className="card-footer">
-        <div className="footer-left">
-          <div className="stat-item">
-            <IconUser />
-            <span>{event.people}</span>
+        <div className="footer-left" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <div className="stat-item">
+              <IconUser />
+              <span>{event.people_count || 0} คน</span>
+            </div>
+            <div className="stat-item">
+              <IconWallet />
+              <span>{Number(event.budget || 0).toLocaleString()} บาท</span>
+            </div>
           </div>
-          <div className="stat-item">
-            <IconWallet />
-            <span>{event.budget}</span>
+          <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: '#9ca3af' }}>
+            <div>จ้าง: {Number(event.staff_cost || 0).toLocaleString()} ฿</div>
+            <div>สถานที่: {Number(event.venue_cost || 0).toLocaleString()} ฿</div>
           </div>
         </div>
 
@@ -702,7 +466,7 @@ export default function WorkRecord() {
             className="edit-btn"
             onClick={(e) => {
               e.stopPropagation();
-              handleEditClick(event, eventType);
+              handleEditClick(event);
             }}
           >
             <IconEdit /> แก้ไข
@@ -711,7 +475,7 @@ export default function WorkRecord() {
             className="delete-btn"
             onClick={(e) => {
               e.stopPropagation();
-              handleDeleteClick(event, eventType);
+              handleDeleteClick(event);
             }}
           >
             <IconTrash />
@@ -780,7 +544,7 @@ export default function WorkRecord() {
         <header className="wr-header">
           <div>
             <h1 className="page-title">บันทึกงานทั้งหมด</h1>
-            <div className="page-year">2025</div>
+            <div className="page-year">{new Date().getFullYear() + 543}</div>
           </div>
           <button
             type="button"
@@ -877,8 +641,7 @@ export default function WorkRecord() {
         </section>
 
         <div className="cards-grid">
-          {filteredWeddingEvents.map((event) => renderCard(event, "wedding"))}
-          {filteredPartyEvents.map((event) => renderCard(event, "party"))}
+          {filteredEvents.map((event) => renderCard(event))}
         </div>
       </main>
 
@@ -1014,6 +777,37 @@ export default function WorkRecord() {
                 </div>
               </div>
 
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>ค่าจ้างพนักงาน</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="staff_cost"
+                      value={newWork.staff_cost}
+                      onChange={handleCreateInputChange}
+                      className="form-input"
+                      placeholder="35,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>ค่าสถานที่</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="venue_cost"
+                      value={newWork.venue_cost}
+                      onChange={handleCreateInputChange}
+                      className="form-input"
+                      placeholder="100,000"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>สถานะ</label>
                 <div className="select-wrapper">
@@ -1023,9 +817,9 @@ export default function WorkRecord() {
                     onChange={handleCreateInputChange}
                     className="form-input form-select"
                   >
-                    <option value="undetermined">กำลังจัดเตรียม</option>
-                    <option value="inprogress">กำลังดำเนินการ</option>
-                    <option value="completed">เสร็จสิ้น</option>
+                    <option value="กำลังจัดเตรียม">กำลังจัดเตรียม</option>
+                    <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                    <option value="เสร็จสิ้น">เสร็จสิ้น</option>
                   </select>
                   <span className="select-arrow-black">
                     <IconChevronDown />
@@ -1040,6 +834,175 @@ export default function WorkRecord() {
               </button>
               <button className="btn-save" onClick={handleSaveNewWork}>
                 สร้างงาน
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Work Modal */}
+      {isEditModalOpen && editWork && (
+        <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">แก้ไขงาน</h2>
+
+            <div className="modal-form">
+              <div className="form-group">
+                <label>ชื่องาน</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={editWork.title}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>ประเภทงาน</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={editWork.category}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>สถานที่จัดงาน</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={editWork.location}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>ห้อง</label>
+                <input
+                  type="text"
+                  name="room"
+                  value={editWork.room}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group-row">
+                <div className="form-group date-group">
+                  <label>วันที่</label>
+                  <div className="date-input-wrapper">
+                    <span
+                      className="calendar-icon-left"
+                      onClick={() => setIsEditDateOpen(true)}
+                    >
+                      <IconCalendar />
+                    </span>
+                    <DatePicker
+                      selected={editDate}
+                      onChange={(date) => {
+                        setEditDate(date);
+                        setEditWork((prev) => ({
+                          ...prev,
+                          date: formatThaiBE(date),
+                        }));
+                        setIsEditDateOpen(false);
+                      }}
+                      open={isEditDateOpen}
+                      onInputClick={() => setIsEditDateOpen(true)}
+                      onClickOutside={() => setIsEditDateOpen(false)}
+                      locale={th}
+                      placeholderText="14/2/2568"
+                      className="form-input with-icon-left"
+                      dateFormat="dd/MM/yyyy"
+                      showPopperArrow={false}
+                    />
+                  </div>
+                </div>
+                <div className="form-group participants-group">
+                  <label>จำนวนคน</label>
+                  <input
+                    type="text"
+                    name="participants"
+                    value={editWork.participants}
+                    onChange={handleEditInputChange}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>งบประมาณ</label>
+                <div className="budget-input-wrapper">
+                  <input
+                    type="text"
+                    name="budget"
+                    value={editWork.budget}
+                    onChange={handleEditInputChange}
+                    className="form-input"
+                  />
+                  <span className="budget-unit">บาท</span>
+                </div>
+              </div>
+
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>ค่าจ้างพนักงาน</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="staff_cost"
+                      value={editWork.staff_cost}
+                      onChange={handleEditInputChange}
+                      className="form-input"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>ค่าสถานที่</label>
+                  <div className="budget-input-wrapper">
+                    <input
+                      type="text"
+                      name="venue_cost"
+                      value={editWork.venue_cost}
+                      onChange={handleEditInputChange}
+                      className="form-input"
+                    />
+                    <span className="budget-unit">บาท</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>สถานะ</label>
+                <div className="select-wrapper">
+                  <select
+                    name="status"
+                    value={editWork.status}
+                    onChange={handleEditInputChange}
+                    className="form-input form-select"
+                  >
+                    <option value="กำลังจัดเตรียม">กำลังจัดเตรียม</option>
+                    <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                    <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+                  </select>
+                  <span className="select-arrow-black">
+                    <IconChevronDown />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>
+                ยกเลิก
+              </button>
+              <button className="btn-save" onClick={handleSaveEditWork}>
+                บันทึก
               </button>
             </div>
           </div>

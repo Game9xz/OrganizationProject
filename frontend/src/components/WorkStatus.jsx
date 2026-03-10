@@ -74,64 +74,23 @@ const IconCalendar = () => (
   </svg>
 );
 
-const createEventTimeline = (eventId) => {
-  const timelines = {
-    1: [
-      { time: "06.00 น.", items: [{ title: "พิธีเช้าตักบาตร", timeRange: "เริ่มต้น 06:00 - 08:00 น.", type: "normal" }] },
-      { time: "09.00 น.", items: [{ title: "พิธีแห่ขันหมาก", timeRange: "เริ่มต้น 09:00 - 10:30 น.", type: "normal" }, { title: "พิธีการสู่ขอ และนับสินสอด", timeRange: "เริ่มต้น 10:30 - 11:00 น.", type: "normal" }, { title: "พิธีหลั่งน้ำพระพุทธมนต์", timeRange: "เริ่มต้น 11:30 - 12:00 น.", type: "normal" }] },
-      { time: "12.00 น.", items: [{ title: "รับประทานอาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 14:00 น.", type: "normal" }, { title: "พักผ่อน", timeRange: "เริ่มต้น 12:00 - 15:00 น.", type: "warning" }] },
-      { time: "15.00 น.", items: [{ title: "เตรียมตัว", timeRange: "เริ่มต้น 15:30 - 18:00 น.", type: "normal" }] },
-      { time: "18.00 น.", items: [{ title: "พิธีเย็น", timeRange: "เริ่มต้น 18:00 - 18:30 น.", type: "normal" }] },
-    ],
-    2: [
-      { time: "06.00 น.", items: [{ title: "พิธีเช้าตักบาตร", timeRange: "เริ่มต้น 06:30 - 08:00 น.", type: "normal" }] },
-      { time: "09.00 น.", items: [{ title: "พิธีแห่ขันหมาก", timeRange: "เริ่มต้น 09:00 - 10:00 น.", type: "normal" }, { title: "การประกอบพิธี", timeRange: "เริ่มต้น 10:30 - 11:30 น.", type: "normal" }] },
-      { time: "12.00 น.", items: [{ title: "เลี้ยงอาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 13:30 น.", type: "normal" }] },
-      { time: "15.00 น.", items: [{ title: "เตรียมเย็น", timeRange: "เริ่มต้น 15:00 - 16:30 น.", type: "normal" }] },
-      { time: "18.00 น.", items: [{ title: "สังสรรค์คืนค่ำ", timeRange: "เริ่มต้น 18:30 - 20:00 น.", type: "normal" }] },
-    ],
-    3: [
-      { time: "06.00 น.", items: [{ title: "เตรียมการ", timeRange: "เริ่มต้น 07:00 - 08:30 น.", type: "normal" }] },
-      { time: "09.00 น.", items: [{ title: "พิธีหลัก", timeRange: "เริ่มต้น 09:30 - 11:00 น.", type: "normal" }, { title: "ถ่ายรูป", timeRange: "เริ่มต้น 11:00 - 11:30 น.", type: "normal" }] },
-      { time: "12.00 น.", items: [{ title: "อาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 13:00 น.", type: "normal" }] },
-      { time: "15.00 น.", items: [{ title: "ลงพื้น", timeRange: "เริ่มต้น 15:00 - 17:00 น.", type: "normal" }] },
-      { time: "18.00 น.", items: [] },
-    ],
-    4: [
-      { time: "06.00 น.", items: [{ title: "เตรียมพื้นที่", timeRange: "เริ่มต้น 06:00 - 07:00 น.", type: "normal" }] },
-      { time: "09.00 น.", items: [{ title: "พิธีวิวาห์", timeRange: "เริ่มต้น 09:00 - 10:00 น.", type: "normal" }, { title: "ฉากหลัง", timeRange: "เริ่มต้น 10:00 - 11:00 น.", type: "normal" }] },
-      { time: "12.00 น.", items: [{ title: "ปลุกเสก", timeRange: "เริ่มต้น 12:30 - 13:30 น.", type: "normal" }] },
-      { time: "15.00 น.", items: [{ title: "แพทย์เยี่ยม", timeRange: "เริ่มต้น 15:30 - 16:30 น.", type: "normal" }] },
-      { time: "18.00 น.", items: [{ title: "ดูหน้า", timeRange: "เริ่มต้น 18:00 - 19:00 น.", type: "normal" }] },
-    ],
-    5: [
-      { time: "06.00 น.", items: [] },
-      { time: "09.00 น.", items: [{ title: "ตั้งค่าสถานที่", timeRange: "เริ่มต้น 09:00 - 11:00 น.", type: "normal" }] },
-      { time: "12.00 น.", items: [{ title: "เสิร์ฟอาหาร", timeRange: "เริ่มต้น 12:00 - 13:00 น.", type: "normal" }] },
-      { time: "15.00 น.", items: [{ title: "ตัดเค้ก", timeRange: "เริ่มต้น 15:00 - 15:30 น.", type: "normal" }] },
-      { time: "18.00 น.", items: [{ title: "การแสดงสด", timeRange: "เริ่มต้น 18:00 - 20:00 น.", type: "normal" }] },
-    ],
-    6: [
-      { time: "06.00 น.", items: [] },
-      { time: "09.00 น.", items: [{ title: "ลงทะเบียน", timeRange: "เริ่มต้น 08:30 - 09:00 น.", type: "normal" }, { title: "สปีชอาร์ต", timeRange: "เริ่มต้น 09:00 - 10:30 น.", type: "normal" }] },
-      { time: "12.00 น.", items: [{ title: "อาหารกลางวัน", timeRange: "เริ่มต้น 12:00 - 13:00 น.", type: "normal" }, { title: "Workshop", timeRange: "เริ่มต้น 13:00 - 14:30 น.", type: "normal" }] },
-      { time: "15.00 น.", items: [{ title: "อภิปรายกลุ่ม", timeRange: "เริ่มต้น 15:00 - 16:30 น.", type: "normal" }] },
-      { time: "18.00 น.", items: [{ title: "เลี้ยงค่ำ", timeRange: "เริ่มต้น 18:00 - 19:30 น.", type: "normal" }] },
-    ],
-  };
-  return timelines[eventId] || [
-    { time: "06.00 น.", items: [] },
-    { time: "09.00 น.", items: [] },
-    { time: "12.00 น.", items: [] },
-    { time: "15.00 น.", items: [] },
-    { time: "18.00 น.", items: [] },
-  ];
+// Helper: format date for display
+const formatEventDate = (dateStr) => {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const year = d.getFullYear() + 543;
+    const dayMonth = format(d, "d MMMM", { locale: th });
+    return `${dayMonth} ${year}`;
+  } catch {
+    return dateStr;
+  }
 };
 
 export default function WorkStatus() {
   const navigate = useNavigate();
-  const { weddingEvents, partyEvents, updateEventStatus, addEvent } =
-    useWorkContext();
+  const { events, updateEventStatus, addEvent } = useWorkContext();
   const [activeTab, setActiveTab] = useState("all");
 
   // Modal State
@@ -141,9 +100,11 @@ export default function WorkStatus() {
     title: "",
     category: "",
     location: "",
+    room: "",
     date: "",
     budget: "",
-    status: "undetermined",
+    participants: "",
+    status: "กำลังจัดเตรียม",
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [isDateOpen, setIsDateOpen] = useState(false);
@@ -166,30 +127,31 @@ export default function WorkStatus() {
   };
 
   const allEvents = useMemo(() => {
-    return [...weddingEvents, ...partyEvents].sort((a, b) => {
-      return new Date(a.date) - new Date(b.date);
+    return [...events].sort((a, b) => {
+      return new Date(a.event_date) - new Date(b.event_date);
     });
-  }, [weddingEvents, partyEvents]);
+  }, [events]);
 
   // Stats Calculation
   const totalWorks = allEvents.length;
   const undeterminedCount = allEvents.filter(
-    (e) => e.status === "undetermined",
+    (e) => e.status === "ยังไม่ได้กำหนด",
   ).length;
 
   const overlappingCount = useMemo(() => {
     const dateMap = {};
     allEvents.forEach((e) => {
-      dateMap[e.date] = (dateMap[e.date] || 0) + 1;
+      const dateKey = e.event_date ? new Date(e.event_date).toDateString() : "";
+      if (dateKey) dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
     });
     return Object.values(dateMap).filter((count) => count > 1).length;
   }, [allEvents]);
 
   const statusCounts = {
     all: totalWorks,
-    preparing: allEvents.filter((e) => e.status === "preparing").length,
-    in_progress: allEvents.filter((e) => e.status === "in_progress").length,
-    completed: allEvents.filter((e) => e.status === "completed").length,
+    "กำลังจัดเตรียม": allEvents.filter((e) => e.status === "กำลังจัดเตรียม").length,
+    "กำลังดำเนินการ": allEvents.filter((e) => e.status === "กำลังดำเนินการ").length,
+    "เสร็จสิ้น": allEvents.filter((e) => e.status === "เสร็จสิ้น").length,
   };
 
   const filteredEvents =
@@ -199,13 +161,13 @@ export default function WorkStatus() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "preparing":
+      case "กำลังจัดเตรียม":
         return "status-preparing";
-      case "in_progress":
+      case "กำลังดำเนินการ":
         return "status-inprogress";
-      case "completed":
+      case "เสร็จสิ้น":
         return "status-completed";
-      case "undetermined":
+      case "ยังไม่ได้กำหนด":
         return "status-undetermined";
       default:
         return "";
@@ -219,10 +181,13 @@ export default function WorkStatus() {
       title: "",
       category: "",
       location: "",
+      room: "",
       date: "",
       budget: "",
-      status: "undetermined",
+      participants: "",
+      status: "กำลังจัดเตรียม",
     });
+    setSelectedDate(null);
     setIsModalOpen(true);
   };
 
@@ -238,18 +203,21 @@ export default function WorkStatus() {
     }));
   };
 
-  const handleSaveWork = () => {
+  const handleSaveWork = async () => {
     if (!newWork.title || !newWork.category) {
       alert("กรุณากรอกชื่องานและประเภทงาน");
       return;
     }
 
-    // Convert date format if needed or just pass as is
-    // Assuming simple string for now as per current data structure
+    const eventPayload = {
+      ...newWork,
+      date: selectedDate ? selectedDate.toISOString().split("T")[0] : null,
+    };
 
-    addEvent(newWork);
+    await addEvent(eventPayload);
     setIsModalOpen(false);
   };
+
   const formatThaiBE = (d) => {
     if (!d) return "";
     const year = d.getFullYear() + 543;
@@ -356,22 +324,22 @@ export default function WorkStatus() {
             ทั้งหมด ({statusCounts.all})
           </button>
           <button
-            className={`tab-btn ${activeTab === "preparing" ? "active" : ""}`}
-            onClick={() => setActiveTab("preparing")}
+            className={`tab-btn ${activeTab === "กำลังจัดเตรียม" ? "active" : ""}`}
+            onClick={() => setActiveTab("กำลังจัดเตรียม")}
           >
-            กำลังจัดเตรียม ({statusCounts.preparing})
+            กำลังจัดเตรียม ({statusCounts["กำลังจัดเตรียม"]})
           </button>
           <button
-            className={`tab-btn ${activeTab === "in_progress" ? "active" : ""}`}
-            onClick={() => setActiveTab("in_progress")}
+            className={`tab-btn ${activeTab === "กำลังดำเนินการ" ? "active" : ""}`}
+            onClick={() => setActiveTab("กำลังดำเนินการ")}
           >
-            กำลังดำเนินการ ({statusCounts.in_progress})
+            กำลังดำเนินการ ({statusCounts["กำลังดำเนินการ"]})
           </button>
           <button
-            className={`tab-btn ${activeTab === "completed" ? "active" : ""}`}
-            onClick={() => setActiveTab("completed")}
+            className={`tab-btn ${activeTab === "เสร็จสิ้น" ? "active" : ""}`}
+            onClick={() => setActiveTab("เสร็จสิ้น")}
           >
-            เสร็จสิ้น ({statusCounts.completed})
+            เสร็จสิ้น ({statusCounts["เสร็จสิ้น"]})
           </button>
         </section>
 
@@ -389,26 +357,26 @@ export default function WorkStatus() {
             </thead>
             <tbody>
               {filteredEvents.map((event) => (
-                <tr key={event.id}>
+                <tr key={event.event_id}>
                   <td className="col-title">
                     <div className="event-title">{event.title}</div>
                     <div className="event-category">{event.category}</div>
                   </td>
-                  <td className="col-date">{event.date}</td>
-                  <td className="col-location">{event.location}</td>
+                  <td className="col-date">{formatEventDate(event.event_date)}</td>
+                  <td className="col-location">{event.location || "-"}</td>
                   <td className="col-status">
                     <div className="status-dropdown-wrapper">
                       <select
                         className={`status-select ${getStatusColor(event.status)}`}
                         value={event.status}
                         onChange={(e) =>
-                          updateEventStatus(event.id, e.target.value)
+                          updateEventStatus(event.event_id, e.target.value)
                         }
                       >
-                        <option value="undetermined">ยังไม่ได้กำหนด</option>
-                        <option value="preparing">กำลังจัดเตรียม</option>
-                        <option value="in_progress">กำลังดำเนินการ</option>
-                        <option value="completed">เสร็จสิ้น</option>
+                        <option value="ยังไม่ได้กำหนด">ยังไม่ได้กำหนด</option>
+                        <option value="กำลังจัดเตรียม">กำลังจัดเตรียม</option>
+                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                        <option value="เสร็จสิ้น">เสร็จสิ้น</option>
                       </select>
                       <span className="select-arrow">
                         <IconChevronDown />
@@ -419,10 +387,7 @@ export default function WorkStatus() {
                     <button
                       className="detail-btn"
                       onClick={() => {
-                        const timeline = createEventTimeline(event.id);
-                        navigate(`/workrecord/detail/${event.id}`, {
-                          state: { event, timeline },
-                        });
+                        navigate(`/workrecord/detail/${event.event_id}`);
                       }}
                     >
                       รายละเอียด
@@ -530,10 +495,10 @@ export default function WorkStatus() {
                     onChange={handleInputChange}
                     className="form-input form-select"
                   >
-                    <option value="undetermined">ยังไม่ได้กำหนด</option>
-                    <option value="preparing">กำลังจัดเตรียม</option>
-                    <option value="in_progress">กำลังดำเนินการ</option>
-                    <option value="completed">เสร็จสิ้น</option>
+                    <option value="ยังไม่ได้กำหนด">ยังไม่ได้กำหนด</option>
+                    <option value="กำลังจัดเตรียม">กำลังจัดเตรียม</option>
+                    <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                    <option value="เสร็จสิ้น">เสร็จสิ้น</option>
                   </select>
                   <span className="select-arrow-black">
                     <IconChevronDown />

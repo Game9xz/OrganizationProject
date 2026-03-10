@@ -4,6 +4,7 @@ import db from "../config/db.js";
 // สร้างงาน
 // ==========================
 export const createEvent = async (req, res) => {
+  console.log("REQ BODY:", req.body);
   try {
     const {
       user_id,
@@ -14,6 +15,8 @@ export const createEvent = async (req, res) => {
       event_date,
       people_count,
       budget,
+      staff_cost,
+      venue_cost,
       status = "ยังไม่ได้กำหนด",
     } = req.body;
 
@@ -25,8 +28,8 @@ export const createEvent = async (req, res) => {
 
     const sql = `
       INSERT INTO events
-      (user_id, title, category, location, room, event_date, people_count, budget, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (user_id, title, category, location, room, event_date, people_count, budget, staff_cost, venue_cost, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const [result] = await db.query(sql, [
@@ -36,8 +39,10 @@ export const createEvent = async (req, res) => {
       location || null,
       room || null,
       event_date,
-      people_count || 0,
-      budget || 0,
+      Number(people_count) || 0,
+      Number(budget) || 0,
+      Number(staff_cost) || 0,
+      Number(venue_cost) || 0,
       status,
     ]);
 
@@ -125,13 +130,15 @@ export const updateEvent = async (req, res) => {
       event_date,
       people_count,
       budget,
+      staff_cost,
+      venue_cost,
       status,
     } = req.body;
 
     const sql = `
       UPDATE events
       SET title=?, category=?, location=?, room=?,
-          event_date=?, people_count=?, budget=?, status=?
+          event_date=?, people_count=?, budget=?, staff_cost=?, venue_cost=?, status=?
       WHERE event_id=?
     `;
 
@@ -143,6 +150,8 @@ export const updateEvent = async (req, res) => {
       event_date,
       people_count,
       budget,
+      staff_cost || 0,
+      venue_cost || 0,
       status,
       id,
     ]);

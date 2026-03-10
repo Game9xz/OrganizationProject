@@ -1,23 +1,136 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import './WorkRecordDetail.css';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale';
 
-export default function WorkRecord() {
+const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+
+// Helper: format date for display
+const formatEventDate = (dateStr) => {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const year = d.getFullYear() + 543;
+    const dayMonth = format(d, "d MMMM", { locale: th });
+    return `${dayMonth} ${year}`;
+  } catch {
+    return dateStr;
+  }
+};
+
+// Helper: convert activities from DB to timeline slots
+const activitiesToTimeline = (activities) => {
+  const slots = [
+    { time: '06.00 น.', items: [] },
+    { time: '09.00 น.', items: [] },
+    { time: '12.00 น.', items: [] },
+    { time: '15.00 น.', items: [] },
+    { time: '18.00 น.', items: [] },
+  ];
+
+  activities.forEach((act) => {
+    const startTime = act.start_time || '';
+    const endTime = act.end_time || '';
+    const startHour = parseInt(startTime.split(':')[0], 10);
+
+    let slotIndex = 0;
+    if (startHour >= 6 && startHour < 9) slotIndex = 0;
+    else if (startHour >= 9 && startHour < 12) slotIndex = 1;
+    else if (startHour >= 12 && startHour < 15) slotIndex = 2;
+    else if (startHour >= 15 && startHour < 18) slotIndex = 3;
+    else if (startHour >= 18) slotIndex = 4;
+    else slotIndex = 0;
+
+    slots[slotIndex].items.push({
+      id: act.id,
+      title: act.title,
+      timeRange: `เริ่มต้น ${startTime.substring(0, 5)} - ${endTime.substring(0, 5)} น.`,
+      type: 'normal',
+      details: act.description || '',
+      start_time: startTime,
+      end_time: endTime,
+    });
+  });
+
+  // Sort items within each slot
+  slots.forEach((slot) => {
+    slot.items.sort((a, b) => {
+      const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
+      const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
+      if (timeA && timeB) return timeA[1].localeCompare(timeB[1]);
+      return 0;
+    });
+  });
+
+  return slots;
+};
+
+export default function WorkRecordDetail() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id: eventId } = useParams();
 
+  const [eventData, setEventData] = useState(null);
+  const [timelineEvents, setTimelineEvents] = useState([
+    { time: '06.00 น.', items: [] },
+    { time: '09.00 น.', items: [] },
+    { time: '12.00 น.', items: [] },
+    { time: '15.00 น.', items: [] },
+    { time: '18.00 น.', items: [] },
+  ]);
 
-  // Get event data from navigation state
-  const eventData = location.state?.event || {};
-  const passedTimeline = location.state?.timeline || [];
+  const [user, setUser] = useState(null);
 
-  // Use event data for display
-  const eventTitle = eventData?.title || 'บันทึกงานวันนี้';
-  const eventDate = eventData?.date || '31 ตุลาคม, 2025';
-  const eventLocation = eventData?.location || '';
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) storedUser = sessionStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
 
+  const logout = () => {
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+    navigate('/login');
+  };
 
-  // Modal state
+  // Fetch event data
+  useEffect(() => {
+    if (!eventId) return;
+    const fetchEvent = async () => {
+      try {
+        const res = await fetch(`${BASE_API}/events/${eventId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setEventData(data);
+        }
+      } catch (err) {
+        console.error("Error fetching event:", err);
+      }
+    };
+    fetchEvent();
+  }, [eventId]);
+
+  // Fetch activities
+  const fetchActivities = async () => {
+    if (!eventId) return;
+    try {
+      const res = await fetch(`${BASE_API}/activities/event/${eventId}`);
+      if (res.ok) {
+        const data = await res.json();
+        const timeline = activitiesToTimeline(data);
+        setTimelineEvents(updateEventTypesForOverlaps(timeline));
+      }
+    } catch (err) {
+      console.error("Error fetching activities:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchActivities();
+  }, [eventId]);
+
+  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -26,18 +139,14 @@ export default function WorkRecord() {
     details: ''
   });
 
-  // Delete Modal state
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    slotIndex: null,
-    itemIndex: null
+    activityId: null,
   });
 
-  // Edit Modal state
   const [editModal, setEditModal] = useState({
     isOpen: false,
-    slotIndex: null,
-    itemIndex: null,
+    activityId: null,
     data: {
       title: '',
       startTime: '',
@@ -46,14 +155,48 @@ export default function WorkRecord() {
     }
   });
 
-  // Overlap Modal state
   const [overlapModal, setOverlapModal] = useState({
     isOpen: false,
     overlappingEvents: []
   });
 
+  // CREATE activity
+  const handleSaveEvent = async () => {
+    if (!newEvent.title || !newEvent.startTime || !newEvent.endTime) {
+      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
+
+    try {
+      const payload = {
+        event_id: Number(eventId),
+        title: newEvent.title,
+        description: newEvent.details || null,
+        start_time: newEvent.startTime,
+        end_time: newEvent.endTime,
+      };
+
+      const res = await fetch(`${BASE_API}/activities`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        await fetchActivities();
+        setIsModalOpen(false);
+        setNewEvent({ title: '', startTime: '', endTime: '', details: '' });
+      } else {
+        const data = await res.json();
+        alert(data.message || 'ไม่สามารถสร้างกิจกรรมได้');
+      }
+    } catch (err) {
+      console.error("Error creating activity:", err);
+    }
+  };
+
+  // EDIT activity
   const handleEditClick = (slotIndex, itemIndex, item) => {
-    // Extract times from timeRange string "เริ่มต้น 09:00 - 10:30 น."
     let startTime = '';
     let endTime = '';
     try {
@@ -68,8 +211,7 @@ export default function WorkRecord() {
 
     setEditModal({
       isOpen: true,
-      slotIndex,
-      itemIndex,
+      activityId: item.id,
       data: {
         title: item.title,
         startTime,
@@ -79,218 +221,72 @@ export default function WorkRecord() {
     });
   };
 
-  const handleUpdateEvent = () => {
-    const { slotIndex, itemIndex, data } = editModal;
+  const handleUpdateEvent = async () => {
+    const { activityId, data } = editModal;
     if (!data.title || !data.startTime || !data.endTime) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
       return;
     }
 
-    // 1. Remove old item
-    const updatedTimeline = [...timelineEvents];
-    // We don't remove it yet, because we might just update in place if slot doesn't change
-    // But to be safe and consistent with logic, let's remove and re-add
-    updatedTimeline[slotIndex].items.splice(itemIndex, 1);
+    try {
+      const payload = {
+        title: data.title,
+        description: data.details || null,
+        start_time: data.startTime,
+        end_time: data.endTime,
+      };
 
-    // 2. Determine new target slot
-    const startHour = parseInt(data.startTime.split(':')[0], 10);
-    let targetSlotIndex = -1;
+      const res = await fetch(`${BASE_API}/activities/${activityId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    if (startHour >= 6 && startHour < 9) targetSlotIndex = 0;
-    else if (startHour >= 9 && startHour < 12) targetSlotIndex = 1;
-    else if (startHour >= 12 && startHour < 15) targetSlotIndex = 2;
-    else if (startHour >= 15 && startHour < 18) targetSlotIndex = 3;
-    else if (startHour >= 18) targetSlotIndex = 4;
-
-    if (targetSlotIndex === -1) {
-      if (startHour < 6) targetSlotIndex = 0;
-      else targetSlotIndex = 4;
-    }
-
-    // 3. Create new item
-    const newItem = {
-      title: data.title,
-      timeRange: `เริ่มต้น ${data.startTime} - ${data.endTime} น.`,
-      type: 'normal', // Preserve type or reset? Let's keep it simple as normal or maybe we should store original type?
-      // For now, let's assume type is 'normal' or 'warning' depending on context, but here we just create a new one.
-      // If we want to preserve 'type' (color), we should have passed it to editModal.data.
-      // Let's grab the type from the original item if we can, but we already spliced it. 
-      // Actually we spliced a copy.
-      // Let's improve:
-    };
-
-    // Better way: get original type before splicing?
-    // Actually, let's just default to 'normal' for edited events unless we add a type selector.
-    // Or we can check if it overlaps and set warning? 
-    // The user didn't ask for type editing.
-    // Let's just use 'normal' for now, or maybe check if we can retrieve the old type.
-    // Wait, we have the old item in the closure if we didn't mutate state yet? No.
-
-    // Let's look at how we spliced. `updatedTimeline` is a shallow copy of the array, but `updatedTimeline[slotIndex]` is a ref to the object in state? 
-    // We should deep copy the structure we are modifying.
-    // Actually `updatedTimeline` is `[...timelineEvents]`. The elements are objects.
-    // `updatedTimeline[slotIndex]` is the same object as in state. Modifying `items` array inside it mutates state directly if we are not careful?
-    // React state should be immutable.
-    // Correct way:
-    // const newTimeline = timelineEvents.map((slot, sIdx) => {
-    //   if (sIdx === slotIndex) return { ...slot, items: [...slot.items] };
-    //   return slot;
-    // });
-    // newTimeline[slotIndex].items.splice(itemIndex, 1);
-
-    // But let's stick to the pattern used in `handleSaveEvent` (which was pushing to copy) and `confirmDelete`.
-    // The pattern in `confirmDelete` was `const updatedTimeline = [...timelineEvents]; updatedTimeline[slotIndex].items.splice(...)`. 
-    // This is technically mutating the nested object of the state, but if it works for delete, I will follow it for consistency, 
-    // though proper immutability is better. 
-    // I will try to be slightly safer.
-
-    // Let's assume the user wants to keep the type if possible. 
-    // I'll add `type` to editModal data.
-
-    newItem.type = editModal.data.type || 'normal';
-    newItem.details = data.details;
-
-    // Add to new slot
-    // Check if target slot is different or same.
-    // Note: We already removed it from `updatedTimeline`.
-
-    // If we removed it, we just add it to the target slot.
-    // But we need to make sure we didn't lose the slot structure if we did `splice` on the reference.
-
-    updatedTimeline[targetSlotIndex].items.push(newItem);
-
-    updatedTimeline[targetSlotIndex].items.sort((a, b) => {
-      const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
-      const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
-      if (timeA && timeB) {
-        return timeA[1].localeCompare(timeB[1]);
+      if (res.ok) {
+        await fetchActivities();
+        setEditModal({
+          isOpen: false,
+          activityId: null,
+          data: { title: '', startTime: '', endTime: '', details: '' }
+        });
       }
-      return 0;
-    });
-
-    setTimelineEvents(updateEventTypesForOverlaps(updatedTimeline));
-    setEditModal({
-      isOpen: false,
-      slotIndex: null,
-      itemIndex: null,
-      data: { title: '', startTime: '', endTime: '', details: '' }
-    });
+    } catch (err) {
+      console.error("Error updating activity:", err);
+    }
   };
 
-  const handleDeleteClick = (slotIndex, itemIndex) => {
+  // DELETE activity
+  const handleDeleteClick = (slotIndex, itemIndex, item) => {
     setDeleteModal({
       isOpen: true,
-      slotIndex,
-      itemIndex
+      activityId: item.id,
     });
   };
 
-  const confirmDelete = () => {
-    const { slotIndex, itemIndex } = deleteModal;
-    if (slotIndex === null || itemIndex === null) return;
+  const confirmDelete = async () => {
+    const { activityId } = deleteModal;
+    if (!activityId) return;
 
-    const updatedTimeline = [...timelineEvents];
-    updatedTimeline[slotIndex].items.splice(itemIndex, 1);
+    try {
+      const res = await fetch(`${BASE_API}/activities/${activityId}`, {
+        method: 'DELETE',
+      });
 
-    // Check overlaps again after deletion
-    setTimelineEvents(updateEventTypesForOverlaps(updatedTimeline));
+      if (res.ok) {
+        await fetchActivities();
+      }
+    } catch (err) {
+      console.error("Error deleting activity:", err);
+    }
 
-    setDeleteModal({ isOpen: false, slotIndex: null, itemIndex: null });
+    setDeleteModal({ isOpen: false, activityId: null });
   };
 
   const cancelDelete = () => {
-    setDeleteModal({ isOpen: false, slotIndex: null, itemIndex: null });
+    setDeleteModal({ isOpen: false, activityId: null });
   };
 
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    let storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      storedUser = sessionStorage.getItem("user");
-    }
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  const logout = () => {
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('user');
-    navigate('/login');
-  };
-
-  // Timeline events state - separate for each event
-  const [timelineEvents, setTimelineEvents] = useState(() => {
-    // Initialize timeline with passed data or empty timeline
-    if (passedTimeline && passedTimeline.length > 0) {
-      return passedTimeline;
-    }
-    // Fallback empty timeline
-    return [
-      { time: '06.00 น.', items: [] },
-      { time: '09.00 น.', items: [] },
-      { time: '12.00 น.', items: [] },
-      { time: '15.00 น.', items: [] },
-      { time: '18.00 น.', items: [] }
-    ];
-  });
-
-  const handleSaveEvent = () => {
-    if (!newEvent.title || !newEvent.startTime || !newEvent.endTime) {
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-      return;
-    }
-
-    // Determine target slot based on start time
-    // Logic: 06:00-08:59 -> 06.00 น.
-    //        09:00-11:59 -> 09.00 น.
-    //        12:00-14:59 -> 12.00 น.
-    //        15:00-17:59 -> 15.00 น.
-    //        18:00+      -> 18.00 น.
-    const startHour = parseInt(newEvent.startTime.split(':')[0], 10);
-    let targetSlotIndex = -1;
-
-    if (startHour >= 6 && startHour < 9) targetSlotIndex = 0;
-    else if (startHour >= 9 && startHour < 12) targetSlotIndex = 1;
-    else if (startHour >= 12 && startHour < 15) targetSlotIndex = 2;
-    else if (startHour >= 15 && startHour < 18) targetSlotIndex = 3;
-    else if (startHour >= 18) targetSlotIndex = 4;
-
-    // If time is earlier than 06:00, put in first slot? Or ignore?
-    // Let's assume default to 06.00 if < 6 for now, or last if > 18.
-    if (targetSlotIndex === -1) {
-      if (startHour < 6) targetSlotIndex = 0;
-      else targetSlotIndex = 4;
-    }
-
-    const newItem = {
-      title: newEvent.title,
-      timeRange: `เริ่มต้น ${newEvent.startTime} - ${newEvent.endTime} น.`,
-      type: 'normal', // Default type
-      details: newEvent.details
-    };
-
-    const updatedTimeline = [...timelineEvents];
-    updatedTimeline[targetSlotIndex].items.push(newItem);
-
-    // Sort items by time (optional but good)
-    updatedTimeline[targetSlotIndex].items.sort((a, b) => {
-      // Simple string compare of time range start might be tricky if formats vary
-      // But assuming format "เริ่มต้น HH:MM - ..."
-      const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
-      const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
-      if (timeA && timeB) {
-        return timeA[1].localeCompare(timeB[1]);
-      }
-      return 0;
-    });
-
-    setTimelineEvents(updateEventTypesForOverlaps(updatedTimeline));
-    setIsModalOpen(false);
-    setNewEvent({ title: '', startTime: '', endTime: '', details: '' });
-  };
-
+  // Duration & Overlap helpers
   const getEventDuration = (timeRange) => {
     try {
       const match = timeRange.match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
@@ -301,17 +297,16 @@ export default function WorkRecord() {
         const startMin = startH * 60 + startM;
         const endMin = endH * 60 + endM;
         let diff = endMin - startMin;
-        if (diff < 0) diff += 24 * 60; // Handle overnight if needed
+        if (diff < 0) diff += 24 * 60;
         return diff;
       }
     } catch (e) {
       console.error("Error parsing time range", e);
     }
-    return 60; // Default fallback
+    return 60;
   };
 
   const getOverlappingEvents = () => {
-    // 1. Flatten all events with their start/end minutes and original location
     const allEvents = [];
     timelineEvents.forEach((slot, slotIndex) => {
       slot.items.forEach((item, itemIndex) => {
@@ -323,55 +318,33 @@ export default function WorkRecord() {
             const [endH, endM] = end.split(':').map(Number);
             const startMin = startH * 60 + startM;
             const endMin = endH * 60 + endM;
-
             let effectiveEndMin = endMin;
             if (endMin < startMin) effectiveEndMin += 24 * 60;
-
-            allEvents.push({
-              slotIndex,
-              itemIndex,
-              startMin,
-              endMin: effectiveEndMin,
-              title: item.title,
-              timeRange: item.timeRange,
-              details: item.details
-            });
+            allEvents.push({ slotIndex, itemIndex, startMin, endMin: effectiveEndMin, title: item.title, timeRange: item.timeRange });
           }
-        } catch (e) {
-          console.error("Error parsing time for overlap check", e);
-        }
+        } catch (e) { /* skip */ }
       });
     });
 
-    // 2. Identify overlapping events
     const overlappingList = [];
     for (let i = 0; i < allEvents.length; i++) {
       for (let j = i + 1; j < allEvents.length; j++) {
         const ev1 = allEvents[i];
         const ev2 = allEvents[j];
-
         if (ev1.startMin < ev2.endMin && ev2.startMin < ev1.endMin) {
-          overlappingList.push({
-            event1: ev1,
-            event2: ev2
-          });
+          overlappingList.push({ event1: ev1, event2: ev2 });
         }
       }
     }
-
     return overlappingList;
   };
 
   const handleOpenOverlapModal = () => {
     const overlaps = getOverlappingEvents();
-    setOverlapModal({
-      isOpen: true,
-      overlappingEvents: overlaps
-    });
+    setOverlapModal({ isOpen: true, overlappingEvents: overlaps });
   };
 
   const updateEventTypesForOverlaps = (timeline) => {
-    // 1. Flatten all events with their start/end minutes and original location
     const allEvents = [];
     timeline.forEach((slot, slotIndex) => {
       slot.items.forEach((item, itemIndex) => {
@@ -383,33 +356,19 @@ export default function WorkRecord() {
             const [endH, endM] = end.split(':').map(Number);
             const startMin = startH * 60 + startM;
             const endMin = endH * 60 + endM;
-
-            // Handle overnight
             let effectiveEndMin = endMin;
             if (endMin < startMin) effectiveEndMin += 24 * 60;
-
-            allEvents.push({
-              slotIndex,
-              itemIndex,
-              startMin,
-              endMin: effectiveEndMin,
-              // We'll update the type later
-            });
+            allEvents.push({ slotIndex, itemIndex, startMin, endMin: effectiveEndMin });
           }
-        } catch (e) {
-          console.error("Error parsing time for overlap check", e);
-        }
+        } catch (e) { /* skip */ }
       });
     });
 
-    // 2. Identify overlapping events
     const overlappingIndices = new Set();
     for (let i = 0; i < allEvents.length; i++) {
       for (let j = i + 1; j < allEvents.length; j++) {
         const ev1 = allEvents[i];
         const ev2 = allEvents[j];
-
-        // Check overlap: start1 < end2 && start2 < end1
         if (ev1.startMin < ev2.endMin && ev2.startMin < ev1.endMin) {
           overlappingIndices.add(`${ev1.slotIndex}-${ev1.itemIndex}`);
           overlappingIndices.add(`${ev2.slotIndex}-${ev2.itemIndex}`);
@@ -417,33 +376,24 @@ export default function WorkRecord() {
       }
     }
 
-    // 3. Update timeline types
-    // We need to create a deep copy to avoid mutation issues if not already copied
-    // But since we are usually passing a fresh copy to this function or setting state with it, 
-    // we should map it.
-
     return timeline.map((slot, sIdx) => ({
       ...slot,
       items: slot.items.map((item, iIdx) => {
         const isOverlapping = overlappingIndices.has(`${sIdx}-${iIdx}`);
-        // Only change type if it's 'normal' or 'warning' (don't override other potential types if any)
-        // Or strictly follow user rule: overlapping -> warning (red), not -> normal (grey/default)
-        if (isOverlapping) {
-          return { ...item, type: 'warning' };
-        } else {
-          // If it was warning, change back to normal. If it was something else, maybe keep it?
-          // For now, let's reset to normal if it was warning.
-          return { ...item, type: 'normal' };
-        }
+        return { ...item, type: isOverlapping ? 'warning' : 'normal' };
       })
     }));
   };
+
+  const eventTitle = eventData?.title || 'กำลังโหลด...';
+  const eventDate = formatEventDate(eventData?.event_date);
+  const eventLocation = eventData?.location || '';
 
   return (
     <div className="layout dark-layout">
       <aside className="sidebar dark-sidebar">
         <div className="sb-header">
-          <div className="brand-logo" aria-label="SE EVENT logo">
+          <div className="brand-logo" aria-label="logo">
             <svg className="cat-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
               <path d="M66 38 L62 24 L50 35 Z" fill="#000" />
@@ -457,13 +407,15 @@ export default function WorkRecord() {
           <div className="avatar">{user?.username}</div>
           <div className="sb-email">{user?.email}</div>
         </div>
-        <nav className="sb-menu">          <Link to="/workrecord" className="sb-item">← ย้อนกลับ</Link>          <Link to="/" className="sb-item">หน้าแรก</Link>
-          <Link to="/record" className="sb-item active">บันทึกงาน</Link>
-          <Link to="#" className="sb-item">สถานะงาน</Link>
+        <nav className="sb-menu">
+          <Link to="/workrecord" className="sb-item">← ย้อนกลับ</Link>
+          <Link to="/homepage" className="sb-item">หน้าแรก</Link>
+          <Link to="/workrecord" className="sb-item active">บันทึกงาน</Link>
+          <Link to="/workrecord/status" className="sb-item">สถานะงาน</Link>
           <Link to="#" className="sb-item">ออกแบบ</Link>
-          <Link to="#" className="sb-item">คลัง</Link>
-          <Link to="#" className="sb-item">สถานะคลัง</Link>
-          <Link to="#" className="sb-item">งบประมาณ</Link>
+          <Link to="/inventory" className="sb-item">คลัง</Link>
+          <Link to="/inventory/status" className="sb-item">สถานะคลัง</Link>
+          <Link to="/budget" className="sb-item">งบประมาณ</Link>
         </nav>
 
         <button className="logout-btn-red" onClick={logout}>
@@ -521,13 +473,11 @@ export default function WorkRecord() {
               <div className="timeline-events">
                 {slot.items.map((item, idx) => {
                   const duration = getEventDuration(item.timeRange);
-                  // Calculate width: min 200px, plus 4px per minute
-                  // Adjust the multiplier as needed for best visual
                   const width = Math.max(200, duration * 4);
 
                   return (
                     <div
-                      key={idx}
+                      key={item.id || idx}
                       className={`event-card ${item.type}`}
                       style={{ minWidth: `${width}px`, flexBasis: `${width}px`, flexGrow: 0, flexShrink: 0, cursor: 'pointer' }}
                       onClick={() => handleEditClick(index, idx, item)}
@@ -536,7 +486,7 @@ export default function WorkRecord() {
                         className="delete-card-btn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteClick(index, idx);
+                          handleDeleteClick(index, idx, item);
                         }}
                         title="ลบกิจกรรม"
                       >
@@ -559,7 +509,7 @@ export default function WorkRecord() {
                         <div className="event-time">{item.timeRange}</div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
