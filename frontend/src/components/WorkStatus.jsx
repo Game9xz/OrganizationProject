@@ -286,10 +286,10 @@ export default function WorkStatus() {
           <Link to="/inventory" className="nav-item">
             คลัง
           </Link>
-          <Link to="#" className="nav-item">
+          <Link to="/inventory/status" className="nav-item">
             สถานะคลัง
           </Link>
-          <Link to="#" className="nav-item">
+          <Link to="/budget" className="nav-item">
             งบประมาณ
           </Link>
         </nav>

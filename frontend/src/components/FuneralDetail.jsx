@@ -8,17 +8,32 @@ export default function FuneralDetail() {
       {/* Sidebar */}{" "}
       <aside className="sidebar">
         <div className="brand">
+
           <div className="cat-logo">
-            <div className="ear left"></div>
-            <div className="ear right"></div>
-            <div className="face">
-              <div className="eye left-eye"></div>
-              <div className="eye right-eye"></div>
-            </div>
+            <svg
+              viewBox="0 0 100 100"
+              xmlns="http://www.w3.org/2000/svg"
+              className="cat-icon"
+            >
+              <g transform="scale(1.45) translate(-15,-15)">
+                <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
+                <path d="M66 38 L62 24 L50 35 Z" fill="#000" />
+                <path
+                  d="M20 60 C20 40, 40 35, 50 35 C60 35, 80 40, 80 60 C80 75, 70 85, 50 85 C30 85, 20 75, 20 60 Z"
+                  fill="#000"
+                />
+                <circle cx="42" cy="58" r="6" fill="#fff" />
+                <circle cx="58" cy="58" r="6" fill="#fff" />
+                <circle cx="42" cy="58" r="2.5" fill="#000" />
+                <circle cx="58" cy="58" r="2.5" fill="#000" />
+              </g>
+            </svg>
           </div>
+
           <h3>SE EVENT</h3>
           <span>Group8@ku.th</span>
         </div>
+
         <ul className="menu">
           <li onClick={() => navigate("/homepage")}>หน้าแรก</li>
           <li>บันทึกงาน</li>
@@ -28,8 +43,10 @@ export default function FuneralDetail() {
           <li>สถานะคลัง</li>
           <li>งบประมาณ</li>
         </ul>
+
         <button className="logout">Log out</button>
       </aside>
+
       {/* Main Content */}
       <main className="funeral-content">
         <div className="funeral-card">

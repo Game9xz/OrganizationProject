@@ -141,16 +141,15 @@
 }
 
 /* Cat Logo */
-.cat-logo {
-  width: 60px;
-  height: 60px;
-  background: #f3f3f3;
-  border-radius: 16px;
-  position: relative;
-  margin: 0 auto 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.cat-logo{
+  width:40px;
+  height:40px;
+  background:#f3f3f3;
+  border-radius:16px;
+  position:relative;
+  margin:0 0 8px 0;   /* ชิดซ้าย */
+  display:flex;
+  align-items:center;
 }
 
 .cat-logo .face {
@@ -193,4 +192,11 @@
 
 .right-eye {
   right: 7px;
+}
+
+.brand{
+  margin-bottom:32px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
 }
