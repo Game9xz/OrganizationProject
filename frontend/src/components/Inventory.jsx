@@ -135,10 +135,14 @@ export default function Inventory() {
     }
   };
 
+  // ---------- ฟังก์ชันลบสินค้า (อัปเดตใหม่ ป้องกัน Error HTML) ----------
   const deleteProduct = async (id) => {
     if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?")) return;
 
-    // Optimistic delete
+    // เก็บ state เดิมไว้ก่อน เผื่อลบไม่สำเร็จจะได้ดึงกลับมาได้ทันที
+    const previousItems = [...items];
+
+    // Optimistic delete: ซ่อนการ์ดออกไปจากหน้าจอก่อนเพื่อให้ดูรวดเร็ว
     setItems((prev) => prev.filter((it) => it.product_id !== id));
 
     try {
@@ -147,19 +151,34 @@ export default function Inventory() {
       });
 
       if (res.ok) {
+        // ลบสำเร็จ อัปเดตตัวเลข 4 กล่องด้านบน
         fetchStats();
       } else {
-        throw new Error("Failed to delete");
+        // เช็คว่า Backend ส่งอะไรกลับมา
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            // ถ้าเป็น JSON ปกติ
+            const errorData = await res.json();
+            throw new Error(errorData.error || errorData.message || "เกิดข้อผิดพลาดในการลบ");
+        } else {
+            // ถ้าเป็น HTML (หา Route ไม่เจอ หรือ Server Error)
+            const textData = await res.text();
+            console.error("Server Error Response (HTML):", textData); // <--- ปริ้นท์ HTML ลง Console
+            throw new Error(`เซิร์ฟเวอร์ตอบกลับผิดปกติ (Status: ${res.status}) ดูสาเหตุได้ที่ Console F12`);
+        }
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      // Re-fetch if failed
-      fetchProducts();
+      // แจ้งเตือนให้ผู้ใช้รู้ว่าทำไมถึงลบไม่ได้
+      alert(`${error.message}`); 
+      
+      // คืนค่าข้อมูลกลับมาแสดงเหมือนเดิม เพราะลบที่ฐานข้อมูลไม่สำเร็จ
+      setItems(previousItems);
     }
   };
+  // ----------------------------------------------------------------
 
   // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า ---------
-
   const handleOpenAdd = () => {
     setNewItem({ name: "", remain: 0, imageFile: null, previewUrl: "" });
     setIsAddOpen(true);
@@ -185,7 +204,7 @@ export default function Inventory() {
       return;
     }
 
-    // สร้างข้อมูลชั่วคราวเพื่อให้หน้าเว็บแสดงผลทันที (รอข้อมูลจริงจาก Backend)
+    // สร้างข้อมูลชั่วคราวเพื่อให้หน้าเว็บแสดงผลทันที
     const tempId = Math.max(0, ...items.map((i) => i.product_id || 0)) + 1;
     const optimistic = {
       product_id: tempId,
@@ -204,22 +223,30 @@ export default function Inventory() {
       form.append("remain", String(remain));
       if (newItem.imageFile) form.append("image", newItem.imageFile);
 
-      // ใช้ API_BASE_URL แทน /api/inventory เฉยๆ เพื่อให้เชื่อมหลังบ้านได้
       const res = await fetch(`${API_BASE_URL}`, {
         method: "POST",
         body: form,
       });
       
       if (res.ok) {
-        // ถ้าเซฟสำเร็จ โหลดข้อมูลใหม่ทั้งหมดเพื่อให้ ID และรูปภาพตรงกับ Database
         fetchProducts();
         fetchStats();
+      } else {
+         const contentType = res.headers.get("content-type");
+         if (contentType && contentType.includes("application/json")) {
+             const errorData = await res.json();
+             console.error("Add Error:", errorData);
+             alert(errorData.error || "เกิดข้อผิดพลาดในการเพิ่มสินค้า");
+         } else {
+             const textData = await res.text();
+             console.error("Add Error (HTML):", textData);
+             alert(`เซิร์ฟเวอร์ตอบกลับผิดปกติ (Status: ${res.status}) ดูสาเหตุได้ที่ Console F12`);
+         }
       }
     } catch (error) {
       console.error("Error adding product:", error);
     }
   };
-
   // -----------------------------------------------------------------------------------
 
   return (
