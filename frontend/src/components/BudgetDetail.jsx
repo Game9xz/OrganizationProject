@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import "./Budget.css";
 import "./Workrecord.css";
@@ -14,9 +14,21 @@ export default function BudgetDetail() {
   const { type } = useParams();
   const navigate = useNavigate();
   const meta = TYPE_MAP[type] || TYPE_MAP.wedding;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const logout = () => {
-    localStorage.removeItem("se_remember");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -34,8 +46,8 @@ export default function BudgetDetail() {
             <circle cx="58" cy="58" r="2.5" fill="#000" />
           </svg>
         </div>
-        <div className="brand-text">SE EVENT</div>
-        <div className="brand-sub">Group8.SE@ku.th</div>
+        <div className="brand-text">{user?.username}</div>
+        <div className="brand-sub">{user?.email}</div>
 
         <nav className="nav-menu">
           <Link to="/homepage" className="nav-item">หน้าแรก</Link>

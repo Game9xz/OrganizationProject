@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useWorkContext } from "../context/useWorkContext";
 import "./Workrecord.css";
@@ -514,9 +514,21 @@ export default function WorkRecord() {
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [isDateOpen, setIsDateOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const logout = () => {
-    localStorage.removeItem("se_remember");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -731,8 +743,8 @@ export default function WorkRecord() {
             <circle cx="58" cy="58" r="2.5" fill="#000" />
           </svg>
         </div>
-        <div className="brand-text">SE EVENT</div>
-        <div className="brand-sub">Group8.SE@ku.th</div>
+        <div className="brand-text">{user?.username}</div>
+        <div className="brand-sub">{user?.email}</div>
 
         <nav className="nav-menu">
           <Link to="/homepage" className="nav-item">

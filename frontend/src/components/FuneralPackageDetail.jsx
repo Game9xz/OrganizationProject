@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./FuneralPackageDetail.css";
 
 // 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
@@ -7,7 +7,17 @@ const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api
 
 export default function FuneralPackageDetail() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   // 🔥 กำหนดราคาแพ็กเกจงานศพที่นี่
   const packagePrice = 59999;
 
@@ -73,7 +83,7 @@ export default function FuneralPackageDetail() {
         user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
         package_id: 3, // 🔥 สมมติแพ็กเกจนี้ id = 3 (งานศพ)
         guest_count: guestCount,
-        duration: "ตามแพ็กเกจ", 
+        duration: "ตามแพ็กเกจ",
         budget: packagePrice, // ส่งราคา 59999 เข้าไป
         full_name: name,
         contact_email: email,
@@ -134,8 +144,8 @@ export default function FuneralPackageDetail() {
             </svg>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <ul className="menu">
@@ -217,9 +227,8 @@ export default function FuneralPackageDetail() {
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "custom" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
@@ -232,9 +241,8 @@ export default function FuneralPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "3m" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -244,9 +252,8 @@ export default function FuneralPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "6m" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -256,9 +263,8 @@ export default function FuneralPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "1y" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);

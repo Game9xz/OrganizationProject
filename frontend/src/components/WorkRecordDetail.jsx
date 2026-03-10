@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './WorkRecordDetail.css';
 
 export default function WorkRecord() {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  
+
+
   // Get event data from navigation state
   const eventData = location.state?.event || {};
   const passedTimeline = location.state?.timeline || [];
-  
+
   // Use event data for display
   const eventTitle = eventData?.title || 'บันทึกงานวันนี้';
   const eventDate = eventData?.date || '31 ตุลาคม, 2025';
   const eventLocation = eventData?.location || '';
-  
-  
+
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -101,10 +101,10 @@ export default function WorkRecord() {
     else if (startHour >= 12 && startHour < 15) targetSlotIndex = 2;
     else if (startHour >= 15 && startHour < 18) targetSlotIndex = 3;
     else if (startHour >= 18) targetSlotIndex = 4;
-    
+
     if (targetSlotIndex === -1) {
-       if (startHour < 6) targetSlotIndex = 0;
-       else targetSlotIndex = 4;
+      if (startHour < 6) targetSlotIndex = 0;
+      else targetSlotIndex = 4;
     }
 
     // 3. Create new item
@@ -118,14 +118,14 @@ export default function WorkRecord() {
       // Actually we spliced a copy.
       // Let's improve:
     };
-    
+
     // Better way: get original type before splicing?
     // Actually, let's just default to 'normal' for edited events unless we add a type selector.
     // Or we can check if it overlaps and set warning? 
     // The user didn't ask for type editing.
     // Let's just use 'normal' for now, or maybe check if we can retrieve the old type.
     // Wait, we have the old item in the closure if we didn't mutate state yet? No.
-    
+
     // Let's look at how we spliced. `updatedTimeline` is a shallow copy of the array, but `updatedTimeline[slotIndex]` is a ref to the object in state? 
     // We should deep copy the structure we are modifying.
     // Actually `updatedTimeline` is `[...timelineEvents]`. The elements are objects.
@@ -137,13 +137,13 @@ export default function WorkRecord() {
     //   return slot;
     // });
     // newTimeline[slotIndex].items.splice(itemIndex, 1);
-    
+
     // But let's stick to the pattern used in `handleSaveEvent` (which was pushing to copy) and `confirmDelete`.
     // The pattern in `confirmDelete` was `const updatedTimeline = [...timelineEvents]; updatedTimeline[slotIndex].items.splice(...)`. 
     // This is technically mutating the nested object of the state, but if it works for delete, I will follow it for consistency, 
     // though proper immutability is better. 
     // I will try to be slightly safer.
-    
+
     // Let's assume the user wants to keep the type if possible. 
     // I'll add `type` to editModal data.
 
@@ -153,27 +153,27 @@ export default function WorkRecord() {
     // Add to new slot
     // Check if target slot is different or same.
     // Note: We already removed it from `updatedTimeline`.
-    
+
     // If we removed it, we just add it to the target slot.
     // But we need to make sure we didn't lose the slot structure if we did `splice` on the reference.
-    
+
     updatedTimeline[targetSlotIndex].items.push(newItem);
-    
+
     updatedTimeline[targetSlotIndex].items.sort((a, b) => {
-        const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
-        const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
-        if (timeA && timeB) {
-            return timeA[1].localeCompare(timeB[1]);
-        }
-        return 0;
+      const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
+      const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
+      if (timeA && timeB) {
+        return timeA[1].localeCompare(timeB[1]);
+      }
+      return 0;
     });
 
     setTimelineEvents(updateEventTypesForOverlaps(updatedTimeline));
-    setEditModal({ 
-      isOpen: false, 
-      slotIndex: null, 
-      itemIndex: null, 
-      data: { title: '', startTime: '', endTime: '', details: '' } 
+    setEditModal({
+      isOpen: false,
+      slotIndex: null,
+      itemIndex: null,
+      data: { title: '', startTime: '', endTime: '', details: '' }
     });
   };
 
@@ -191,7 +191,7 @@ export default function WorkRecord() {
 
     const updatedTimeline = [...timelineEvents];
     updatedTimeline[slotIndex].items.splice(itemIndex, 1);
-    
+
     // Check overlaps again after deletion
     setTimelineEvents(updateEventTypesForOverlaps(updatedTimeline));
 
@@ -202,8 +202,21 @@ export default function WorkRecord() {
     setDeleteModal({ isOpen: false, slotIndex: null, itemIndex: null });
   };
 
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const logout = () => {
-    localStorage.removeItem('se_remember');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     navigate('/login');
   };
 
@@ -243,12 +256,12 @@ export default function WorkRecord() {
     else if (startHour >= 12 && startHour < 15) targetSlotIndex = 2;
     else if (startHour >= 15 && startHour < 18) targetSlotIndex = 3;
     else if (startHour >= 18) targetSlotIndex = 4;
-    
+
     // If time is earlier than 06:00, put in first slot? Or ignore?
     // Let's assume default to 06.00 if < 6 for now, or last if > 18.
     if (targetSlotIndex === -1) {
-       if (startHour < 6) targetSlotIndex = 0;
-       else targetSlotIndex = 4;
+      if (startHour < 6) targetSlotIndex = 0;
+      else targetSlotIndex = 4;
     }
 
     const newItem = {
@@ -260,17 +273,17 @@ export default function WorkRecord() {
 
     const updatedTimeline = [...timelineEvents];
     updatedTimeline[targetSlotIndex].items.push(newItem);
-    
+
     // Sort items by time (optional but good)
     updatedTimeline[targetSlotIndex].items.sort((a, b) => {
-        // Simple string compare of time range start might be tricky if formats vary
-        // But assuming format "เริ่มต้น HH:MM - ..."
-        const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
-        const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
-        if (timeA && timeB) {
-            return timeA[1].localeCompare(timeB[1]);
-        }
-        return 0;
+      // Simple string compare of time range start might be tricky if formats vary
+      // But assuming format "เริ่มต้น HH:MM - ..."
+      const timeA = a.timeRange.match(/(\d{2}:\d{2})/);
+      const timeB = b.timeRange.match(/(\d{2}:\d{2})/);
+      if (timeA && timeB) {
+        return timeA[1].localeCompare(timeB[1]);
+      }
+      return 0;
     });
 
     setTimelineEvents(updateEventTypesForOverlaps(updatedTimeline));
@@ -310,7 +323,7 @@ export default function WorkRecord() {
             const [endH, endM] = end.split(':').map(Number);
             const startMin = startH * 60 + startM;
             const endMin = endH * 60 + endM;
-            
+
             let effectiveEndMin = endMin;
             if (endMin < startMin) effectiveEndMin += 24 * 60;
 
@@ -370,7 +383,7 @@ export default function WorkRecord() {
             const [endH, endM] = end.split(':').map(Number);
             const startMin = startH * 60 + startM;
             const endMin = endH * 60 + endM;
-            
+
             // Handle overnight
             let effectiveEndMin = endMin;
             if (endMin < startMin) effectiveEndMin += 24 * 60;
@@ -408,7 +421,7 @@ export default function WorkRecord() {
     // We need to create a deep copy to avoid mutation issues if not already copied
     // But since we are usually passing a fresh copy to this function or setting state with it, 
     // we should map it.
-    
+
     return timeline.map((slot, sIdx) => ({
       ...slot,
       items: slot.items.map((item, iIdx) => {
@@ -418,9 +431,9 @@ export default function WorkRecord() {
         if (isOverlapping) {
           return { ...item, type: 'warning' };
         } else {
-           // If it was warning, change back to normal. If it was something else, maybe keep it?
-           // For now, let's reset to normal if it was warning.
-           return { ...item, type: 'normal' };
+          // If it was warning, change back to normal. If it was something else, maybe keep it?
+          // For now, let's reset to normal if it was warning.
+          return { ...item, type: 'normal' };
         }
       })
     }));
@@ -441,8 +454,8 @@ export default function WorkRecord() {
               <circle cx="58" cy="58" r="2.5" fill="#000" />
             </svg>
           </div>
-          <div className="avatar">SE EVENT</div>
-          <div className="sb-email">Group8.SE@ku.th</div>
+          <div className="avatar">{user?.username}</div>
+          <div className="sb-email">{user?.email}</div>
         </div>
         <nav className="sb-menu">          <Link to="/workrecord" className="sb-item">← ย้อนกลับ</Link>          <Link to="/" className="sb-item">หน้าแรก</Link>
           <Link to="/record" className="sb-item active">บันทึกงาน</Link>
@@ -452,14 +465,14 @@ export default function WorkRecord() {
           <Link to="#" className="sb-item">สถานะคลัง</Link>
           <Link to="#" className="sb-item">งบประมาณ</Link>
         </nav>
-        
+
         <button className="logout-btn-red" onClick={logout}>
-           Log out 
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft: '8px'}}>
-             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-             <polyline points="16 17 21 12 16 7"></polyline>
-             <line x1="21" y1="12" x2="9" y2="12"></line>
-           </svg>
+          Log out
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '8px' }}>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
         </button>
       </aside>
 
@@ -479,8 +492,8 @@ export default function WorkRecord() {
             จำนวนกิจกรรมทั้งหมด : {timelineEvents.reduce((sum, slot) => sum + slot.items.length, 0)}
           </div>
           <div className="stat-pill grey">จำนวนงานที่ยังไม่ได้กำหนด : 0</div>
-          <button 
-            className="stat-pill red" 
+          <button
+            className="stat-pill red"
             onClick={handleOpenOverlapModal}
             style={{ cursor: 'pointer', border: 'none', fontSize: '14px' }}
           >
@@ -493,11 +506,11 @@ export default function WorkRecord() {
           <button className="filter-btn purple">ห้อง</button>
           <button className="filter-btn orange">ประเภท</button>
           <div className="search-wrapper">
-             <input className="search-input" placeholder="ค้นหากิจกรรม" />
-             <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-             </svg>
+            <input className="search-input" placeholder="ค้นหากิจกรรม" />
+            <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
           </div>
         </section>
 
@@ -511,42 +524,43 @@ export default function WorkRecord() {
                   // Calculate width: min 200px, plus 4px per minute
                   // Adjust the multiplier as needed for best visual
                   const width = Math.max(200, duration * 4);
-                  
+
                   return (
-                  <div 
-                    key={idx} 
-                    className={`event-card ${item.type}`}
-                    style={{ minWidth: `${width}px`, flexBasis: `${width}px`, flexGrow: 0, flexShrink: 0, cursor: 'pointer' }}
-                    onClick={() => handleEditClick(index, idx, item)}
-                  >
-                    <button 
-                      className="delete-card-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteClick(index, idx);
-                      }}
-                      title="ลบกิจกรรม"
+                    <div
+                      key={idx}
+                      className={`event-card ${item.type}`}
+                      style={{ minWidth: `${width}px`, flexBasis: `${width}px`, flexGrow: 0, flexShrink: 0, cursor: 'pointer' }}
+                      onClick={() => handleEditClick(index, idx, item)}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      </svg>
-                    </button>
-                    {item.type === 'warning' && (
-                      <div className="warning-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                           <circle cx="12" cy="12" r="10"></circle>
-                           <line x1="12" y1="8" x2="12" y2="12"></line>
-                           <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      <button
+                        className="delete-card-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(index, idx);
+                        }}
+                        title="ลบกิจกรรม"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
-                      </div>
-                    )}
-                    <div className="event-info">
+                      </button>
+                      {item.type === 'warning' && (
+                        <div className="warning-icon">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                          </svg>
+                        </div>
+                      )}
+                      <div className="event-info">
                         <div className="event-title">{item.title}</div>
                         <div className="event-time">{item.timeRange}</div>
+                      </div>
                     </div>
-                  </div>
-                )})}
+                  )
+                })}
               </div>
             </div>
           ))}
@@ -554,216 +568,216 @@ export default function WorkRecord() {
 
         {/* Create Event Modal */}
         {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 className="modal-title">สร้างกิจกรรมใหม่</h2>
-            
-            <div className="modal-form-group">
-              <label>ชื่อกิจกรรม</label>
-              <input 
-                type="text" 
-                className="modal-input" 
-                placeholder="ใส่ชื่อกิจกรรม"
-                value={newEvent.title}
-                onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-              />
-            </div>
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h2 className="modal-title">สร้างกิจกรรมใหม่</h2>
 
-            <div className="modal-row">
               <div className="modal-form-group">
-                <label>เวลาเริ่มต้น</label>
-                <input 
-                  type="time" 
-                  className="modal-input time-input"
-                  value={newEvent.startTime}
-                  onChange={(e) => setNewEvent({...newEvent, startTime: e.target.value})}
+                <label>ชื่อกิจกรรม</label>
+                <input
+                  type="text"
+                  className="modal-input"
+                  placeholder="ใส่ชื่อกิจกรรม"
+                  value={newEvent.title}
+                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                 />
               </div>
-              <div className="modal-form-group">
-                <label>เวลาสิ้นสุด</label>
-                <input 
-                  type="time" 
-                  className="modal-input time-input"
-                  value={newEvent.endTime}
-                  onChange={(e) => setNewEvent({...newEvent, endTime: e.target.value})}
-                />
+
+              <div className="modal-row">
+                <div className="modal-form-group">
+                  <label>เวลาเริ่มต้น</label>
+                  <input
+                    type="time"
+                    className="modal-input time-input"
+                    value={newEvent.startTime}
+                    onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
+                  />
+                </div>
+                <div className="modal-form-group">
+                  <label>เวลาสิ้นสุด</label>
+                  <input
+                    type="time"
+                    className="modal-input time-input"
+                    value={newEvent.endTime}
+                    onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="modal-form-group">
-              <label>รายละเอียด</label>
-              <textarea 
-                className="modal-textarea" 
-                placeholder="ใส่รายละเอียด"
-                rows="4"
-                value={newEvent.details}
-                onChange={(e) => setNewEvent({...newEvent, details: e.target.value})}
-              ></textarea>
-            </div>
+              <div className="modal-form-group">
+                <label>รายละเอียด</label>
+                <textarea
+                  className="modal-textarea"
+                  placeholder="ใส่รายละเอียด"
+                  rows="4"
+                  value={newEvent.details}
+                  onChange={(e) => setNewEvent({ ...newEvent, details: e.target.value })}
+                ></textarea>
+              </div>
 
-            <div className="modal-actions">
-              <button className="btn-save" onClick={handleSaveEvent}>บันทึก</button>
-              <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>ยกเลิก</button>
+              <div className="modal-actions">
+                <button className="btn-save" onClick={handleSaveEvent}>บันทึก</button>
+                <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>ยกเลิก</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteModal.isOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ textAlign: 'center', width: '400px' }}>
-            <h2 className="modal-title">ยืนยันการลบ?</h2>
-            <p style={{ color: '#d1d5db', marginBottom: '32px', fontSize: '16px' }}>
-              คุณต้องการลบกิจกรรมนี้ใช่หรือไม่
-            </p>
-            <div className="modal-actions">
-              <button className="btn-confirm-delete" onClick={confirmDelete}>ลบ</button>
-              <button className="btn-cancel-grey" onClick={cancelDelete}>ยกเลิก</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Event Modal */}
-      {editModal.isOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 className="modal-title">แก้ไขกิจกรรม</h2>
-            
-            <div className="modal-form-group">
-              <label>ชื่อกิจกรรม</label>
-              <input 
-                type="text" 
-                className="modal-input" 
-                placeholder="ใส่ชื่อกิจกรรม"
-                value={editModal.data.title}
-                onChange={(e) => setEditModal({
-                  ...editModal, 
-                  data: { ...editModal.data, title: e.target.value }
-                })}
-              />
-            </div>
-
-            <div className="modal-row">
-              <div className="modal-form-group">
-                <label>เวลาเริ่มต้น</label>
-                <input 
-                  type="time" 
-                  className="modal-input time-input"
-                  value={editModal.data.startTime}
-                  onChange={(e) => setEditModal({
-                    ...editModal,
-                    data: { ...editModal.data, startTime: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="modal-form-group">
-                <label>เวลาสิ้นสุด</label>
-                <input 
-                  type="time" 
-                  className="modal-input time-input"
-                  value={editModal.data.endTime}
-                  onChange={(e) => setEditModal({
-                    ...editModal,
-                    data: { ...editModal.data, endTime: e.target.value }
-                  })}
-                />
-              </div>
-            </div>
-
-            <div className="modal-form-group">
-              <label>รายละเอียด</label>
-              <textarea 
-                className="modal-textarea" 
-                placeholder="ใส่รายละเอียด"
-                rows="4"
-                value={editModal.data.details}
-                onChange={(e) => setEditModal({
-                  ...editModal,
-                  data: { ...editModal.data, details: e.target.value }
-                })}
-              ></textarea>
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn-save" onClick={handleUpdateEvent}>บันทึก</button>
-              <button className="btn-cancel" onClick={() => setEditModal({ ...editModal, isOpen: false })}>ยกเลิก</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Overlap Events Modal */}
-      {overlapModal.isOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '600px' }}>
-            <h2 className="modal-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', display: 'inline' }}>
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              กิจกรรมที่ซ้อนกัน ({overlapModal.overlappingEvents.length})
-            </h2>
-
-            {overlapModal.overlappingEvents.length === 0 ? (
-              <p style={{ color: '#d1d5db', fontSize: '16px', textAlign: 'center', padding: '24px' }}>
-                ไม่มีกิจกรรมที่ซ้อนกัน
+        {/* Delete Confirmation Modal */}
+        {deleteModal.isOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content" style={{ textAlign: 'center', width: '400px' }}>
+              <h2 className="modal-title">ยืนยันการลบ?</h2>
+              <p style={{ color: '#d1d5db', marginBottom: '32px', fontSize: '16px' }}>
+                คุณต้องการลบกิจกรรมนี้ใช่หรือไม่
               </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
-                {overlapModal.overlappingEvents.map((overlap, idx) => (
-                  <div key={idx} style={{ 
-                    display: 'flex', 
-                    gap: '12px',
-                    padding: '16px',
-                    backgroundColor: '#1a1a1a',
-                    borderRadius: '8px',
-                    border: '1px solid #4b5563'
-                  }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" style={{ marginTop: '2px', flexShrink: 0 }}>
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '8px' }}>
-                        <div>
+              <div className="modal-actions">
+                <button className="btn-confirm-delete" onClick={confirmDelete}>ลบ</button>
+                <button className="btn-cancel-grey" onClick={cancelDelete}>ยกเลิก</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Event Modal */}
+        {editModal.isOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h2 className="modal-title">แก้ไขกิจกรรม</h2>
+
+              <div className="modal-form-group">
+                <label>ชื่อกิจกรรม</label>
+                <input
+                  type="text"
+                  className="modal-input"
+                  placeholder="ใส่ชื่อกิจกรรม"
+                  value={editModal.data.title}
+                  onChange={(e) => setEditModal({
+                    ...editModal,
+                    data: { ...editModal.data, title: e.target.value }
+                  })}
+                />
+              </div>
+
+              <div className="modal-row">
+                <div className="modal-form-group">
+                  <label>เวลาเริ่มต้น</label>
+                  <input
+                    type="time"
+                    className="modal-input time-input"
+                    value={editModal.data.startTime}
+                    onChange={(e) => setEditModal({
+                      ...editModal,
+                      data: { ...editModal.data, startTime: e.target.value }
+                    })}
+                  />
+                </div>
+                <div className="modal-form-group">
+                  <label>เวลาสิ้นสุด</label>
+                  <input
+                    type="time"
+                    className="modal-input time-input"
+                    value={editModal.data.endTime}
+                    onChange={(e) => setEditModal({
+                      ...editModal,
+                      data: { ...editModal.data, endTime: e.target.value }
+                    })}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-form-group">
+                <label>รายละเอียด</label>
+                <textarea
+                  className="modal-textarea"
+                  placeholder="ใส่รายละเอียด"
+                  rows="4"
+                  value={editModal.data.details}
+                  onChange={(e) => setEditModal({
+                    ...editModal,
+                    data: { ...editModal.data, details: e.target.value }
+                  })}
+                ></textarea>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn-save" onClick={handleUpdateEvent}>บันทึก</button>
+                <button className="btn-cancel" onClick={() => setEditModal({ ...editModal, isOpen: false })}>ยกเลิก</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Overlap Events Modal */}
+        {overlapModal.isOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content" style={{ maxWidth: '600px' }}>
+              <h2 className="modal-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', display: 'inline' }}>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                กิจกรรมที่ซ้อนกัน ({overlapModal.overlappingEvents.length})
+              </h2>
+
+              {overlapModal.overlappingEvents.length === 0 ? (
+                <p style={{ color: '#d1d5db', fontSize: '16px', textAlign: 'center', padding: '24px' }}>
+                  ไม่มีกิจกรรมที่ซ้อนกัน
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
+                  {overlapModal.overlappingEvents.map((overlap, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      gap: '12px',
+                      padding: '16px',
+                      backgroundColor: '#1a1a1a',
+                      borderRadius: '8px',
+                      border: '1px solid #4b5563'
+                    }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" style={{ marginTop: '2px', flexShrink: 0 }}>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '8px' }}>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#fff', marginBottom: '4px' }}>
+                              {overlap.event1.title}
+                            </div>
+                            <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '8px' }}>
+                              {overlap.event1.timeRange}
+                            </div>
+                          </div>
+                          <span style={{ fontSize: '12px', color: '#ef4444', fontWeight: '500' }}>ซ้อนกับ</span>
+                        </div>
+                        <div style={{ paddingTop: '8px', borderTop: '1px solid #4b5563' }}>
                           <div style={{ fontSize: '14px', fontWeight: '600', color: '#fff', marginBottom: '4px' }}>
-                            {overlap.event1.title}
+                            {overlap.event2.title}
                           </div>
-                          <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '8px' }}>
-                            {overlap.event1.timeRange}
+                          <div style={{ fontSize: '13px', color: '#9ca3af' }}>
+                            {overlap.event2.timeRange}
                           </div>
-                        </div>
-                        <span style={{ fontSize: '12px', color: '#ef4444', fontWeight: '500' }}>ซ้อนกับ</span>
-                      </div>
-                      <div style={{ paddingTop: '8px', borderTop: '1px solid #4b5563' }}>
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#fff', marginBottom: '4px' }}>
-                          {overlap.event2.title}
-                        </div>
-                        <div style={{ fontSize: '13px', color: '#9ca3af' }}>
-                          {overlap.event2.timeRange}
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
 
-            <div className="modal-actions" style={{ marginTop: '24px' }}>
-              <button 
-                className="btn-cancel" 
-                onClick={() => setOverlapModal({ isOpen: false, overlappingEvents: [] })}
-                style={{ width: '100%' }}
-              >
-                ปิด
-              </button>
+              <div className="modal-actions" style={{ marginTop: '24px' }}>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setOverlapModal({ isOpen: false, overlappingEvents: [] })}
+                  style={{ width: '100%' }}
+                >
+                  ปิด
+                </button>
+              </div>
             </div>
           </div>
-        </div>
         )}
       </main>
     </div>
