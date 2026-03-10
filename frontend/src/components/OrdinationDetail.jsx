@@ -1,8 +1,20 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./OrdinationDetail.css";
 
 export default function OrdinationDetail() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   return (
     <div className="ordination-container">
@@ -31,8 +43,8 @@ export default function OrdinationDetail() {
             </svg>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <ul className="menu">

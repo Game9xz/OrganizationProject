@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./PreWeddingDetail.css";
 
 // 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
@@ -7,7 +7,17 @@ const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api
 
 export default function PreWeddingDetail() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   // 🔥 กำหนดราคาแพ็กเกจพรีเวดดิ้งที่นี่
   const packagePrice = 12999;
 
@@ -125,8 +135,8 @@ export default function PreWeddingDetail() {
             </svg>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <ul className="menu">
@@ -211,9 +221,8 @@ export default function PreWeddingDetail() {
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "custom" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
@@ -226,9 +235,8 @@ export default function PreWeddingDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "3m" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -240,9 +248,8 @@ export default function PreWeddingDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "6m" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -254,9 +261,8 @@ export default function PreWeddingDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "1y" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);

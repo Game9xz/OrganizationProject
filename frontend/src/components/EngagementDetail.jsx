@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./EngagementDetail.css";
 
 // 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
@@ -7,7 +7,17 @@ const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api
 
 export default function EngagementDetail() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   // 🔥 กำหนดราคาแพ็กเกจงานหมั้นที่นี่
   const packagePrice = 49999;
 
@@ -134,8 +144,8 @@ export default function EngagementDetail() {
             </svg>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <ul className="menu">
@@ -181,14 +191,14 @@ export default function EngagementDetail() {
 
               <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
 
-              <ul> <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li> 
-              <li>การจัดอาสนะ: ชุดโซฟาสำหรับประธานและญาติผู้ใหญ่บนเวที</li> 
-              <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (เช่น 30-50 ท่าน)</li> 
-              <li>ป้ายชื่อบ่าวสาว: Backdrop บนเวทีพร้อมโลโก้ชื่อคู่บ่าวสาว</li> 
-              <li>การตกแต่งดอกไม้: สแตนด์ดอกไม้บนเวที 1 คู่, ดอกไม้ตกแต่งโต๊ะลงทะเบียน</li> 
-              <li>พานแหวนหมั้น: พานดอกไม้สำหรับวางแหวนหมั้น</li> 
-              <li>ห้องพัก: ห้องพัก 1 คืนสำหรับบ่าวสาวพร้อมอาหารเช้า</li> 
-              <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li> </ul>
+              <ul> <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li>
+                <li>การจัดอาสนะ: ชุดโซฟาสำหรับประธานและญาติผู้ใหญ่บนเวที</li>
+                <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (เช่น 30-50 ท่าน)</li>
+                <li>ป้ายชื่อบ่าวสาว: Backdrop บนเวทีพร้อมโลโก้ชื่อคู่บ่าวสาว</li>
+                <li>การตกแต่งดอกไม้: สแตนด์ดอกไม้บนเวที 1 คู่, ดอกไม้ตกแต่งโต๊ะลงทะเบียน</li>
+                <li>พานแหวนหมั้น: พานดอกไม้สำหรับวางแหวนหมั้น</li>
+                <li>ห้องพัก: ห้องพัก 1 คืนสำหรับบ่าวสาวพร้อมอาหารเช้า</li>
+                <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li> </ul>
 
               <p className="limit-title">
                 ข้อจำกัดในแพ็กเกจนี้!
@@ -221,9 +231,8 @@ export default function EngagementDetail() {
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "custom" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
@@ -236,9 +245,8 @@ export default function EngagementDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "3m" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -248,9 +256,8 @@ export default function EngagementDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "6m" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -260,9 +267,8 @@ export default function EngagementDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${
-                    selectedDateType === "1y" ? "active" : ""
-                  }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);

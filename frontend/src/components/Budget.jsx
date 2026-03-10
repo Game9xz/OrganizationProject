@@ -1,12 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Budget.css";
 import "./Workrecord.css";
 
 export default function Budget() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const logout = () => {
-    localStorage.removeItem("se_remember");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -38,8 +51,8 @@ export default function Budget() {
             <circle cx="58" cy="58" r="2.5" fill="#000" />
           </svg>
         </div>
-        <div className="brand-text">SE EVENT</div>
-        <div className="brand-sub">Group8.SE@ku.th</div>
+        <div className="brand-text">{user?.username}</div>
+        <div className="brand-sub">{user?.email}</div>
 
         <nav className="nav-menu">
           <Link to="/homepage" className="nav-item">หน้าแรก</Link>
@@ -73,10 +86,10 @@ export default function Budget() {
                 c.title === "งานแต่งงาน"
                   ? "wedding"
                   : c.title === "งานบุญ"
-                  ? "merit"
-                  : c.title === "งานเลี้ยง"
-                  ? "party"
-                  : "funeral";
+                    ? "merit"
+                    : c.title === "งานเลี้ยง"
+                      ? "party"
+                      : "funeral";
               return (
                 <Link key={idx} to={`/budget/${slug}`} className="bd-card-link">
                   <div className={`bd-card ${c.color}`}>

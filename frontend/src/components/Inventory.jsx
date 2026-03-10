@@ -17,7 +17,7 @@ const BACKEND_URL = BASE_API.replace('/api', '');
 
 export default function Inventory() {
   const navigate = useNavigate();
-  
+
   // 1. State สำหรับเก็บข้อมูลสินค้าและสถิติ (ดึงจาก Backend)
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({
@@ -36,8 +36,11 @@ export default function Inventory() {
     previewUrl: "",
   });
 
+  const [user, setUser] = useState(null);
+
   const logout = () => {
-    localStorage.removeItem("se_remember");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -52,7 +55,7 @@ export default function Inventory() {
   const getValidImage = (url) => {
     if (!url || url === "null" || url.trim() === "") return fallbackImage;
     if (url.startsWith("http")) return url;
-    
+
     const cleanPath = url.startsWith('/') ? url : `/${url}`;
     if (cleanPath.includes('/uploads/')) {
       return `${BACKEND_URL}${cleanPath}`;
@@ -94,6 +97,14 @@ export default function Inventory() {
   useEffect(() => {
     fetchProducts();
     fetchStats();
+
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
   }, []);
 
   // ฟังก์ชันกดบวก-ลบ จำนวนสินค้า
@@ -170,7 +181,7 @@ export default function Inventory() {
       available_stock: remain,
       image_url: newItem.previewUrl || fallbackImage,
     };
-    
+
     setItems((prev) => [optimistic, ...prev]);
     closeAddModal();
 
@@ -186,7 +197,7 @@ export default function Inventory() {
         method: "POST",
         body: form,
       });
-      
+
       if (res.ok) {
         // ถ้าเซฟสำเร็จ โหลดข้อมูลใหม่ทั้งหมดเพื่อให้ ID และรูปภาพตรงกับ Database
         fetchProducts();
@@ -213,8 +224,8 @@ export default function Inventory() {
             <circle cx="58" cy="58" r="2.5" fill="#000" />
           </svg>
         </div>
-        <div className="brand-text">SE EVENT</div>
-        <div className="brand-sub">Group8.SE@ku.th</div>
+        <div className="brand-text">{user?.username}</div>
+        <div className="brand-sub">{user?.email}</div>
 
         <nav className="nav-menu">
           <Link to="/homepage" className="nav-item">
@@ -275,16 +286,16 @@ export default function Inventory() {
           {items.map((it) => (
             <article key={it.product_id} className="inv-card">
               <div className="inv-card-image">
-                <img 
-                  src={getValidImage(it.image_url)} 
-                  alt={it.product_name} 
+                <img
+                  src={getValidImage(it.image_url)}
+                  alt={it.product_name}
                   onError={(e) => {
-                    e.target.onerror = null; 
+                    e.target.onerror = null;
                     e.target.src = fallbackImage;
                   }}
                   style={{ width: "100%", height: "100%", minHeight: "150px", objectFit: "cover", display: "block", backgroundColor: "#fff" }}
                 />
-                
+
                 {it.available_stock > 0 && it.available_stock <= 5 && <span className="badge orange">ใกล้หมด</span>}
                 {it.available_stock === 0 && <span className="badge red">หมด</span>}
               </div>
@@ -346,7 +357,7 @@ export default function Inventory() {
                 </label>
                 {newItem.previewUrl && (
                   <div className="inv-preview">
-                    <img src={newItem.previewUrl} alt="preview" style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}/>
+                    <img src={newItem.previewUrl} alt="preview" style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} />
                   </div>
                 )}
               </div>

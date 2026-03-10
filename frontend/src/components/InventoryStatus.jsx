@@ -1,8 +1,26 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./InventoryStatus.css";
-import Sidebar from "./Sidebar";
 
 export default function InventoryStatus() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
+    navigate("/login");
+  };
 
   const [inventory, setInventory] = useState([
     {
@@ -86,7 +104,47 @@ export default function InventoryStatus() {
   return (
     <div className="inv-layout">
 
-      <Sidebar />
+      <aside className="ws-sidebar">
+        <div className="brand-logo">
+          <svg className="cat-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
+            <path d="M66 38 L62 24 L50 35 Z" fill="#000" />
+            <path d="M20 60 C20 40, 40 35, 50 35 C60 35, 80 40, 80 60 C80 75, 70 85, 50 85 C30 85, 20 75, 20 60 Z" fill="#000" />
+            <circle cx="42" cy="58" r="6" fill="#fff" />
+            <circle cx="58" cy="58" r="6" fill="#fff" />
+            <circle cx="42" cy="58" r="2.5" fill="#000" />
+            <circle cx="58" cy="58" r="2.5" fill="#000" />
+          </svg>
+        </div>
+        <div className="brand-text">{user?.username}</div>
+        <div className="brand-sub">{user?.email}</div>
+
+        <nav className="nav-menu">
+          <Link to="/homepage" className="nav-item">
+            หน้าแรก
+          </Link>
+          <Link to="/workrecord" className="nav-item">
+            บันทึกงาน
+          </Link>
+          <Link to="/workrecord/status" className="nav-item">
+            สถานะงาน
+          </Link>
+          <Link to="#" className="nav-item">
+            ออกแบบ
+          </Link>
+          <Link to="/inventory" className="nav-item">
+            คลัง
+          </Link>
+          <Link to="/inventory/status" className="nav-item active">
+            สถานะคลัง
+          </Link>
+          <Link to="/budget" className="nav-item">
+            งบประมาณ
+          </Link>
+        </nav>
+
+        <button className="logout-btn" onClick={logout}>Log out</button>
+      </aside>
 
       <main className="inv-content">
 

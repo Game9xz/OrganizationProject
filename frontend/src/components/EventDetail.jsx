@@ -1,9 +1,20 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./EventDetail.css";
 
 export default function EventDetail() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   return (
     <div className="detail-container">
       {/* Sidebar */}
@@ -30,8 +41,8 @@ export default function EventDetail() {
             </svg>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <ul className="menu">

@@ -9,12 +9,12 @@
 
 /* Sidebar */
 .wr-sidebar {
-width:220px;
-background:linear-gradient(180deg,#3f3f3f,#2b2b2b) !important;
-padding:20px;
-display:flex;
-flex-direction:column;
-box-shadow:6px 0 25px rgba(0,0,0,0.7);
+  width: 220px;
+  background-color: #262626 !important;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 6px 0 25px rgba(0, 0, 0, 0.7);
 }
 
 .brand-logo {
@@ -60,14 +60,16 @@ box-shadow:6px 0 25px rgba(0,0,0,0.7);
   transition: all 0.2s;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover,
+.nav-item.active {
   color: #fff;
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-item.active {
   font-weight: 500;
-  border-left: 3px solid #fff; /* Optional indicator */
+  border-left: 3px solid #fff;
+  /* Optional indicator */
 }
 
 .logout-btn {
@@ -177,9 +179,17 @@ box-shadow:6px 0 25px rgba(0,0,0,0.7);
   box-shadow: 0 0 0 2px white;
 }
 
-.btn-blue { background-color: #0ea5e9; }
-.btn-purple { background-color: #a855f7; }
-.btn-orange { background-color: #f97316; }
+.btn-blue {
+  background-color: #0ea5e9;
+}
+
+.btn-purple {
+  background-color: #a855f7;
+}
+
+.btn-orange {
+  background-color: #f97316;
+}
 
 .search-box {
   flex: 1;
@@ -306,6 +316,7 @@ box-shadow:6px 0 25px rgba(0,0,0,0.7);
     grid-template-columns: 1fr;
   }
 }
+
 /* Delete Confirmation Modal */
 .delete-modal-overlay {
   position: fixed;
@@ -600,11 +611,13 @@ box-shadow:6px 0 25px rgba(0,0,0,0.7);
 }
 
 .date-group {
-  flex: 2.5 !important; /* Make date field wider */
+  flex: 2.5 !important;
+  /* Make date field wider */
 }
 
 .participants-group {
-  flex: 2 !important; /* Make participants field wider */
+  flex: 2 !important;
+  /* Make participants field wider */
 }
 
 .budget-input-wrapper {
@@ -625,13 +638,15 @@ box-shadow:6px 0 25px rgba(0,0,0,0.7);
 }
 
 .budget-input-wrapper .form-input {
-  padding-right: 60px; /* Adjust based on unit text length */
+  padding-right: 60px;
+  /* Adjust based on unit text length */
 }
 
 /* React DatePicker customization */
 .react-datepicker-wrapper {
   width: 100%;
 }
+
 .react-datepicker-popper {
   z-index: 3000;
 }

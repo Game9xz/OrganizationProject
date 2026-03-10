@@ -1,7 +1,19 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./FuneralDetail.css";
 export default function FuneralDetail() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      storedUser = sessionStorage.getItem("user");
+    }
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   return (
     <div className="funeral-container">
@@ -30,8 +42,8 @@ export default function FuneralDetail() {
             </svg>
           </div>
 
-          <h3>SE EVENT</h3>
-          <span>Group8@ku.th</span>
+          <h3>{user?.username}</h3>
+          <span>{user?.email}</span>
         </div>
 
         <ul className="menu">
