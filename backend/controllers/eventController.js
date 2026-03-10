@@ -26,6 +26,10 @@ export const createEvent = async (req, res) => {
       });
     }
 
+    const staffCostVal = parseFloat(String(staff_cost || '0').replace(/,/g, "")) || 0;
+    const venueCostVal = parseFloat(String(venue_cost || '0').replace(/,/g, "")) || 0;
+    console.log("PARSED VALUES - staff_cost:", staffCostVal, "venue_cost:", venueCostVal);
+
     const sql = `
       INSERT INTO events
       (user_id, title, category, location, room, event_date, people_count, budget, staff_cost, venue_cost, status)
@@ -39,11 +43,11 @@ export const createEvent = async (req, res) => {
       location || null,
       room || null,
       event_date,
-      Number(people_count) || 0,
-      Number(budget) || 0,
-      Number(staff_cost) || 0,
-      Number(venue_cost) || 0,
-      status,
+      people_count || 0,
+      budget || 0,
+      staffCostVal,
+      venueCostVal,
+      status
     ]);
 
     res.status(201).json({
@@ -51,6 +55,7 @@ export const createEvent = async (req, res) => {
       event_id: result.insertId,
     });
   } catch (err) {
+    console.error("CREATE EVENT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -135,6 +140,10 @@ export const updateEvent = async (req, res) => {
       status,
     } = req.body;
 
+    const staffCostVal = parseFloat(String(staff_cost || '0').replace(/,/g, "")) || 0;
+    const venueCostVal = parseFloat(String(venue_cost || '0').replace(/,/g, "")) || 0;
+    console.log("UPDATE PARSED - staff_cost:", staffCostVal, "venue_cost:", venueCostVal);
+
     const sql = `
       UPDATE events
       SET title=?, category=?, location=?, room=?,
@@ -150,8 +159,8 @@ export const updateEvent = async (req, res) => {
       event_date,
       people_count,
       budget,
-      staff_cost || 0,
-      venue_cost || 0,
+      staffCostVal,
+      venueCostVal,
       status,
       id,
     ]);
@@ -162,6 +171,7 @@ export const updateEvent = async (req, res) => {
 
     res.json({ message: "อัปเดตสำเร็จ" });
   } catch (err) {
+    console.error("UPDATE EVENT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -173,6 +183,9 @@ export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // ลบ activities ที่เกี่ยวข้องก่อน (เพื่อไม่ให้ติด FK constraint)
+    await db.query("DELETE FROM activities WHERE event_id=?", [id]);
+
     const [result] = await db.query("DELETE FROM events WHERE event_id=?", [
       id,
     ]);
@@ -183,6 +196,7 @@ export const deleteEvent = async (req, res) => {
 
     res.json({ message: "ลบสำเร็จ" });
   } catch (err) {
+    console.error("DELETE EVENT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
