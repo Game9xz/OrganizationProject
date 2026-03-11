@@ -252,6 +252,7 @@ export default function InventoryStatus() {
           </tbody>
         </table>
 
+        {/* 🌟 เช็คสิทธิ์: ให้โชว์ปุ่มเฉพาะ user ที่มี role เป็น admin เท่านั้น */}
         {user?.role === "admin" && (
           <button className="add-btn" onClick={() => setShowModal(true)}>
             + เพิ่ม
