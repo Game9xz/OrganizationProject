@@ -27,7 +27,7 @@ const Login = () => {
         icon: "success",
         title: "เข้าสู่ระบบสำเร็จ!",
         text: "กำลังนำคุณไปยังหน้าแรก...",
-        timer: 1500, // แสดง 1.5 วินาทีแล้วหายไปเอง
+        timer: 1500,
         showConfirmButton: false,
       }).then(() => {
         const userData = result.data.user || result.data || {};

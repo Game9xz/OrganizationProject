@@ -1,0 +1,37 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
+
+:root {
+    --bg-main: #f5f5f5;         /* สีเทาอ่อนมากสำหรับพื้นหลัง */
+    --bg-panel: rgba(255, 255, 255, 0.9); /* แผงควบคุมสีขาวโปร่งแสง */
+    --text-color: #333333;      /* ตัวอักษรสีเข้มเพื่อให้ตัดกับพื้นหลัง */
+    --accent-blue: #007bff;     /* สีฟ้าสำหรับจุดที่ต้องการเน้น */
+}
+
+body, html {
+    background-color: var(--bg-main);
+    color: var(--text-color);
+    font-family: 'Prompt', sans-serif;
+}
+
+#ui-panel, .side-menu {
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
+}
+
+.side-menu li {
+    color: #666;
+}
+.side-menu li.active {
+    color: var(--accent-blue);
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.bottom-toolbar {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}

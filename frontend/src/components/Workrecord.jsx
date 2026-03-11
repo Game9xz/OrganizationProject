@@ -527,7 +527,7 @@ export default function WorkRecord() {
           <Link to="/workrecord/status" className="nav-item">
             สถานะงาน
           </Link>
-          <Link to="#" className="nav-item">
+          <Link to="/design3d" className="nav-item">
             ออกแบบ
           </Link>
           <Link to="/inventory" className="nav-item">

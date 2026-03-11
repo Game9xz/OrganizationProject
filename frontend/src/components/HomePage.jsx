@@ -81,14 +81,19 @@ export default function HomePage() {
             สถานะงาน
           </div>
 
-          <div className="nav-item">ออกแบบ</div>
+          <div
+            className={isActive("/design3d") ? "nav-item active" : "nav-item"}
+            onClick={() => navigate("/design3d")}
+          >
+            ออกแบบ
+          </div>
           <div
             className={isActive("/inventory") ? "nav-item active" : "nav-item"}
             onClick={() => navigate("/inventory")}
           >
             คลัง
           </div>
-                    <div
+          <div
             className={isActive("/inventory/status") ? "nav-item active" : "nav-item"}
             onClick={() => navigate("/inventory/status")}
           >
