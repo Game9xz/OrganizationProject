@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { WorkContext } from "../context/WorkContextBase";
 import "./Budget.css";
 import "./Workrecord.css";
 
 const TYPE_MAP = {
-  wedding: { title: "งานแต่ง", color: "pink", budget: 400000 },
-  party: { title: "งานเลี้ยง", color: "blue", budget: 200000 },
-  merit: { title: "งานบุญ", color: "orange", budget: 200000 },
-  funeral: { title: "งานศพ", color: "purple", budget: 200000 },
+  wedding: { title: "งานแต่ง", color: "pink", budget: 1000000 },
+  party: { title: "งานเลี้ยง", color: "blue", budget: 1000000 },
+  merit: { title: "งานบุญ", color: "orange", budget: 1000000 },
+  funeral: { title: "งานศพ", color: "purple", budget: 1000000 },
 };
 
 export default function BudgetDetail() {
   const { type } = useParams();
   const navigate = useNavigate();
+  const { budgetItems, weddingEvents, partyEvents } = useContext(WorkContext);
   const meta = TYPE_MAP[type] || TYPE_MAP.wedding;
   const [user, setUser] = useState(null);
 
@@ -26,6 +28,62 @@ export default function BudgetDetail() {
     }
   }, []);
 
+  const currentItems = useMemo(() => budgetItems[type] || [], [budgetItems, type]);
+
+  // ดึงรายการค่าจ้างและค่าสถานที่จากหน้าบันทึกงาน แยกตามงาน
+  const workRecordItems = useMemo(() => {
+    let events = [];
+    if (type === 'wedding') events = weddingEvents;
+    else if (type === 'party') events = partyEvents.filter(e => 
+      e.category === 'ปาร์ตี้' || 
+      e.category === 'งานเลี้ยง' || 
+      e.category === 'งานวันเกิด' || 
+      e.category === 'งานสร้างสรรค์' ||
+      e.title.includes('วันเกิด')
+    );
+    else if (type === 'merit') events = partyEvents.filter(e => e.category === 'งานบุญ' || e.category === 'สัมมนา');
+    else if (type === 'funeral') events = partyEvents.filter(e => e.category === 'งานศพ');
+    
+    const items = [];
+    events.forEach(ev => {
+      const staff = Number(String(ev.staff_cost || ev.staffWages || "0").replace(/[^0-9.]/g, "")) || 0;
+      const venue = Number(String(ev.venue_cost || ev.venueCost || "0").replace(/[^0-9.]/g, "")) || 0;
+      
+      if (staff > 0) {
+        items.push({
+          name: `ค่าจ้างพนักงาน (${ev.title})`,
+          amount: staff,
+          unit: "บาท",
+          isWorkRecord: true
+        });
+      }
+      if (venue > 0) {
+        items.push({
+          name: `ค่าสถานที่ (${ev.title})`,
+          amount: venue,
+          unit: "บาท",
+          isWorkRecord: true
+        });
+      }
+    });
+    return items;
+  }, [type, weddingEvents, partyEvents]);
+
+  const totalSpent = useMemo(() => {
+    const itemTotal = currentItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const workRecordTotal = workRecordItems.reduce((sum, item) => sum + item.amount, 0);
+    return itemTotal + workRecordTotal;
+  }, [currentItems, workRecordItems]);
+
+  const workRecordCosts = useMemo(() => {
+    return workRecordItems.reduce((sum, item) => sum + item.amount, 0);
+  }, [workRecordItems]);
+
+  // ถ้าไม่มีการใช้จ่ายเลย ให้กำไรและขาดทุนเป็น 0
+  const netResult = totalSpent === 0 ? 0 : meta.budget - totalSpent;
+  const profit = netResult > 0 ? netResult : 0;
+  const loss = netResult < 0 ? Math.abs(netResult) : 0;
+
   const logout = () => {
     localStorage.removeItem("user");
     sessionStorage.removeItem("user");
@@ -34,7 +92,7 @@ export default function BudgetDetail() {
 
   return (
     <div className="bd-layout">
-      <aside className="wr-sidebar">
+      <aside className="ws-sidebar">
         <div className="brand-logo">
           <svg className="cat-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
@@ -67,7 +125,7 @@ export default function BudgetDetail() {
           <button className="back-btn" onClick={() => navigate(-1)}>
             ←
           </button>
-          <h1 className="bd-title">Budget</h1>
+          <h1 className="bd-title">Budget Detail</h1>
         </div>
 
         <section className="bd-detail">
@@ -83,9 +141,32 @@ export default function BudgetDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td>-</td><td>0</td><td>บาท</td></tr>
-                  <tr><td>-</td><td>0</td><td>บาท</td></tr>
-                  <tr><td>-</td><td>0</td><td>บาท</td></tr>
+                  {workRecordItems.length > 0 && (
+                    workRecordItems.map((it, idx) => (
+                      <tr key={`wr-${idx}`}>
+                        <td style={{ color: '#6b7280', fontStyle: 'italic' }}>{it.name}</td>
+                        <td>{it.amount.toLocaleString()}</td>
+                        <td>{it.unit}</td>
+                      </tr>
+                    ))
+                  )}
+                  {currentItems.length > 0 ? (
+                    currentItems.map((it, idx) => (
+                      <tr key={`item-${idx}`}>
+                        <td>{it.name}</td>
+                        <td>{it.amount.toLocaleString()}</td>
+                        <td>{it.unit}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    workRecordItems.length === 0 && (
+                      <>
+                        <tr><td>-</td><td>0</td><td>บาท</td></tr>
+                        <tr><td>-</td><td>0</td><td>บาท</td></tr>
+                        <tr><td>-</td><td>0</td><td>บาท</td></tr>
+                      </>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -99,15 +180,15 @@ export default function BudgetDetail() {
             <div className="bd-summary-card orange">
               <div className="sum-title">สรุปงบประมาณสุทธิ</div>
               <div className="sum-sub">รายการทั้งหมดรวม</div>
-              <div className="sum-value">0 บาท</div>
+              <div className="sum-value">{totalSpent.toLocaleString()} บาท</div>
             </div>
             <div className="bd-summary-card green">
               <div className="sum-title">กำไร</div>
-              <div className="sum-value">0 บาท</div>
+              <div className="sum-value">{profit.toLocaleString()} บาท</div>
             </div>
             <div className="bd-summary-card red">
               <div className="sum-title">ขาดทุน</div>
-              <div className="sum-value">0 บาท</div>
+              <div className="sum-value">{loss.toLocaleString()} บาท</div>
             </div>
           </div>
         </section>

@@ -1,185 +1,167 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useContext } from "react";
 import { WorkContext } from "./WorkContextBase";
 
-const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
-
 export const WorkProvider = ({ children }) => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [budgetItems, setBudgetItems] = useState({
+    wedding: [],
+    party: [],
+    merit: [],
+    funeral: [],
+  });
 
-  // ดึง user_id จาก localStorage/sessionStorage
-  const getUserId = () => {
-    let storedUser = localStorage.getItem("user");
-    if (!storedUser) storedUser = sessionStorage.getItem("user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      return user.id || user.user_id;
-    }
-    return null;
+  const addBudgetItem = (category, item) => {
+    setBudgetItems((prev) => ({
+      ...prev,
+      [category]: [...prev[category], { ...item, id: Date.now() }],
+    }));
   };
 
-  // =====================
-  // FETCH all events
-  // =====================
-  const fetchEvents = useCallback(async () => {
-    const userId = getUserId();
-    if (!userId) return;
+  const [weddingEvents, setWeddingEvents] = useState([
+    {
+      id: 1,
+      title: "งานแต่ง คุณกาญจนา",
+      desc: "งานแต่งสุดอบอุ่น ณ สวนสวรรค์ รีสอร์ท พร้อมบรรยากาศโรแมนติก โรงแรมตึก",
+      date: "21 มกราคม 2568",
+      location: "คณะวิศวกรรมศาสตร์, ศรีราชา",
+      room: "ห้องประชุมใหญ่",
+      category: "งานแต่ง",
+      people: "200 คน",
+      budget: "500,000",
+      staff_cost: "35,000",
+      venue_cost: "100,000",
+      manager: "กาญจนศิริ",
+      isTarget: true,
+      status: "completed",
+    },
+    {
+      id: 2,
+      title: "งานแต่ง คุณเอ & คุณบี",
+      desc: "งานแต่งสุดอบอุ่น ณ สวนสวรรค์ รีสอร์ท พร้อมบรรยากาศโรแมนติก โรงแรมตึก",
+      date: "14 กุมภาพันธ์ 2568",
+      location: "สวนสวรรค์ รีสอร์ท, เชียงใหม่",
+      room: "สวนกลางแจ้ง",
+      category: "งานแต่ง",
+      people: "200 คน",
+      budget: "500,000",
+      staff_cost: "35,000",
+      venue_cost: "100,000",
+      manager: "พีรณัฐ",
+      status: "completed",
+    },
+    {
+      id: 3,
+      title: "งานแต่ง คุณเจ้านาย",
+      desc: "งานแต่งสุดอบอุ่น ณ ชายหาด รีสอร์ท พร้อมบรรยากาศ โรงแรมตึกแสนหวาน",
+      date: "30 มกราคม 2568",
+      location: "ชายหาดลับพัทยา, ชลบุรี",
+      room: "ริมทะเล",
+      category: "งานแต่ง",
+      people: "150 คน",
+      budget: "250,000",
+      staff_cost: "20,000",
+      venue_cost: "50,000",
+      manager: "พัฒน์ธนันภู",
+      status: "completed",
+    },
+    {
+      id: 4,
+      title: "งานแต่ง คุณเจได",
+      desc: "งานแต่งสุดอบอุ่น ณ สวนผึ้ง รีสอร์ท พร้อมบรรยากาศ โรงแรมตึก",
+      date: "28 กุมภาพันธ์ 2568",
+      location: "สวนผึ้ง, ราชบุรี",
+      room: "ลานกิจกรรม",
+      category: "งานแต่ง",
+      people: "200 คน",
+      budget: "500,000",
+      staff_cost: "35,000",
+      venue_cost: "100,000",
+      manager: "ศุภกร",
+      status: "completed",
+    },
+  ]);
 
-    setLoading(true);
-    try {
-      const res = await fetch(`${BASE_API}/events?user_id=${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setEvents(data);
-      }
-    } catch (err) {
-      console.error("Error fetching events:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [partyEvents, setPartyEvents] = useState([
+    {
+      id: 5,
+      title: "งานวันเกิดสุดพิเศษ",
+      desc: "ปาร์ตี้วันเกิดริมสระน้ำ พร้อมการแสดงสด",
+      date: "5 มกราคม 2568",
+      location: "บ้านพักริมทะเล, พัทยา",
+      room: "Pool Side",
+      category: "ปาร์ตี้",
+      people: "80 คน",
+      budget: "150,000",
+      staff_cost: "10,000",
+      venue_cost: "25,000",
+      manager: "ธนภัทร",
+      status: "completed",
+    },
+    {
+      id: 6,
+      title: "สัมมนาผู้นำองค์กร 2024",
+      desc: "งานสัมมนาประจำปีสำหรับผู้บริหารระดับสูง พร้อม Workshop",
+      date: "20 มกราคม 2568",
+      location: "โรงแรมแกรนด์ไฮแอท, กรุงเทพฯ",
+      room: "Grand Ballroom",
+      category: "สัมมนา",
+      people: "150 คน",
+      budget: "800,000",
+      staff_cost: "50,000",
+      venue_cost: "150,000",
+      manager: "สิรินธร",
+      status: "completed",
+    },
+  ]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
-
-  // =====================
-  // CREATE event
-  // =====================
-  const addEvent = async (newEvent) => {
-    console.log("DATA SEND:", newEvent);
-    const userId = getUserId();
-    if (!userId) return;
-
-    try {
-      const payload = {
-        user_id: userId,
-        title: newEvent.title,
-        category: newEvent.category || null,
-        location: newEvent.location || null,
-        room: newEvent.room || null,
-        event_date: newEvent.event_date
-          ? String(newEvent.event_date).split("T")[0]
-          : null,
-        people_count: parseFloat(String(newEvent.participants ?? newEvent.people_count ?? 0).replace(/,/g, "")) || 0,
-        budget: parseFloat(String(newEvent.budget ?? 0).replace(/,/g, "")) || 0,
-        staff_cost: parseFloat(String(newEvent.staff_cost ?? 0).replace(/,/g, "")) || 0,
-        venue_cost: parseFloat(String(newEvent.venue_cost ?? 0).replace(/,/g, "")) || 0,
-        status: newEvent.status || "ยังไม่ได้กำหนด",
-      };
-
-      console.log("PAYLOAD SENT:", payload);
-
-      const res = await fetch(`${BASE_API}/events`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        await fetchEvents(); // refetch
-      } else {
-        const data = await res.json();
-        alert(data.message || "ไม่สามารถสร้างงานได้");
-      }
-    } catch (err) {
-      console.error("Error creating event:", err);
-    }
+  const updateEventStatus = (id, newStatus) => {
+    setWeddingEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, status: newStatus } : e)),
+    );
+    setPartyEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, status: newStatus } : e)),
+    );
   };
 
-  // =====================
-  // DELETE event
-  // =====================
-  const deleteEvent = async (id) => {
-    try {
-      const res = await fetch(`${BASE_API}/events/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        setEvents((prev) => prev.filter((e) => e.event_id !== id));
-      }
-    } catch (err) {
-      console.error("Error deleting event:", err);
-    }
+  const deleteEvent = (id) => {
+    setWeddingEvents((prev) => prev.filter((e) => e.id !== id));
+    setPartyEvents((prev) => prev.filter((e) => e.id !== id));
   };
 
-  // =====================
-  // UPDATE status
-  // =====================
-  const updateEventStatus = async (id, newStatus) => {
-    try {
-      const res = await fetch(`${BASE_API}/events/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
+  const addEvent = (newEvent) => {
+    const eventToAdd = {
+      ...newEvent,
+      id: Date.now(),
+      status: newEvent.status || "undetermined",
+    };
 
-      if (res.ok) {
-        setEvents((prev) =>
-          prev.map((e) => (e.event_id === id ? { ...e, status: newStatus } : e))
-        );
-      }
-    } catch (err) {
-      console.error("Error updating event status:", err);
-    }
-  };
-
-  // =====================
-  // UPDATE full event
-  // =====================
-  const updateEvent = async (id, updatedData) => {
-    try {
-      // Normalize event_date: prefer event_date, fallback to date, strip time component
-      const rawDate = updatedData.event_date || updatedData.date || null;
-      const eventDate = rawDate ? String(rawDate).split("T")[0] : null;
-
-      const payload = {
-        title: updatedData.title,
-        category: updatedData.category || null,
-        location: updatedData.location || null,
-        room: updatedData.room || null,
-        event_date: eventDate,
-        people_count: parseFloat(String(updatedData.participants ?? updatedData.people_count ?? 0).replace(/,/g, "")) || 0,
-        budget: parseFloat(String(updatedData.budget ?? 0).replace(/,/g, "")) || 0,
-        staff_cost: parseFloat(String(updatedData.staff_cost ?? 0).replace(/,/g, "")) || 0,
-        venue_cost: parseFloat(String(updatedData.venue_cost ?? 0).replace(/,/g, "")) || 0,
-        status: updatedData.status || "ยังไม่ได้กำหนด",
-      };
-
-      console.log("UPDATE PAYLOAD:", payload);
-
-      const res = await fetch(`${BASE_API}/events/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        await fetchEvents();
-      } else {
-        const data = await res.json();
-        alert(data.message || "ไม่สามารถแก้ไขงานได้");
-      }
-    } catch (err) {
-      console.error("Error updating event:", err);
+    if (newEvent.category === "งานแต่ง") {
+      setWeddingEvents((prev) => [...prev, eventToAdd]);
+    } else {
+      setPartyEvents((prev) => [...prev, eventToAdd]);
     }
   };
 
-  // backward compat: provide weddingEvents/partyEvents as computed
-  const weddingEvents = events.filter((e) => e.category === "งานแต่ง");
-  const partyEvents = events.filter((e) => e.category !== "งานแต่ง");
+  const updateEvent = (id, updatedEvent) => {
+    setWeddingEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...updatedEvent } : e)),
+    );
+    setPartyEvents((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...updatedEvent } : e)),
+    );
+  };
 
   const value = {
-    events,
     weddingEvents,
+    setWeddingEvents,
     partyEvents,
-    loading,
-    fetchEvents,
-    addEvent,
-    deleteEvent,
-    updateEvent,
+    setPartyEvents,
+    events: [...weddingEvents, ...partyEvents], // รวม events ทั้งหมด
     updateEventStatus,
+    updateEvent, // เพิ่มฟังก์ชัน updateEvent
+    deleteEvent,
+    addEvent,
+    budgetItems,
+    addBudgetItem,
   };
 
   return <WorkContext.Provider value={value}>{children}</WorkContext.Provider>;

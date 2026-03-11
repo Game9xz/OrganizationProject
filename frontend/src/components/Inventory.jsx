@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { WorkContext } from "../context/WorkContextBase";
 import "./Inventory.css";
 import "./Workrecord.css";
 
@@ -17,6 +18,7 @@ const BACKEND_URL = BASE_API.replace('/api', '');
 
 export default function Inventory() {
   const navigate = useNavigate();
+  const { addBudgetItem, weddingEvents, partyEvents } = useContext(WorkContext);
 
   // 1. State สำหรับเก็บข้อมูลสินค้าและสถิติ (ดึงจาก Backend)
   const [items, setItems] = useState([]);
@@ -32,9 +34,37 @@ export default function Inventory() {
   const [newItem, setNewItem] = useState({
     name: "",
     remain: 0,
+    price: 0,
     imageFile: null,
     previewUrl: "",
   });
+
+  // 3. State สำหรับ Modal ย้ายไปงบประมาณ
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
+  const [itemToMove, setItemToMove] = useState(null);
+  const [selectedBudget, setSelectedBudget] = useState("wedding");
+  const [selectedEventId, setSelectedSelectedEventId] = useState("");
+
+  const allEvents = useMemo(() => {
+    return [
+      ...weddingEvents.map(e => ({ ...e, type: 'wedding' })),
+      ...partyEvents.map(e => ({ ...e, type: 'party' }))
+    ];
+  }, [weddingEvents, partyEvents]);
+
+  useEffect(() => {
+    if (allEvents.length > 0 && !selectedEventId) {
+      const ev = allEvents[0];
+      const firstEventId = ev.event_id || ev.id;
+      setSelectedSelectedEventId(String(firstEventId));
+      
+      const cat = ev.category;
+      if (cat === "งานแต่ง") setSelectedBudget("wedding");
+      else if (cat === "งานเลี้ยง" || cat === "ปาร์ตี้" || cat === "งานวันเกิด" || cat === "งานสร้างสรรค์") setSelectedBudget("party");
+      else if (cat === "งานบุญ" || cat === "สัมมนา") setSelectedBudget("merit");
+      else if (cat === "งานศพ") setSelectedBudget("funeral");
+    }
+  }, [allEvents, selectedEventId]);
 
   const [user, setUser] = useState(null);
 
@@ -146,10 +176,67 @@ export default function Inventory() {
     }
   };
 
+  const handleMoveToBudget = (product) => {
+    setItemToMove(product);
+    setIsMoveOpen(true);
+  };
+
+  const confirmMoveToBudget = async () => {
+    if (!itemToMove) return;
+
+    const id = itemToMove.product_id;
+    const event = allEvents.find(e => (e.event_id === Number(selectedEventId) || e.id === Number(selectedEventId)));
+    
+    // กำหนดหมวดหมู่งบประมาณตามประเภทงานจริง
+    let budgetType = selectedBudget;
+    if (event) {
+      const cat = event.category;
+      if (cat === "งานแต่ง") budgetType = "wedding";
+      else if (cat === "งานเลี้ยง" || cat === "ปาร์ตี้" || cat === "งานวันเกิด" || cat === "งานสร้างสรรค์") budgetType = "party";
+      else if (cat === "งานบุญ" || cat === "สัมมนา") budgetType = "merit";
+      else if (cat === "งานศพ") budgetType = "funeral";
+    }
+
+    // 1. เพิ่มลงในงบประมาณที่เลือก
+    addBudgetItem(budgetType, {
+      name: `${itemToMove.product_name} (${event ? event.title : 'ทั่วไป'})`,
+      amount: getNumericPrice(itemToMove),
+      unit: "บาท"
+    });
+
+    // 2. ลดจำนวนในคลังลง 1
+    await adjustRemain(id, -1);
+
+    setIsMoveOpen(false);
+    setItemToMove(null);
+  };
+
+  const deleteProduct = async (id) => {
+    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบสินค้าชนิดนี้ออกจากคลังถาวร?")) return;
+
+    // Optimistic delete
+    setItems((prev) => prev.filter((it) => it.product_id !== id));
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        fetchStats();
+      } else {
+        throw new Error("Failed to delete");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      fetchProducts();
+    }
+  };
+
   // --------- ส่วนของการจัดการ Modal เพิ่มสินค้า ---------
 
   const handleOpenAdd = () => {
-    setNewItem({ name: "", remain: 0, imageFile: null, previewUrl: "" });
+    setNewItem({ name: "", remain: 0, price: 0, imageFile: null, previewUrl: "" });
     setIsAddOpen(true);
   };
 
@@ -168,6 +255,7 @@ export default function Inventory() {
   const handleSaveNew = async () => {
     const name = newItem.name.trim();
     const remain = Number(newItem.remain) || 0;
+    const price = Number(newItem.price) || 0;
     if (!name) {
       alert("กรุณากรอกชื่อสินค้า");
       return;
@@ -179,6 +267,7 @@ export default function Inventory() {
       product_id: tempId,
       product_name: name,
       available_stock: remain,
+      price: price,
       image_url: newItem.previewUrl || fallbackImage,
     };
 
@@ -190,6 +279,7 @@ export default function Inventory() {
       const form = new FormData();
       form.append("name", name);
       form.append("remain", String(remain));
+      form.append("price", String(price));
       if (newItem.imageFile) form.append("image", newItem.imageFile);
 
       // ใช้ API_BASE_URL แทน /api/inventory เฉยๆ เพื่อให้เชื่อมหลังบ้านได้
@@ -206,6 +296,51 @@ export default function Inventory() {
     } catch (error) {
       console.error("Error adding product:", error);
     }
+  };
+
+  // ฟังก์ชันช่วยดึงราคาเป็นตัวเลข
+  const getNumericPrice = (it) => {
+    if (it.price && it.price > 0) return Number(it.price);
+
+    // ตัวอย่างราคาสำหรับสินค้าที่มีในหน้าคลัง
+    const examplePrices = {
+      "โต๊ะหมู่บูชา": 7000,
+      "โต๊ะจัดเลี้ยง": 7000,
+      "เก้าอี้/โต๊ะ": 70000,
+      "แบคดรอป": 45000,
+      "โต๊ะจัดพิธีรดน้ำสังข์": 6500,
+      "ซุ้มดอกไม้": 70000,
+      "เวที": 75500,
+      "Mixer": 25000,
+      "ไมโครโฟน": 3500,
+      "ลำโพง": 25500,
+      "ไฟประดับ": 30000,
+      "โต๊ะวางของชำร่วย": 7000,
+      "โลงศพ": 15000,
+      "พวงหรีด": 1500,
+      "แท่นวางเชิงตะเกียง": 4500,
+      "อาสนะ": 500,
+      "เต็นท์": 15000,
+      "พัดลม": 1200,
+      "พรม": 2500,
+      "เครื่องเสียง": 15000,
+      "โต๊ะกลมจัดเลี้ยง": 12000,
+      "พานดอกไม้": 2500,
+      "โต๊ะวางอาหาร": 5500,
+      "โต๊ะวางเครื่องไทยธรรม": 3500
+    };
+
+    for (const [key, value] of Object.entries(examplePrices)) {
+      if (it.product_name.includes(key)) return value;
+    }
+
+    return 0;
+  };
+
+  // ฟังก์ชันช่วยแสดงราคาตัวอย่างถ้าไม่มีข้อมูลจาก Backend
+  const displayPrice = (it) => {
+    const price = getNumericPrice(it);
+    return price > 0 ? price.toLocaleString() : "0";
   };
 
   // -----------------------------------------------------------------------------------
@@ -301,23 +436,40 @@ export default function Inventory() {
               </div>
               <div className="inv-card-body">
                 <div className="inv-name">{it.product_name}</div>
+                <div className="inv-price">{displayPrice(it)} บาท</div>
                 <div className="inv-meta">
                   <span>คงเหลือ: {it.available_stock}</span>
                   <span>สถานะ: {getStatusLabel(it.available_stock)}</span>
                 </div>
-                <div className="inv-controls">
+                <div className="inv-card-actions">
+                  <div className="inv-controls">
+                    <button
+                      className="inv-btn minus"
+                      onClick={() => handleMoveToBudget(it)}
+                      disabled={it.available_stock <= 0}
+                      title="นำไปใช้ในงาน (หักจำนวนและลงงบประมาณ)"
+                    >
+                      −
+                    </button>
+                    <button
+                      className="inv-btn plus"
+                      onClick={() => adjustRemain(it.product_id, +1)}
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    className="inv-btn minus"
-                    onClick={() => adjustRemain(it.product_id, -1)}
-                    disabled={it.available_stock <= 0}
+                    className="inv-delete-btn"
+                    onClick={() => deleteProduct(it.product_id)}
+                    title="ลบสินค้าชนิดนี้ออกจากคลัง"
                   >
-                    −
-                  </button>
-                  <button
-                    className="inv-btn plus"
-                    onClick={() => adjustRemain(it.product_id, +1)}
-                  >
-                    +
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -337,6 +489,19 @@ export default function Inventory() {
                     value={newItem.name}
                     onChange={(e) => setNewItem((p) => ({ ...p, name: e.target.value }))}
                     placeholder="เช่น โต๊ะจัดเลี้ยง"
+                  />
+                </label>
+                <label className="inv-field">
+                  <span>ราคา (บาท)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="inv-input"
+                    value={newItem.price}
+                    onChange={(e) =>
+                      setNewItem((p) => ({ ...p, price: Math.max(0, Number(e.target.value || 0)) }))
+                    }
+                    placeholder="เช่น 7000"
                   />
                 </label>
                 <label className="inv-field">
@@ -367,6 +532,64 @@ export default function Inventory() {
                 </button>
                 <button className="inv-save" onClick={handleSaveNew}>
                   เพิ่มสินค้า
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {isMoveOpen && (
+          <div className="inv-modal-overlay">
+            <div className="inv-modal">
+              <div className="inv-modal-title">เลือกงานที่ต้องการลงรายการงบประมาณ</div>
+              <div className="inv-form">
+                <p style={{ fontSize: '14px', marginBottom: '8px' }}>
+                  รายการ: <strong>{itemToMove?.product_name}</strong>
+                </p>
+                <label className="inv-field">
+                  <span>เลือกโครงการ/งาน</span>
+                  <select
+                    className="inv-input"
+                    value={selectedEventId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedSelectedEventId(id);
+                      const ev = allEvents.find(ev => (ev.event_id === Number(id) || ev.id === Number(id)));
+                      if (ev) {
+                        const cat = ev.category;
+                        if (cat === "งานแต่ง") setSelectedBudget("wedding");
+                        else if (cat === "งานเลี้ยง" || cat === "ปาร์ตี้" || cat === "งานวันเกิด" || cat === "งานสร้างสรรค์") setSelectedBudget("party");
+                        else if (cat === "งานบุญ" || cat === "สัมมนา") setSelectedBudget("merit");
+                        else if (cat === "งานศพ") setSelectedBudget("funeral");
+                      }
+                    }}
+                  >
+                    {allEvents.length > 0 ? (
+                      allEvents.map(ev => {
+                        const evId = ev.event_id || ev.id;
+                        return (
+                          <option key={evId} value={evId}>
+                            [{ev.category}] {ev.title}
+                          </option>
+                        );
+                      })
+                    ) : (
+                      <>
+                        <option value="">-- เลือกประเภทงาน --</option>
+                        <option value="wedding">งานแต่งงาน (ทั่วไป)</option>
+                        <option value="party">งานเลี้ยง (ทั่วไป)</option>
+                        <option value="merit">งานบุญ (ทั่วไป)</option>
+                        <option value="funeral">งานศพ (ทั่วไป)</option>
+                      </>
+                    )}
+                  </select>
+                </label>
+              </div>
+              <div className="inv-modal-actions">
+                <button className="inv-cancel" onClick={() => setIsMoveOpen(false)}>
+                  ยกเลิก
+                </button>
+                <button className="inv-save" onClick={confirmMoveToBudget}>
+                  ยืนยันและหักจำนวนสินค้า
                 </button>
               </div>
             </div>
