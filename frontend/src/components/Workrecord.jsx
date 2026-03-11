@@ -217,6 +217,7 @@ export default function WorkRecord() {
 
   const [newWork, setNewWork] = useState({
     title: "",
+    manager: "",
     category: "",
     location: "",
     room: "",
@@ -232,6 +233,7 @@ export default function WorkRecord() {
     if (e) e.preventDefault();
     setNewWork({
       title: "",
+      manager: "",
       category: "",
       location: "",
       room: "",
@@ -277,6 +279,7 @@ export default function WorkRecord() {
     // Convert selectedDate to ISO format for the API
     const eventPayload = {
       title: newWork.title,
+      manager: newWork.manager,
       category: newWork.category,
       location: newWork.location,
       room: newWork.room,
@@ -347,6 +350,7 @@ export default function WorkRecord() {
     setEditWork({
       event_id: event.event_id,
       title: event.title || "",
+      manager: event.manager || "",
       category: event.category || "",
       location: event.location || "",
       room: event.room || "",
@@ -391,6 +395,7 @@ export default function WorkRecord() {
 
     const eventPayload = {
       title: editWork.title,
+      manager: editWork.manager,
       category: editWork.category,
       location: editWork.location,
       room: editWork.room,
@@ -442,7 +447,7 @@ export default function WorkRecord() {
 
       <div className="card-row">
         <IconCalendar />
-        <span>{formatEventDate(event.event_date)}</span>
+        <span>{formatEventDate(event.event_date || event.date)}</span>
       </div>
 
       <div className="card-row">
@@ -455,16 +460,16 @@ export default function WorkRecord() {
           <div style={{ display: 'flex', gap: '16px' }}>
             <div className="stat-item">
               <IconUser />
-              <span>{event.people_count || 0} คน</span>
+              <span>{event.people || event.people_count || 0}</span>
             </div>
             <div className="stat-item">
               <IconWallet />
-              <span>{Number(event.budget || 0).toLocaleString()} บาท</span>
+              <span>{Number(String(event.budget || 0).replace(/[^0-9.]/g, "")).toLocaleString()} บาท</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: '#9ca3af' }}>
-            <div>จ้าง: {Number(event.staff_cost || 0).toLocaleString()} ฿</div>
-            <div>สถานที่: {Number(event.venue_cost || 0).toLocaleString()} ฿</div>
+            <div>จ้าง: {Number(String(event.staff_cost || 0).replace(/[^0-9.]/g, "")).toLocaleString()} ฿</div>
+            <div>สถานที่: {Number(String(event.venue_cost || 0).replace(/[^0-9.]/g, "")).toLocaleString()} ฿</div>
           </div>
         </div>
 
@@ -690,6 +695,18 @@ export default function WorkRecord() {
               </div>
 
               <div className="form-group">
+                <label>ชื่อผู้รับผิดชอบ (Manager)</label>
+                <input
+                  type="text"
+                  name="manager"
+                  value={newWork.manager}
+                  onChange={handleCreateInputChange}
+                  className="form-input"
+                  placeholder="ชื่อผู้รับผิดชอบ"
+                />
+              </div>
+
+              <div className="form-group">
                 <label>ประเภทงาน</label>
                 <input
                   type="text"
@@ -860,6 +877,17 @@ export default function WorkRecord() {
                   type="text"
                   name="title"
                   value={editWork.title}
+                  onChange={handleEditInputChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>ชื่อผู้รับผิดชอบ (Manager)</label>
+                <input
+                  type="text"
+                  name="manager"
+                  value={editWork.manager}
                   onChange={handleEditInputChange}
                   className="form-input"
                 />
