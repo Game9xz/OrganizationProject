@@ -22,14 +22,12 @@ export default function InventoryStatus() {
 
   // 1. ดึงข้อมูล User ตอนเปิดหน้าเว็บ + ดึงข้อมูลตาราง
   useEffect(() => {
-    let storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      storedUser = sessionStorage.getItem("user");
-    }
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      console.log("Current User Data:", parsedUser); // 👈 เพิ่มบรรทัดนี้เพื่อเช็คใน Console
+      setUser(parsedUser);
     }
-
     fetchInventory();
   }, []);
 
@@ -252,11 +250,13 @@ export default function InventoryStatus() {
           </tbody>
         </table>
 
-        {user?.role === "admin" && (
-          <button className="add-btn" onClick={() => setShowModal(true)}>
-            + เพิ่ม
-          </button>
-        )}
+        {/* 🌟 เช็คสิทธิ์: ให้โชว์ปุ่มเฉพาะ user ที่มี role เป็น admin เท่านั้น */}
+        {/* 🌟 เช็คสิทธิ์: ให้โชว์ปุ่มสำหรับ user ชื่อ Lazy หรือ peeranat */}
+{(user?.username === "Lazy" || user?.username === "peeranat") && (
+  <button className="add-btn" onClick={() => setShowModal(true)}>
+    + เพิ่ม
+  </button>
+)}
       </main>
 
       {showModal && (
