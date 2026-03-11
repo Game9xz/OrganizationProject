@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My 3D Room Designer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+
+    <style>
+        :root {
+            --bg-dark: #2B2B2B;
+            --sidebar-bg: #1a1a1a;
+            --panel-bg: rgba(43, 43, 43, 0.96);
+            --text-light: #ffffff;
+            --accent-purple: #822eea;
+            --shadow-smooth: 0 16px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        body,
+        select,
+        button,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: 'Prompt', sans-serif;
+            color: var(--text-light);
+            width: 100%;
+            height: 100%;
+        }
+
+        .canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+
+
+        /* ---------------- Toolbar ---------------- */
+        .bottom-toolbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(33, 33, 33, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            display: flex;
+            padding: 10px 30px;
+            gap: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .tool-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 60px;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        .tool-item:hover {
+            color: var(--accent-purple);
+            transform: translateY(-3px);
+        }
+
+        .tool-item i {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .tool-item span {
+            font-size: 12px;
+        }
+
+        .tool-item.active {
+            color: #ffffff;
+        }
+
+        .tool-item.active::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            width: 20px;
+            height: 4px;
+            background: var(--accent-purple);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--accent-purple);
+        }
+
+        /* ---------------- Home panal (icon hamburger) ---------------- */
+        .home-panel {
+            position: fixed;
+            top: 20px;
+            left: 80px;
+            width: 240px;
+            background: #2a2a2a;
+            border-radius: 16px;
+            padding: 20px 10px;
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+
+        .home-panel.show {
+            display: block;
+            animation: fadeInSlide 0.3s ease-out;
+        }
+
+        .menu-list-vertical {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0 0 0;
+        }
+
+        .menu-list-vertical li {
+            padding: 12px 18px;
+            color: #ccc;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+
+        .menu-list-vertical li:hover {
+            background: rgba(130, 46, 234, 0.1);
+            color: var(--accent-purple);
+            padding-left: 25px;
+        }
+
+        .purple-text {
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        /* ---------------- Sidebar ---------------- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 70px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            z-index: 1001;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .avatar-box {
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            border: 2px solid var(--accent-purple);
+        }
+
+        .side-icons div {
+            color: #888;
+            font-size: 24px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .side-icons div:hover {
+            color: var(--accent-purple);
+            transform: scale(1.1);
+        }
+
+        /* ---------------- Floating Panels ---------------- */
+        .floating-panel {
+            position: fixed;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-smooth);
+            width: 300px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 85vh;
+            overflow: visible;
+        }
+
+        .floating-panel-right {
+            position: fixed;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-smooth);
+            width: 300px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .floating-panel.show,
+        .floating-panel-right.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .floating-panel {
+            left: 85px;
+            top: 20px;
+            transform: translateX(-20px);
+        }
+
+        .floating-panel.show {
+            transform: translateX(0);
+        }
+
+        .floating-panel-right {
+            right: 20px;
+            top: 80px;
+            transform: translateX(20px);
+        }
+
+        .floating-panel-right.show {
+            transform: translateX(0);
+        }
+
+
+
+        /* ---------------- Button Close  ---------------- */
+        .close-btn-minimal {
+            position: absolute !important;
+            top: 15px !important;
+            right: 15px !important;
+            left: auto !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: none !important;
+            color: rgba(255, 255, 255, 0.5) !important;
+            font-size: 20px !important;
+            cursor: pointer !important;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1010;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn-minimal:hover {
+            background: #ff4d4d !important;
+            color: white !important;
+            transform: rotate(90deg);
+        }
+
+
+        /* ---------------- Layout Panel  (icon home)----------------*/
+        .ui-section {
+            margin-top: 25px;
+        }
+
+        .section-label {
+            display: block;
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .layout-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .layout-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .layout-item:hover .layout-icon-box {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+
+        .layout-icon-box {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #fff;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .layout-item span {
+            font-size: 11px;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .control-group input {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #a855f7;
+        }
+
+        .section-label {
+            font-weight: bold;
+            color: #a855f7;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* ---------------- Catalog (icon basket) ---------------- */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .model-card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .model-card:hover {
+            border-color: var(--accent-purple);
+            background: #252525;
+        }
+
+        .card-image {
+            background: none;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .card-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .card-info {
+            padding: 8px;
+        }
+
+        .card-info h4 {
+            font-size: 12px;
+            margin: 0;
+            color: #fff;
+            font-weight: 400;
+        }
+
+        .card-info p {
+            font-size: 11px;
+            color: var(--accent-purple);
+            margin: 4px 0 0 0;
+        }
+
+        /* ---------------- Inventory List ---------------- */
+        .panel-header-right,
+        .panel-header,
+        .panel-header-main,
+        home-panel {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .inventory-item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 12px;
+            border-left: 4px solid #a855f7;
+        }
+
+        .inventory-item-thumb {
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 2px;
+        }
+
+        .inventory-item-thumb img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .inventory-item-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .item-badge {
+            background: #a855f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .qty-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 28px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .item-controls-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        /* --- count ( + / - ) --- */
+        .qty-control-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .qty-action-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border-radius: 50%;
+        }
+
+        .qty-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .qty-display-badge {
+            background: #a855f7;
+            min-width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        /* --- Button bin --- */
+        .trash-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .trash-action-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .item-price-each {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 2px 0;
+        }
+
+        /* ---------------- Form Elements ---------------- */
+        .select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        select {
+            padding: 12px;
+            border-radius: 10px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            outline: none;
+        }
+
+        /* ---------------- Top right UI ---------------- */
+        .top-right-ui {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(15px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-right-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .home-panel.show,
+        .floating-panel.show,
+        .floating-panel-right.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .home-panel:not(.show),
+        .floating-panel:not(.show),
+        .floating-panel-right:not(.show) {
+            display: none !important;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* --- อัปเกรด Modal ดีไซน์ใหม่ --- */
+
+        #model-selection-popup {
+            display: none;
+            position: fixed !important;
+            left: 380px !important;
+            /* ขยับออกมาให้พ้นเมนูหลัก */
+            top: 50px !important;
+            width: 320px !important;
+            height: auto !important;
+            max-height: 80vh !important;
+            background: #1e1e1e !important;
+            border: 2px solid #a855f7 !important;
+            /* เน้นขอบสีม่วงให้เห็นชัด */
+            border-radius: 20px !important;
+            z-index: 99999 !important;
+            padding: 20px !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
+            overflow-y: auto !important;
+
+            /* บังคับให้ปรากฎตัว */
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: none !important;
+
+            #model-selection-popup.active {
+                display: block !important;
+            }
+        }
+
+        #project-modal {
+            display: none;
+            position: fixed !important;
+            z-index: 10000 !important;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            /* เบลอฉากหลัง */
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        /* กล่อง Modal */
+        .modal-content {
+            position: relative;
+            background: #18181b;
+            /* สีเทาเข้มแบบ Modern */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            animation: modalShow 0.3s ease-out;
+        }
+
+        /* หัวข้อ Modal */
+        .modal-header {
+            background: rgba(168, 85, 247, 0.1);
+            /* สีม่วงอ่อนๆ */
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-header h2 {
+            color: #a855f7;
+            /* สีม่วงหลัก */
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* ปุ่มปิด (X) */
+        .close-modal {
+            position: absolute;
+            top: 28px;
+            /* ห่างจากขอบบน */
+            right: 28px;
+            /* ห่างจากขอบขวา */
+            background: rgba(255, 255, 255, 0.1);
+            /* พื้นหลังวงกลมจางๆ */
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            /* ทำเป็นวงกลม */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 100;
+            /* ให้อยู่เหนือทุกอย่างใน Modal */
+        }
+
+        .model-card:hover {
+            border-color: #a855f7 !important;
+            background: rgba(168, 85, 247, 0.1) !important;
+            transform: translateY(-3px);
+        }
+
+        /* ปรับแต่ง Scrollbar ของ Popup ให้ดูหรู */
+        #model-selection-popup::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #model-selection-popup::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 10px;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+            transform: scale(1.1);
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+        }
+
+        /* รายการโปรเจกต์ */
+        #project-list-container {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* การ์ดแต่ละโปรเจกต์ */
+        .project-card {
+            background: #27272a;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .project-card:hover {
+            border-color: #a855f7;
+            background: #2e2e33;
+        }
+
+        .project-info strong {
+            color: #f8fafc;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .project-info small {
+            color: #71717a;
+        }
+
+        @keyframes modalShow {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* สไตล์ปุ่มลบโปรเจกต์ */
+        .btn-delete-project {
+            background: rgba(239, 68, 68, 0.1);
+            /* แดงจางๆ แบบโปร่งใส */
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete-project:hover {
+            background: #ef4444;
+            /* แดงสดตอนจิ้ม */
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .btn-load {
+            background: #822eea;
+            /* สีน้ำเงินสว่าง */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-load:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        /* ปรับให้ปุ่มโหลดกับปุ่มลบอยู่ด้วยกันสวยๆ */
+        .project-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="bottom-toolbar">
+        <div class="tool-item" id="tool-select"><i class="fi fi-rr-cursor-finger"></i><span>เลือก</span></div>
+        <div class="tool-item" id="btn-undo"><i class="fi fi-rr-undo-alt"></i><span>ย้อนกลับ</span></div>
+        <div class="tool-item" id="btn-redo"><i class="fi fi-rr-redo-alt"></i><span>กู้คืน</span></div>
+        <div class="tool-item" id="btn-delete-tool"><i class="fi fi-rr-eraser"></i><span>ลบ</span></div>
+        <div class="tool-item" id="btn-reset-view"><i class="fi fi-rr-expand"></i><span>รีเซ็ต</span></div>
+        <div class="tool-item" id="btn-save-project"><i class="fi fi-rr-disk"></i><span>บันทึก</span></div>
+        <!-- ปุ่มเปิดดูรายการงานที่เซฟไว้ (เพิ่มไว้ใน Toolbar เดิมของคุณก็ได้) -->
+        <div class="tool-item" id="btn-open-projects"><i class="fi fi-rr-folder-open"></i><span>เปิดงาน</span></div>
+    </div>
+
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>โปรเจกต์ที่บันทึกไว้</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="project-list-container" class="project-grid">
+                <p>กำลังโหลดรายการ...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-right-ui">
+        <button class="top-right-btn" id="btn-open-catalog">
+            <i class="fi fi-rr-shopping-basket"></i>
+        </button>
+    </div>
+
+    <nav class="sidebar">
+        <div class="avatar-box">
+            <img src="../image/cat-logo.jpg" class="avatar">
+        </div>
+        <div class="side-icons">
+            <div id="btn-home-toggle"><i class="fi fi-rr-menu-burger"></i></div>
+            <div id="menu-design-item"><i class="fi fi-rr-home"></i></div>
+            <div id="btn-list"><i class="fi fi-rr-couch"></i></div>
+        </div>
+    </nav>
+
+    <div id="home-panel" class="home-panel">
+        <button class="close-btn-minimal">×</button>
+        <div class="panel-header">
+            <span class="purple-text" style="font-size: 0.8em; letter-spacing: 2px;">GROP 8 ORGANIZE</span>
+        </div>
+
+        <ul class="menu-list-vertical">
+            <li id="menu-home-item">หน้าแรก</li>
+            <li id="menu-save-item">บันทึกงาน</li>
+            <li id="menu-status-item">สถานะงาน</li>
+            <li id="menu-design-item">ออกแบบ</li>
+            <li id="menu-inventory-item">คลัง</li>
+            <li id="menu-inv-status-item">สถานะคลัง</li>
+        </ul>
+    </div>
+
+    <!-- Layout Panel -->
+    <div id="layout-panel" class="floating-panel">
+        <button class="close-btn-minimal">×</button>
+
+        <div class="panel-header-main">
+            <span><i class="fi fi-rr-home"></i> Room Designer</span>
+        </div>
+
+        <!-- Section: ห้อง -->
+        <div class="ui-section">
+            <label class="section-label">ห้อง</label>
+            <div class="layout-grid">
+                <div class="layout-item" id="btn-create-wall">
+                    <div class="layout-icon-box"><i class="fi fi-rr-block-brick"></i></div>
+                    <span>สร้างผนัง</span>
+                </div>
+                <div class="layout-item" id="btn-create-room">
+                    <div class="layout-icon-box"><i class="fi fi-rr-layout-fluid"></i></div>
+                    <span>สร้างพื้น</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: ประตูและหน้าต่าง -->
+        <div class="ui-section">
+            <label class="section-label">ประตูและหน้าต่าง</label>
+            <div class="layout-grid" style="display: flex; gap: 10px;">
+
+                <div class="layout-item" onclick="openModelPopup('doors')" style="flex: 1;">
+                    <div class="layout-icon-box"><i class="fi fi-rr-door-open"></i></div>
+                    <span>ประตู</span>
+                </div>
+
+                <div class="layout-item" id="btn-add-window" onclick="openModelPopup('windows')" style="flex: 1;">
+                    <div class="layout-icon-box"><i class="fi fi-rr-window-frame"></i></div>
+                    <span>หน้าต่าง</span>
+                </div>
+
+                <div style="flex: 1; visibility: hidden;"></div>
+
+            </div>
+        </div>
+
+
+
+        <div class="ui-section">
+            <label class="section-label">ตั้งค่าแสงสว่าง</label>
+            <div class="control-group">
+                <span>แสงสว่างรวม (Ambient)</span>
+                <input type="range" id="input-ambient-intensity" min="0" max="2" step="0.1" value="0.8">
+            </div>
+            <div class="control-group">
+                <span>แสงทิศทาง (Sunlight)</span>
+                <input type="range" id="input-dir-intensity" min="0" max="5" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <span>ตำแหน่งมุมแสง (Rotation)</span>
+                <input type="range" id="input-light-pos" min="0" max="6.28" step="0.1" value="0">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- หน้าต่างเลือกโมเดลประตู/หน้าต่างแยก -->
+    <div id="model-selection-popup" class="floating-panel"
+        style="display: none; position: fixed; left: 330px; top: 20px;">
+        <div class="panel-header-main" style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="popup-title">เลือกโมเดล</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="close-btn-minimal"
+                style="position: absolute; top: 15px; right: 15px;">×
+
+            </button>
+            `;
+        </div>
+        <div id="popup-list-container" class="layout-grid"
+            style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+            <!-- รายการ -->
+        </div>
+    </div>
+
+    <div id="catalog-panel" class="floating-panel-right">
+        <button id="btn-close-catalog" class="close-btn-minimal">×</button>
+        <div class="panel-header-right">
+            <span><i class="fi fi-rr-boxes"></i> รายการเฟอร์นิเจอร์</span>
+        </div>
+        <div class="panel-body">
+            <div id="list-items"></div>
+            <div id="empty-catalog-msg" style="text-align: center; color: #666; padding: 30px 10px;">
+
+            </div>
+        </div>
+    </div>
+
+    <div id="ui-panel" class="floating-panel">
+        <button class="close-btn-minimal"
+            onclick="document.getElementById('ui-panel').classList.remove('show')">×</button>
+        <div class="panel-header">
+            <span><i class="fi fi-rr-couch"></i> Furniture</span>
+        </div>
+        <div class="button-group">
+            <div class="select-group">
+                <label>📂 หมวดหมู่</label>
+                <select id="category-select">
+                    <option value="chair">เก้าอี้ (Chairs)</option>
+                    <option value="table">โต๊ะ (Tables)</option>
+                    <option value="decor">ของตกแต่ง (Decor)</option>
+                    <option value="audio">ระบบเสียง (Audio)</option>
+                    <option value="lighting">ระบบไฟ (Lighting)</option>
+                    <option value="funeral">งานศพ (Funeral)</option>
+                    <option value="make_merit">งานบุญ (Make Merit)</option>
+                    <option value="wedding">งานแต่งงาน (Wedding)</option>
+                    <option value="party">งานเลี้ยง (Party)</option>
+                </select>
+            </div>
+            <div class="select-group">
+                <label>✨ เลือกโมเดล</label>
+                <div id="model-catalog-container" class="catalog-grid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="keyboard-guide" style="
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px; 
+    background: rgba(25, 25, 27, 0.3); /* โปร่งใสมากเป็นพิเศษ */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #efeff1; 
+    padding: 10px 14px; /* ลด Padding ลง */
+    border-radius: 10px; 
+    width: 160px; /* บีบความกว้างให้แคบลงอีก */
+    font-family: 'Prompt', sans-serif;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 9999;
+    pointer-events: none;
+">
+        <div style="font-weight: 600; 
+    font-size: 15px; 
+    margin-bottom: 15px; 
+    color: #a855f7; 
+    border-bottom: 1px solid rgba(168, 85, 247, 0.3); 
+    padding-bottom: 8px;">
+            🎮 คู่มือการควบคุม
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>เลื่อนตำแหน่ง</span> <b
+                    style="color: #a855f7; background: rgba(158, 59, 201, 0.1); padding: 2px 6px; border-radius: 4px;">W</b>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>หมุนวัตถุ</span> <b
+                    style="color: #a855f7; background: rgba(158, 59, 201, 0.1); padding: 2px 6px; border-radius: 4px;">E</b>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>ขยายขนาด</span> <b
+                    style="color: #a855f7; background: rgba(158, 59, 201, 0.1); padding: 2px 6px; border-radius: 4px;">R</b>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>ลบวัตถุ</span> <b
+                    style="color: #f87171; background: rgba(248, 113, 113, 0.1); padding: 2px 6px; border-radius: 4px;">Del</b>
+            </div>
+        </div>
+
+        <div
+            style="margin-top: 15px; font-size: 11px; color: #71717a; text-align: center; font-family: 'Prompt', sans-serif;">
+            * คลิกที่วัตถุเพื่อเริ่มปรับแต่ง
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module" src="main.js"></script>
+
+    <script>
+        function openModelPopup(category) {
+            if (!document.getElementById('popup-animation-style')) {
+                const style = document.createElement('style');
+                style.id = 'popup-animation-style';
+                style.innerHTML = `
+            .close-btn-animate {
+                position: absolute !important;
+                top: 15px !important;
+                right: 15px !important;
+                left: auto !important;
+                background: rgba(255,255,255,0.05) !important;
+                border: none !important;
+                color: rgba(255, 255, 255, 0.5) !important;
+                font-size: 20px !important;
+                cursor: pointer !important;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1010;
+                transition: all 0.2s ease;
+
+            }
+            .close-btn-animate:hover {
+                background: #ff4d4d !important;
+                color: white !important;
+                transform: rotate(90deg);
+            }
+            .close-btn-animate:active {
+                transform: scale(0.9) !important;
+            }
+        `;
+                document.head.appendChild(style);
+            }
+
+            // ข้อมูลโมเดล
+            const model = {
+                'doors': [
+                    { name: 'ประตูไม้โมเดิร์น', file: 'model/door.glb', thumb: 'image/door.png' },
+                    { name: 'ประตูบานเลื่อน', file: 'model/sliding_door.glb', thumb: 'image/sliding_door.png' },
+                ],
+                'windows': [
+                    { name: 'หน้าต่างมีม่าน', file: 'model/window1.glb', thumb: 'image/window1.png' },
+                    { name: 'หน้าต่างตารางบานเลื่อน', file: 'model/window2.glb', thumb: 'image/window2.png' },
+                ]
+            };
+
+            const currentModels = model[category] || [];
+
+            const oldPopup = document.getElementById('model-selection-popup');
+            if (oldPopup) oldPopup.remove();
+
+            const popup = document.createElement('div');
+            popup.id = 'model-selection-popup';
+            popup.style.cssText = `
+        position: fixed !important; top: 20px !important; left: 450px !important;
+        width: 380px !important; max-height: 85vh !important; background: #2a2a2a !important;
+        border-radius: 22px !important; z-index: 1000 !important; padding: 25px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important; color: white !important;
+        display: flex !important; flex-direction: column !important; font-family: 'Prompt', sans-serif !important;
+        overflow: hidden !important; border: 2px solid #a855f7 !important;
+    `;
+
+            // สร้าง HTML ข้างใน
+            let contentHtml = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <i class="fi ${category === 'doors' ? 'fi-rr-door-open' : 'fi-rr-window-frame'}" style="color:#a855f7; font-size:24px;"></i>
+                <h2 style="margin:0; font-size:20px; font-weight:600; color:#a855f7;">เลือก${category === 'doors' ? 'ประตู' : 'หน้าต่าง'}</h2>
+            </div>
+            <button class="close-btn-animate" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+        
+        <div style="margin-bottom:15px; color:rgba(255,255,255,0.6); font-size:14px;">✨ เลือกโมเดล</div>
+        
+        <div id="popup-scroll-container" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; overflow-y:auto; padding-right:10px; flex-grow:1;">
+    `;
+
+            currentModels.forEach(m => {
+                contentHtml += `
+        <div class="model-card" 
+             onclick="if(window.loadModelFromWeb){ window.loadModelFromWeb('${m.file}'); this.parentElement.parentElement.remove(); }else{ alert('ระบบยังไม่พร้อมจ้ะ!'); }" 
+             style="background:#1e1e1e; border-radius:15px; padding:10px; cursor:pointer; text-align:center;">
+            <img src="${m.thumb}" style="width:100%; border-radius:10px; margin-bottom:8px;">
+            <div style="font-size:13px; color:white;">${m.name}</div>
+        </div>
+    `;
+            });
+
+
+            contentHtml += `</div>`;
+            popup.innerHTML = contentHtml;
+            document.body.appendChild(popup);
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -24,6 +24,7 @@ import BudgetDetail from "./components/BudgetDetail.jsx";
 import ForgotPassword from "./auth/ForgotPassword.jsx";
 import VerifyOTP from "./auth/VerifyOTP.jsx";
 import ResetPassword from "./auth/ResetPassword.jsx";
+import Design3D from "./components/Design3D.jsx";
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/design3d" element={<Design3D />} />
     </Routes>
   );
 }
