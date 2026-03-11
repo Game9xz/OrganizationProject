@@ -30,24 +30,29 @@ const Login = () => {
         timer: 1500,
         showConfirmButton: false,
       }).then(() => {
+        // ดึงข้อมูล userData และ token
         const userData = result.data.user || result.data || {};
-        if (rememberMe) {
-          localStorage.setItem("user", JSON.stringify(userData));
-        } else {
-          sessionStorage.setItem("user", JSON.stringify(userData));
+        const token = result.data.token; 
+
+        // 🔥 บันทึก user และ token ลง localStorage เสมอ 
+        // เพื่อให้ component หน้าอื่นๆ ดึงสิทธิ์ (role) ไปเช็คได้ง่ายๆ
+        localStorage.setItem("user", JSON.stringify(userData));
+        if (token) {
+          localStorage.setItem("token", token);
         }
+
         navigate("/homepage", { replace: true });
       });
 
     } else {
       // ❌ กรณี Login ไม่สำเร็จ
-      setError(result.error); // ยังเก็บไว้แสดงในฟอร์มได้ (ถ้าต้องการ)
+      setError(result.error); 
 
       Swal.fire({
         icon: "error",
         title: "เข้าสู่ระบบไม่สำเร็จ",
         text: result.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
-        confirmButtonColor: "#d33", // สีปุ่มตกลงเป็นสีแดง
+        confirmButtonColor: "#d33", 
         confirmButtonText: "ลองอีกครั้ง"
       });
     }

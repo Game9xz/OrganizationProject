@@ -62,4 +62,4 @@ export const deleteBorrow = async (req, res) => {
     console.error("Error deleting record:", err);
     return res.status(500).json({ error: "Failed to delete record" });
   }
-};//1
+};
