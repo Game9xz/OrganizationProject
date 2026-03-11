@@ -12,10 +12,13 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import resetRoutes from "./routes/resetRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import design3dRoutes from "./routes/design3dRoutes.js";
+import borrowRoutes from "./routes/borrowRoutes.js";
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/borrows", borrowRoutes);
 
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
