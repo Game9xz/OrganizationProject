@@ -406,8 +406,9 @@ export default function WorkRecordDetail() {
         end_time: data.endTime,
       };
 
-      // Check if it's a mock ID (starts with 2xx or is a timestamp)
-      if (String(activityId).startsWith('2') || activityId > 1000000000000) {
+      // Check if it's a mock ID (starts with 2xx, 4xx, 5xx, 6xx or is a timestamp)
+      const strId = String(activityId);
+      if (strId.startsWith('2') || strId.startsWith('4') || strId.startsWith('5') || strId.startsWith('6') || activityId > 1000000000000) {
         // Update mock data in state
         const updatedActivities = activities.map(act => 
           act.id === activityId 
@@ -469,7 +470,8 @@ export default function WorkRecordDetail() {
 
     try {
       // Check if it's a mock ID
-      if (String(activityId).startsWith('2') || activityId > 1000000000000) {
+      const strId = String(activityId);
+      if (strId.startsWith('2') || strId.startsWith('4') || strId.startsWith('5') || strId.startsWith('6') || activityId > 1000000000000) {
         const updatedActivities = activities.filter(act => act.id !== activityId);
         setActivities(updatedActivities);
         localStorage.setItem(getStorageKey(eventId), JSON.stringify(updatedActivities));

@@ -77,7 +77,7 @@ const IconCalendar = () => (
 );
 
 const LocationName = ({ location }) => {
-  const [name, setName] = useState(location?.address || "กำลังโหลดตำแหน่ง...");
+  const [name, setName] = useState(location?.address || "กำลังโหลดตำแหน่ง..");
   const isMapReady = useLongdoMap('391bb8f4015c8ab179b4714d3f2942bb');
 
   useEffect(() => {
