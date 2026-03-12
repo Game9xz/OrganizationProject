@@ -7,6 +7,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
+import LocationMap from './LocationMap';
+import { useLongdoMap } from "../hooks/useLongdoMap";
+
 // Icons
 const IconCalendar = () => (
   <svg
@@ -156,6 +159,63 @@ const IconChevronDown = () => (
   </svg>
 );
 
+const IconX = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
+const LocationName = ({ location }) => {
+  const [name, setName] = useState(location?.address || "กำลังโหลดตำแหน่ง...");
+  const isMapReady = useLongdoMap('391bb8f4015c8ab179b4714d3f2942bb');
+
+  useEffect(() => {
+    if (location?.address) {
+      setName(location.address);
+      return;
+    }
+
+    if (!isMapReady || !location) {
+      setName("-");
+      return;
+    }
+
+    // Ensure longdo API is fully loaded
+    if (window.longdo && window.longdo.Geocoder) {
+      if (typeof location === 'object' && location.lon && location.lat) {
+        const longdo = window.longdo;
+        new longdo.Geocoder().location({ lon: location.lon, lat: location.lat }, (result) => {
+          if (result) {
+            const subdistrict = result.subdistrict ? `${result.subdistrict}, ` : "";
+            const district = result.district ? `${result.district}, ` : "";
+            const province = result.province ? result.province : "";
+            setName(`${subdistrict}${district}${province}`.replace(/, $/, ''));
+          }
+        });
+      } else if (typeof location === 'string') {
+        setName(location);
+      } else {
+        setName("-");
+      }
+    } else {
+      // If longdo is not ready, keep loading state
+      setName("กำลังโหลดตำแหน่ง...");
+    }
+  }, [location, isMapReady]);
+
+  return <span>{name}</span>;
+};
+
 // Helper: format date for display
 const formatEventDate = (dateStr) => {
   if (!dateStr) return "-";
@@ -172,11 +232,11 @@ const formatEventDate = (dateStr) => {
 
 export default function WorkRecord() {
   const navigate = useNavigate();
+  const createMapRef = React.useRef(null);
+  const editMapRef = React.useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [filters, setFilters] = useState({
-    location: "",
-    room: "",
     category: "",
   });
   const [selectedDate, setSelectedDate] = useState(null);
@@ -219,7 +279,6 @@ export default function WorkRecord() {
     title: "",
     manager: "",
     category: "",
-    location: "",
     room: "",
     date: "",
     budget: "",
@@ -227,7 +286,37 @@ export default function WorkRecord() {
     staff_cost: "",
     venue_cost: "",
     status: "กำลังจัดเตรียม",
+    location: { lon: 100.5383, lat: 13.7649, address: "" }, // Default location with address
   });
+
+  const handleLocationChange = (location, setter) => {
+    setter((prev) => ({ ...prev, location }));
+  };
+
+  const handleCreateLocationChange = (location) => {
+    handleLocationChange(location, setNewWork);
+  };
+
+  const handleEditLocationChange = (location) => {
+    handleLocationChange(location, setEditWork);
+  };
+
+  const handleAddressChange = (e, setter) => {
+    const { value } = e.target;
+    setter((prev) => ({
+      ...prev,
+      location: {
+        ...(prev.location || { lon: 100.5383, lat: 13.7649 }),
+        address: value
+      }
+    }));
+  };
+
+  const handleAddressSearch = (address, mapRef) => {
+    if (address && mapRef.current) {
+      mapRef.current.searchLocation(address);
+    }
+  };
 
   const handleOpenCreateModal = (e) => {
     if (e) e.preventDefault();
@@ -235,7 +324,6 @@ export default function WorkRecord() {
       title: "",
       manager: "",
       category: "",
-      location: "",
       room: "",
       date: "",
       budget: "",
@@ -243,6 +331,7 @@ export default function WorkRecord() {
       staff_cost: "",
       venue_cost: "",
       status: "กำลังจัดเตรียม",
+      location: { lon: 100.5383, lat: 13.7649, address: "" }, // Default location
     });
     setSelectedDate(null);
     setIsCreateModalOpen(true);
@@ -281,7 +370,7 @@ export default function WorkRecord() {
       title: newWork.title,
       manager: newWork.manager,
       category: newWork.category,
-      location: newWork.location,
+      location: newWork.location, // Send location object
       room: newWork.room,
 
       event_date: selectedDate
@@ -318,15 +407,12 @@ export default function WorkRecord() {
     const matchesSearch = (event.title || "")
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesLocation =
-      !filters.location || event.location === filters.location;
-    const matchesRoom = !filters.room || event.room === filters.room;
     const matchesCategory =
       !filters.category || event.category === filters.category;
-    return matchesSearch && matchesLocation && matchesRoom && matchesCategory;
+    return matchesSearch && matchesCategory;
   };
 
-  const filteredEvents = events.filter(filterEvent);
+  const filteredEvents = (events || []).filter(filterEvent);
   const totalWorks = filteredEvents.length;
 
   // Dropdown Helpers
@@ -347,26 +433,50 @@ export default function WorkRecord() {
   };
 
   const handleEditClick = (event) => {
-    setEditWork({
-      event_id: event.event_id,
-      title: event.title || "",
-      manager: event.manager || "",
-      category: event.category || "",
-      location: event.location || "",
-      room: event.room || "",
-      date: event.event_date || "",
-      budget: String(event.budget ?? ""),
-      participants: String(event.people_count ?? ""),
-      staff_cost: String(event.staff_cost ?? ""),
-      venue_cost: String(event.venue_cost ?? ""),
-      status: event.status || "กำลังจัดเตรียม",
-    });
-    if (event.event_date) {
-      setEditDate(new Date(event.event_date));
-    } else {
-      setEditDate(null);
+    try {
+      if (!event) return;
+      
+      const eventId = event.event_id || event.id;
+      
+      // Formatting numbers to string with commas if they are numbers
+      const formatValue = (val) => {
+        if (val === null || val === undefined) return "";
+        const strVal = String(val);
+        const rawValue = strVal.replace(/[^0-9.]/g, "");
+        if (!rawValue) return strVal;
+        const num = Number(rawValue);
+        return isNaN(num) ? strVal : num.toLocaleString("en-US");
+      };
+
+      const locationData = event.location || { lon: 100.5383, lat: 13.7649, address: "" };
+
+      setEditWork({
+        id: eventId,
+        title: event.title || "",
+        manager: event.manager || "",
+        category: event.category || "",
+        location: locationData,
+        room: event.room || "",
+        date: event.event_date || event.date || "",
+        budget: formatValue(event.budget),
+        participants: String(event.people_count || event.people || ""),
+        staff_cost: formatValue(event.staff_cost),
+        venue_cost: formatValue(event.venue_cost),
+        status: event.status || "กำลังจัดเตรียม",
+      });
+      
+      const dateToSet = event.event_date || event.date;
+      if (dateToSet) {
+        const d = new Date(dateToSet);
+        setEditDate(isNaN(d.getTime()) ? null : d);
+      } else {
+        setEditDate(null);
+      }
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error("Error in handleEditClick:", error);
+      alert("เกิดข้อผิดพลาดในการเปิดหน้าแก้ไข");
     }
-    setIsEditModalOpen(true);
   };
 
   const handleEditInputChange = (e) => {
@@ -381,10 +491,13 @@ export default function WorkRecord() {
       newValue = rawValue ? Number(rawValue).toLocaleString("en-US") : "";
     }
 
-    setEditWork((prev) => ({
-      ...prev,
-      [name]: newValue,
-    }));
+    setEditWork((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [name]: newValue,
+      };
+    });
   };
 
   const handleSaveEditWork = async () => {
@@ -397,7 +510,7 @@ export default function WorkRecord() {
       title: editWork.title,
       manager: editWork.manager,
       category: editWork.category,
-      location: editWork.location,
+      location: editWork.location, // Send location object
       room: editWork.room,
       event_date: editDate
         ? editDate.toISOString().split("T")[0]
@@ -413,14 +526,14 @@ export default function WorkRecord() {
 
     console.log("EDIT PAYLOAD (before updateEvent):", eventPayload);
 
-    await updateEvent(editWork.event_id, eventPayload);
+    await updateEvent(editWork.id, eventPayload);
     setIsEditModalOpen(false);
   };
 
   const handleDeleteClick = (event) => {
     setDeleteModal({
       isOpen: true,
-      eventId: event.event_id,
+      eventId: event.event_id || event.id,
     });
   };
 
@@ -431,71 +544,76 @@ export default function WorkRecord() {
     });
   };
 
-  const renderCard = (event) => (
-    <div
-      key={event.event_id}
-      className="work-card"
-      onClick={() => {
-        navigate(`/workrecord/detail/${event.event_id}`, {
-          state: { event },
-        });
-      }}
-      style={{ cursor: "pointer" }}
-    >
-      <div className="card-title">{event.title}</div>
-      <div className="card-desc">{event.category || ""}</div>
+  const renderCard = (event) => {
+    const eventId = event.event_id || event.id;
+    return (
+      <div
+        key={eventId}
+        className="work-card"
+        onClick={() => {
+          navigate(`/workrecord/detail/${eventId}`, {
+            state: { event },
+          });
+        }}
+        style={{ cursor: "pointer" }}
+      >
+        <div className="card-title">{event.title}</div>
+        <div className="card-desc">{event.category || ""}</div>
 
-      <div className="card-row">
-        <IconCalendar />
-        <span>{formatEventDate(event.event_date || event.date)}</span>
-      </div>
-
-      <div className="card-row">
-        <IconPin />
-        <span>{event.location || "-"}</span>
-      </div>
-
-      <div className="card-footer">
-        <div className="footer-left" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div className="stat-item">
-              <IconUser />
-              <span>{event.people || event.people_count || 0}</span>
-            </div>
-            <div className="stat-item">
-              <IconWallet />
-              <span>{Number(String(event.budget || 0).replace(/[^0-9.]/g, "")).toLocaleString()} บาท</span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: '#9ca3af' }}>
-            <div>จ้าง: {Number(String(event.staff_cost || 0).replace(/[^0-9.]/g, "")).toLocaleString()} ฿</div>
-            <div>สถานที่: {Number(String(event.venue_cost || 0).replace(/[^0-9.]/g, "")).toLocaleString()} ฿</div>
-          </div>
+        <div className="card-row">
+          <IconCalendar />
+          <span>{formatEventDate(event.event_date || event.date)}</span>
         </div>
 
-        <div className="action-btns">
-          <button
-            className="edit-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditClick(event);
-            }}
-          >
-            <IconEdit /> แก้ไข
-          </button>
-          <button
-            className="delete-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteClick(event);
-            }}
-          >
-            <IconTrash />
-          </button>
+        <div className="card-row">
+          <IconPin />
+          <LocationName location={event.location} />
+        </div>
+
+        <div className="card-footer">
+          <div className="footer-left" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div className="stat-item">
+                <IconUser />
+                <span>{event.people || event.people_count || 0}</span>
+              </div>
+              <div className="stat-item">
+                <IconWallet />
+                <span>{Number(String(event.budget || 0).replace(/[^0-9.]/g, "")).toLocaleString()} บาท</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: '#9ca3af' }}>
+              <div>จ้าง: {Number(String(event.staff_cost || 0).replace(/[^0-9.]/g, "")).toLocaleString()} ฿</div>
+              <div>สถานที่: {Number(String(event.venue_cost || 0).replace(/[^0-9.]/g, "")).toLocaleString()} ฿</div>
+            </div>
+          </div>
+
+          <div className="action-btns">
+            <button
+              type="button"
+              className="edit-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditClick(event);
+              }}
+            >
+              <IconEdit /> แก้ไข
+            </button>
+            <button
+              type="button"
+              className="delete-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteClick(event);
+              }}
+            >
+              <IconTrash />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="wr-layout">
@@ -573,49 +691,21 @@ export default function WorkRecord() {
           {/* Location Dropdown */}
           <div className="filter-dropdown-container">
             <button
-              className={`filter-btn btn-blue ${filters.location ? "active-filter" : ""}`}
+              className={`filter-btn btn-orange ${filters.location ? "active-filter" : ""}`}
               onClick={() => toggleDropdown("location")}
             >
               {filters.location || "สถานที่"}
             </button>
-            {activeDropdown === "location" && (
-              <div className="dropdown-menu">
-                {uniqueLocations.map((loc) => (
-                  <button
-                    key={loc}
-                    className={`dropdown-item ${filters.location === loc ? "active" : ""}`}
-                    onClick={() => handleFilterSelect("location", loc)}
-                  >
-                    {loc}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-
           {/* Room Dropdown */}
           <div className="filter-dropdown-container">
             <button
-              className={`filter-btn btn-purple ${filters.room ? "active-filter" : ""}`}
+              className={`filter-btn btn-orange ${filters.room ? "active-filter" : ""}`}
               onClick={() => toggleDropdown("room")}
             >
               {filters.room || "ห้อง"}
             </button>
-            {activeDropdown === "room" && (
-              <div className="dropdown-menu">
-                {uniqueRooms.map((room) => (
-                  <button
-                    key={room}
-                    className={`dropdown-item ${filters.room === room ? "active" : ""}`}
-                    onClick={() => handleFilterSelect("room", room)}
-                  >
-                    {room}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-
           {/* Category Dropdown */}
           <div className="filter-dropdown-container">
             <button
@@ -675,12 +765,17 @@ export default function WorkRecord() {
         </div>
       )}
 
-      {/* Create Work Modal */}
-      {isCreateModalOpen && (
-        <div className="modal-overlay" onClick={handleCloseCreateModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">สร้างงานใหม่</h2>
+      {/* Create Work Sidebar (Slide-out) */}
+      <div className={`edit-sidebar-overlay ${isCreateModalOpen ? 'open' : ''}`} onClick={handleCloseCreateModal}>
+        <div className="edit-sidebar" onClick={(e) => e.stopPropagation()}>
+          <header className="edit-sidebar-header">
+            <h2 className="edit-sidebar-title">สร้างงานใหม่</h2>
+            <button className="close-sidebar-btn" onClick={handleCloseCreateModal}>
+              <IconX />
+            </button>
+          </header>
 
+          <div className="edit-sidebar-content">
             <div className="modal-form">
               <div className="form-group">
                 <label>ชื่องาน</label>
@@ -720,14 +815,32 @@ export default function WorkRecord() {
 
               <div className="form-group">
                 <label>สถานที่จัดงาน</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={newWork.location}
-                  onChange={handleCreateInputChange}
-                  className="form-input"
-                  placeholder="สถานที่จัดงาน"
-                />
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {isCreateModalOpen && (
+                    <LocationMap 
+                      ref={createMapRef}
+                      onLocationChange={handleCreateLocationChange} 
+                      initialLocation={newWork.location}
+                    />
+                  )}
+                  <div className="address-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ position: 'absolute', left: '12px', color: '#6b7280' }}>📍</span>
+                    <input
+                      type="text"
+                      placeholder="พิมพ์ชื่อสถานที่แล้วกด Enter เพื่อค้นหา"
+                      value={newWork.location?.address || ""}
+                      onChange={(e) => handleAddressChange(e, setNewWork)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddressSearch(newWork.location.address, createMapRef);
+                        }
+                      }}
+                      className="form-input"
+                      style={{ paddingLeft: '36px', fontSize: '14px' }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="form-group">
@@ -851,32 +964,37 @@ export default function WorkRecord() {
                 </div>
               </div>
             </div>
-
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={handleCloseCreateModal}>
-                ยกเลิก
-              </button>
-              <button className="btn-save" onClick={handleSaveNewWork}>
-                สร้างงาน
-              </button>
-            </div>
           </div>
+
+          <footer className="edit-sidebar-footer">
+            <button className="btn-cancel" onClick={handleCloseCreateModal}>
+              ยกเลิก
+            </button>
+            <button className="btn-save" onClick={handleSaveNewWork}>
+              สร้างงาน
+            </button>
+          </footer>
         </div>
-      )}
+      </div>
 
-      {/* Edit Work Modal */}
-      {isEditModalOpen && editWork && (
-        <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">แก้ไขงาน</h2>
+      {/* Edit Work Sidebar (Slide-out) */}
+      <div className={`edit-sidebar-overlay ${isEditModalOpen ? 'open' : ''}`} onClick={() => setIsEditModalOpen(false)}>
+        <div className="edit-sidebar" onClick={(e) => e.stopPropagation()}>
+          <header className="edit-sidebar-header">
+            <h2 className="edit-sidebar-title">แก้ไขงาน</h2>
+            <button className="close-sidebar-btn" onClick={() => setIsEditModalOpen(false)}>
+              <IconX />
+            </button>
+          </header>
 
+          <div className="edit-sidebar-content">
             <div className="modal-form">
               <div className="form-group">
                 <label>ชื่องาน</label>
                 <input
                   type="text"
                   name="title"
-                  value={editWork.title}
+                  value={editWork?.title || ""}
                   onChange={handleEditInputChange}
                   className="form-input"
                 />
@@ -887,7 +1005,7 @@ export default function WorkRecord() {
                 <input
                   type="text"
                   name="manager"
-                  value={editWork.manager}
+                  value={editWork?.manager || ""}
                   onChange={handleEditInputChange}
                   className="form-input"
                 />
@@ -898,7 +1016,7 @@ export default function WorkRecord() {
                 <input
                   type="text"
                   name="category"
-                  value={editWork.category}
+                  value={editWork?.category || ""}
                   onChange={handleEditInputChange}
                   className="form-input"
                 />
@@ -906,13 +1024,32 @@ export default function WorkRecord() {
 
               <div className="form-group">
                 <label>สถานที่จัดงาน</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={editWork.location}
-                  onChange={handleEditInputChange}
-                  className="form-input"
-                />
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {isEditModalOpen && (
+                    <LocationMap 
+                      ref={editMapRef}
+                      initialLocation={editWork?.location}
+                      onLocationChange={handleEditLocationChange} 
+                    />
+                  )}
+                  <div className="address-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ position: 'absolute', left: '12px', color: '#6b7280' }}>📍</span>
+                    <input
+                      type="text"
+                      placeholder="พิมพ์ชื่อสถานที่แล้วกด Enter เพื่อค้นหา"
+                      value={editWork?.location?.address || ""}
+                      onChange={(e) => handleAddressChange(e, setEditWork)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddressSearch(editWork?.location?.address, editMapRef);
+                        }
+                      }}
+                      className="form-input"
+                      style={{ paddingLeft: '36px', fontSize: '14px' }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="form-group">
@@ -920,7 +1057,7 @@ export default function WorkRecord() {
                 <input
                   type="text"
                   name="room"
-                  value={editWork.room}
+                  value={editWork?.room || ""}
                   onChange={handleEditInputChange}
                   className="form-input"
                 />
@@ -962,7 +1099,7 @@ export default function WorkRecord() {
                   <input
                     type="text"
                     name="participants"
-                    value={editWork.participants}
+                    value={editWork?.participants || ""}
                     onChange={handleEditInputChange}
                     className="form-input"
                   />
@@ -975,7 +1112,7 @@ export default function WorkRecord() {
                   <input
                     type="text"
                     name="budget"
-                    value={editWork.budget}
+                    value={editWork?.budget || ""}
                     onChange={handleEditInputChange}
                     className="form-input"
                   />
@@ -990,7 +1127,7 @@ export default function WorkRecord() {
                     <input
                       type="text"
                       name="staff_cost"
-                      value={editWork.staff_cost}
+                      value={editWork?.staff_cost || ""}
                       onChange={handleEditInputChange}
                       className="form-input"
                     />
@@ -1003,7 +1140,7 @@ export default function WorkRecord() {
                     <input
                       type="text"
                       name="venue_cost"
-                      value={editWork.venue_cost}
+                      value={editWork?.venue_cost || ""}
                       onChange={handleEditInputChange}
                       className="form-input"
                     />
@@ -1017,7 +1154,7 @@ export default function WorkRecord() {
                 <div className="select-wrapper">
                   <select
                     name="status"
-                    value={editWork.status}
+                    value={editWork?.status || "กำลังจัดเตรียม"}
                     onChange={handleEditInputChange}
                     className="form-input form-select"
                   >
@@ -1031,18 +1168,18 @@ export default function WorkRecord() {
                 </div>
               </div>
             </div>
-
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>
-                ยกเลิก
-              </button>
-              <button className="btn-save" onClick={handleSaveEditWork}>
-                บันทึก
-              </button>
-            </div>
           </div>
+
+          <footer className="edit-sidebar-footer">
+            <button className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>
+              ยกเลิก
+            </button>
+            <button className="btn-save" onClick={handleSaveEditWork}>
+              บันทึก
+            </button>
+          </footer>
         </div>
-      )}
+      </div>
     </div>
   );
 }
