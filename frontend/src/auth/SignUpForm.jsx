@@ -18,7 +18,6 @@ const Register = () => {
     e.preventDefault();
     setError("");
 
-    // Validate
     if (password !== confirmPassword) {
       setError("รหัสผ่านไม่ตรงกัน!");
       return;
