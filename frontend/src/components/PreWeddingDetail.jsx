@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./PreWeddingDetail.css";
+import LocationMap from './LocationMap';
 
 // 1. ดึง URL หลักจาก Railway (ถ้ามี) หรือใช้ Localhost เป็นตัวสำรอง
 const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
@@ -8,6 +9,7 @@ const BASE_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api
 export default function PreWeddingDetail() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     let storedUser = localStorage.getItem("user");
@@ -34,7 +36,20 @@ export default function PreWeddingDetail() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [lineId, setLineId] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState({ lon: 100.5383, lat: 13.7649, address: "" });
+
+  const handleLocationChange = (loc) => {
+    setLocation(loc);
+  };
+
+  const handleAddressSearch = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (location.address && mapRef.current) {
+        mapRef.current.searchLocation(location.address);
+      }
+    }
+  };
 
   /* ================= VALIDATION ================= */
   const isFormComplete =
@@ -43,7 +58,7 @@ export default function PreWeddingDetail() {
     phone &&
     email &&
     lineId &&
-    location &&
+    location.address &&
     (selectedDateType !== "custom" || (startDate && endDate));
 
   /* ================= SUBMIT TO DATABASE ================= */
@@ -281,13 +296,25 @@ export default function PreWeddingDetail() {
 
             <div className="form-group">
               <label>สถานที่จัดงาน</label>
-              <input
-                type="text"
-                placeholder="ระบุสถานที่จัดงาน"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="location-input"
-              />
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <LocationMap 
+                  ref={mapRef}
+                  onLocationChange={handleLocationChange} 
+                  initialLocation={location}
+                />
+                <div className="address-input-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ position: 'absolute', left: '12px', color: '#6b7280' }}>📍</span>
+                  <input
+                    type="text"
+                    placeholder="พิมพ์ชื่อสถานที่แล้วกด Enter เพื่อค้นหา"
+                    value={location.address}
+                    onChange={(e) => setLocation({ ...location, address: e.target.value })}
+                    onKeyDown={handleAddressSearch}
+                    className="location-input"
+                    style={{ paddingLeft: '36px', width: '100%' }}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="row-2">
