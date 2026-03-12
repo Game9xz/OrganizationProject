@@ -93,7 +93,7 @@ export const createBooking = async (req, res) => {
     event_timeframe
   } = req.body;
 
-  if (!user_id || !package_id || !guest_count || !full_name || !contact_email) {
+  if (!user_id || !package_id || !full_name || !contact_email) {
     return res.status(400).json({
       message: "กรุณากรอกข้อมูลที่จำเป็นให้ครบ",
     });
