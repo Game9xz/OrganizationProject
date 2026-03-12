@@ -288,6 +288,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 5;
 }
 
 .edit-btn {
@@ -300,6 +302,14 @@
   border: none;
   cursor: pointer;
   font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  pointer-events: auto;
+}
+
+.edit-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .delete-btn {
@@ -309,6 +319,14 @@
   color: #ef4444;
   display: flex;
   align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  pointer-events: auto;
+}
+
+.delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 @media (max-width: 1024px) {
@@ -642,11 +660,141 @@
   /* Adjust based on unit text length */
 }
 
-/* React DatePicker customization */
-.react-datepicker-wrapper {
-  width: 100%;
+/* Edit Sidebar (Slide-out Drawer) */
+.edit-sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 3000;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
 }
 
-.react-datepicker-popper {
-  z-index: 3000;
+.edit-sidebar-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.edit-sidebar {
+  width: 100%;
+  max-width: 500px;
+  height: 100vh;
+  background-color: #262626;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+}
+
+.edit-sidebar-overlay.open .edit-sidebar {
+  transform: translateX(0);
+}
+
+.edit-sidebar-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #404040;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background-color: #262626;
+  z-index: 10;
+}
+
+.edit-sidebar-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.close-sidebar-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.close-sidebar-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.edit-sidebar-content {
+  padding: 32px;
+  flex: 1;
+}
+
+.edit-sidebar-footer {
+  padding: 24px 32px;
+  border-top: 1px solid #404040;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  position: sticky;
+  bottom: 0;
+  background-color: #262626;
+  z-index: 10;
+}
+
+/* Re-using form styles from modal but adapting for sidebar */
+.edit-sidebar .form-group {
+  margin-bottom: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.edit-sidebar .form-group label {
+  width: 100%;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.edit-sidebar .form-group-row {
+  gap: 16px;
+}
+
+.edit-sidebar .form-input {
+  background-color: #1a1a1a;
+  color: #fff;
+  border: 1px solid #404040;
+}
+
+.edit-sidebar .form-input:focus {
+  border-color: #4f46e5;
+  box-shadow: none;
+}
+
+/* Custom scrollbar for sidebar */
+.edit-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.edit-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.edit-sidebar::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 10px;
+}
+
+.edit-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #525252;
 }

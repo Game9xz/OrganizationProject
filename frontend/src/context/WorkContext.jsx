@@ -22,7 +22,7 @@ export const WorkProvider = ({ children }) => {
       title: "งานแต่ง คุณกาญจนา",
       desc: "งานแต่งสุดอบอุ่น ณ สวนสวรรค์ รีสอร์ท พร้อมบรรยากาศโรแมนติก โรงแรมตึก",
       date: "21 มกราคม 2568",
-      location: "คณะวิศวกรรมศาสตร์, ศรีราชา",
+      location: { lon: 100.9927, lat: 13.1131 }, // Kasetsart Si Racha
       room: "ห้องประชุมใหญ่",
       category: "งานแต่ง",
       people: "200 คน",
@@ -38,7 +38,7 @@ export const WorkProvider = ({ children }) => {
       title: "งานแต่ง คุณเอ & คุณบี",
       desc: "งานแต่งสุดอบอุ่น ณ สวนสวรรค์ รีสอร์ท พร้อมบรรยากาศโรแมนติก โรงแรมตึก",
       date: "14 กุมภาพันธ์ 2568",
-      location: "สวนสวรรค์ รีสอร์ท, เชียงใหม่",
+      location: { lon: 98.9633, lat: 18.8039 }, // Suan Sawan Resort, Chiang Mai
       room: "สวนกลางแจ้ง",
       category: "งานแต่ง",
       people: "200 คน",
@@ -53,7 +53,7 @@ export const WorkProvider = ({ children }) => {
       title: "งานแต่ง คุณเจ้านาย",
       desc: "งานแต่งสุดอบอุ่น ณ ชายหาด รีสอร์ท พร้อมบรรยากาศ โรงแรมตึกแสนหวาน",
       date: "30 มกราคม 2568",
-      location: "ชายหาดลับพัทยา, ชลบุรี",
+      location: { lon: 100.8807, lat: 12.9278 }, // Pattaya Beach
       room: "ริมทะเล",
       category: "งานแต่ง",
       people: "150 คน",
@@ -68,7 +68,7 @@ export const WorkProvider = ({ children }) => {
       title: "งานแต่ง คุณเจได",
       desc: "งานแต่งสุดอบอุ่น ณ สวนผึ้ง รีสอร์ท พร้อมบรรยากาศ โรงแรมตึก",
       date: "28 กุมภาพันธ์ 2568",
-      location: "สวนผึ้ง, ราชบุรี",
+      location: { lon: 99.3335, lat: 13.5325 }, // Suan Phueng, Ratchaburi
       room: "ลานกิจกรรม",
       category: "งานแต่ง",
       people: "200 คน",
@@ -86,7 +86,7 @@ export const WorkProvider = ({ children }) => {
       title: "งานวันเกิดสุดพิเศษ",
       desc: "ปาร์ตี้วันเกิดริมสระน้ำ พร้อมการแสดงสด",
       date: "5 มกราคม 2568",
-      location: "บ้านพักริมทะเล, พัทยา",
+      location: { lon: 100.8619, lat: 12.9118 }, // Pattaya Pool Villa
       room: "Pool Side",
       category: "ปาร์ตี้",
       people: "80 คน",
@@ -101,7 +101,7 @@ export const WorkProvider = ({ children }) => {
       title: "สัมมนาผู้นำองค์กร 2024",
       desc: "งานสัมมนาประจำปีสำหรับผู้บริหารระดับสูง พร้อม Workshop",
       date: "20 มกราคม 2568",
-      location: "โรงแรมแกรนด์ไฮแอท, กรุงเทพฯ",
+      location: { lon: 100.5601, lat: 13.7305 }, // Grand Hyatt Erawan Bangkok
       room: "Grand Ballroom",
       category: "สัมมนา",
       people: "150 คน",

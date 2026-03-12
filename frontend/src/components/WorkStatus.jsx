@@ -6,6 +6,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+import { useLongdoMap } from "../hooks/useLongdoMap";
+import LocationMap from "./LocationMap";
 
 // Icons
 const IconLogout = () => (
@@ -74,7 +76,52 @@ const IconCalendar = () => (
   </svg>
 );
 
-// Helper: format date for display
+const LocationName = ({ location }) => {
+  const [name, setName] = useState(location?.address || "กำลังโหลดตำแหน่ง...");
+  const isMapReady = useLongdoMap('391bb8f4015c8ab179b4714d3f2942bb');
+
+  useEffect(() => {
+    if (typeof location === 'string') {
+      setName(location);
+      return;
+    }
+
+    if (location?.address) {
+      setName(location.address);
+      return;
+    }
+
+    if (!isMapReady || !location) {
+      setName("-");
+      return;
+    }
+
+    if (window.longdo && window.longdo.Geocoder) {
+      if (typeof location === 'object' && location.lon && location.lat) {
+        try {
+          const longdo = window.longdo;
+          new longdo.Geocoder().location({ lon: location.lon, lat: location.lat }, (result) => {
+            if (result) {
+              const subdistrict = result.subdistrict ? `${result.subdistrict}, ` : "";
+              const district = result.district ? `${result.district}, ` : "";
+              const province = result.province ? result.province : "";
+              const road = result.road ? `${result.road}, ` : "";
+              setName(`${road}${subdistrict}${district}${province}`.replace(/, $/, ''));
+            }
+          });
+        } catch (e) {
+          setName("พิกัดแผนที่");
+        }
+      } else {
+        setName("-");
+      }
+    } else {
+      setName("กำลังโหลดตำแหน่ง...");
+    }
+  }, [location, isMapReady]);
+
+  return <span>{name}</span>;
+};
 const formatEventDate = (dateStr) => {
   if (!dateStr) return "-";
   try {
@@ -90,8 +137,15 @@ const formatEventDate = (dateStr) => {
 
 export default function WorkStatus() {
   const navigate = useNavigate();
+  const mapRef = React.useRef(null);
   const { events, updateEventStatus, addEvent } = useWorkContext();
   const [activeTab, setActiveTab] = useState("all");
+
+  // Filters State
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [roomFilter, setRoomFilter] = useState("all");
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [isRoomOpen, setIsRoomOpen] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,7 +153,7 @@ export default function WorkStatus() {
   const [newWork, setNewWork] = useState({
     title: "",
     category: "",
-    location: "",
+    location: { lon: 100.5383, lat: 13.7649, address: "" },
     room: "",
     date: "",
     budget: "",
@@ -126,11 +180,63 @@ export default function WorkStatus() {
     navigate("/login");
   };
 
+  const handleLocationChange = (location) => {
+    setNewWork((prev) => ({ ...prev, location }));
+  };
+
+  const handleAddressChange = (e) => {
+    const { value } = e.target;
+    setNewWork((prev) => ({
+      ...prev,
+      location: {
+        ...(prev.location || { lon: 100.5383, lat: 13.7649 }),
+        address: value,
+      },
+    }));
+  };
+
+  const handleAddressSearch = () => {
+    if (newWork.location?.address && mapRef.current) {
+      mapRef.current.searchLocation(newWork.location.address);
+    }
+  };
+
   const allEvents = useMemo(() => {
-    return [...events].sort((a, b) => {
-      return new Date(a.event_date) - new Date(b.event_date);
-    });
+    try {
+      const combined = [...(events || [])];
+      return combined.sort((a, b) => {
+        const dateA = new Date(a.event_date || a.date || 0);
+        const dateB = new Date(b.event_date || b.date || 0);
+        return dateA - dateB;
+      });
+    } catch (e) {
+      console.error("Error sorting events:", e);
+      return events || [];
+    }
   }, [events]);
+
+  const uniqueLocations = useMemo(() => {
+    try {
+      const locations = allEvents
+        .map(e => {
+          if (typeof e.location === 'string') return e.location;
+          return e.location?.address || "";
+        })
+        .filter(Boolean);
+      return ["all", ...new Set(locations)];
+    } catch (e) {
+      return ["all"];
+    }
+  }, [allEvents]);
+
+  const uniqueRooms = useMemo(() => {
+    try {
+      const rooms = allEvents.map(e => e.room).filter(Boolean);
+      return ["all", ...new Set(rooms)];
+    } catch (e) {
+      return ["all"];
+    }
+  }, [allEvents]);
 
   // Stats Calculation
   const totalWorks = allEvents.length;
@@ -139,12 +245,16 @@ export default function WorkStatus() {
   ).length;
 
   const overlappingCount = useMemo(() => {
-    const dateMap = {};
-    allEvents.forEach((e) => {
-      const dateKey = e.event_date ? new Date(e.event_date).toDateString() : "";
-      if (dateKey) dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
-    });
-    return Object.values(dateMap).filter((count) => count > 1).length;
+    try {
+      const dateMap = {};
+      allEvents.forEach((e) => {
+        const dateKey = (e.event_date || e.date) ? new Date(e.event_date || e.date).toDateString() : "";
+        if (dateKey) dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
+      });
+      return Object.values(dateMap).filter((count) => count > 1).length;
+    } catch (e) {
+      return 0;
+    }
   }, [allEvents]);
 
   const statusCounts = {
@@ -152,12 +262,21 @@ export default function WorkStatus() {
     "กำลังจัดเตรียม": allEvents.filter((e) => e.status === "กำลังจัดเตรียม").length,
     "กำลังดำเนินการ": allEvents.filter((e) => e.status === "กำลังดำเนินการ").length,
     "เสร็จสิ้น": allEvents.filter((e) => e.status === "เสร็จสิ้น").length,
+    "ยังไม่ได้กำหนด": allEvents.filter((e) => e.status === "ยังไม่ได้กำหนด").length,
   };
 
-  const filteredEvents =
-    activeTab === "all"
-      ? allEvents
-      : allEvents.filter((e) => e.status === activeTab);
+  const filteredEvents = useMemo(() => {
+    return allEvents.filter((e) => {
+      const matchStatus = activeTab === "all" || e.status === activeTab;
+      
+      const eventLocation = e.location?.address || (typeof e.location === 'string' ? e.location : "");
+      const matchLocation = locationFilter === "all" || eventLocation === locationFilter;
+      
+      const matchRoom = roomFilter === "all" || e.room === roomFilter;
+      
+      return matchStatus && matchLocation && matchRoom;
+    });
+  }, [allEvents, activeTab, locationFilter, roomFilter]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -180,7 +299,7 @@ export default function WorkStatus() {
     setNewWork({
       title: "",
       category: "",
-      location: "",
+      location: { lon: 100.5383, lat: 13.7649, address: "" },
       room: "",
       date: "",
       budget: "",
@@ -341,6 +460,12 @@ export default function WorkStatus() {
           >
             เสร็จสิ้น ({statusCounts["เสร็จสิ้น"]})
           </button>
+          <button
+            className={`tab-btn ${activeTab === "ยังไม่ได้กำหนด" ? "active" : ""}`}
+            onClick={() => setActiveTab("ยังไม่ได้กำหนด")}
+          >
+            ยังไม่ได้กำหนด ({statusCounts["ยังไม่ได้กำหนด"]})
+          </button>
         </section>
 
         {/* Works Table */}
@@ -350,27 +475,95 @@ export default function WorkStatus() {
               <tr>
                 <th>ชื่องาน</th>
                 <th>วันที่</th>
-                <th>สถานที่</th>
+                <th>
+                  <div className="filter-dropdown-container">
+                    <span>สถานที่</span>
+                    <div style={{ position: "relative" }}>
+                      <button 
+                        className="filter-select-btn"
+                        onClick={() => {
+                          setIsLocationOpen(!isLocationOpen);
+                          setIsRoomOpen(false);
+                        }}
+                      >
+                        สถานที่ <IconChevronDown />
+                      </button>
+                      {isLocationOpen && (
+                        <div className="filter-menu">
+                          {uniqueLocations.map((loc) => (
+                            <div
+                              key={loc}
+                              className={`filter-item ${locationFilter === loc ? "active" : ""}`}
+                              onClick={() => {
+                                setLocationFilter(loc);
+                                setIsLocationOpen(false);
+                              }}
+                            >
+                              {loc === "all" ? "ทั้งหมด" : loc}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </th>
+                <th>
+                  <div className="filter-dropdown-container">
+                    <span>ห้อง</span>
+                    <div style={{ position: "relative" }}>
+                      <button 
+                        className="filter-select-btn"
+                        onClick={() => {
+                          setIsRoomOpen(!isRoomOpen);
+                          setIsLocationOpen(false);
+                        }}
+                      >
+                        ห้อง <IconChevronDown />
+                      </button>
+                      {isRoomOpen && (
+                        <div className="filter-menu">
+                          {uniqueRooms.map((room) => (
+                            <div
+                              key={room}
+                              className={`filter-item ${roomFilter === room ? "active" : ""}`}
+                              onClick={() => {
+                                setRoomFilter(room);
+                                setIsRoomOpen(false);
+                              }}
+                            >
+                              {room === "all" ? "ทั้งหมด" : room}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </th>
                 <th>สถานะ</th>
                 <th>รายละเอียด</th>
               </tr>
             </thead>
             <tbody>
               {filteredEvents.map((event) => (
-                <tr key={event.event_id}>
+                <tr key={event.id}>
                   <td className="col-title">
                     <div className="event-title">{event.title}</div>
                     <div className="event-category">{event.category}</div>
                   </td>
-                  <td className="col-date">{formatEventDate(event.event_date)}</td>
-                  <td className="col-location">{event.location || "-"}</td>
+                  <td className="col-date">{formatEventDate(event.event_date || event.date)}</td>
+                  <td className="col-location">
+                    <LocationName location={event.location} />
+                  </td>
+                  <td className="col-room">
+                    {event.room || "-"}
+                  </td>
                   <td className="col-status">
                     <div className="status-dropdown-wrapper">
                       <select
                         className={`status-select ${getStatusColor(event.status)}`}
                         value={event.status}
                         onChange={(e) =>
-                          updateEventStatus(event.event_id, e.target.value)
+                          updateEventStatus(event.id, e.target.value)
                         }
                       >
                         <option value="ยังไม่ได้กำหนด">ยังไม่ได้กำหนด</option>
@@ -387,7 +580,7 @@ export default function WorkStatus() {
                     <button
                       className="detail-btn"
                       onClick={() => {
-                        navigate(`/workrecord/detail/${event.event_id}`);
+                        navigate(`/workrecord/detail/${event.id}`);
                       }}
                     >
                       รายละเอียด
@@ -433,14 +626,30 @@ export default function WorkStatus() {
 
               <div className="form-group">
                 <label>สถานที่จัดงาน</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={newWork.location}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  placeholder="สถานที่จัดงาน"
-                />
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <LocationMap
+                    ref={mapRef}
+                    onLocationChange={handleLocationChange}
+                    initialLocation={newWork.location}
+                  />
+                  <div className="address-input-wrapper" style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <span style={{ position: "absolute", left: "12px", color: "#6b7280" }}>📍</span>
+                    <input
+                      type="text"
+                      placeholder="พิมพ์ชื่อสถานที่แล้วกด Enter เพื่อค้นหา"
+                      value={newWork.location?.address || ""}
+                      onChange={handleAddressChange}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddressSearch();
+                        }
+                      }}
+                      className="form-input"
+                      style={{ paddingLeft: "36px", fontSize: "14px" }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="form-group">
