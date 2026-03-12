@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./InventoryStatus.css";
 
-// 🌟 ปรับตรงนี้: ลบ process.env ออก เพื่อไม่ให้ Vite บัคหน้าจอขาว
+// 🌟 URL สำหรับเชื่อมต่อ Backend
 const BASE_URL = import.meta.env?.VITE_API_URL || "http://localhost:8080";
 const API_URL = `${BASE_URL}/api/borrows`;
 
@@ -25,16 +25,25 @@ export default function InventoryStatus() {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      console.log("Current User Data:", parsedUser); // 👈 เพิ่มบรรทัดนี้เพื่อเช็คใน Console
+      console.log("Current User Data:", parsedUser);
       setUser(parsedUser);
     }
     fetchInventory();
   }, []);
 
-  // ฟังก์ชันดึงข้อมูล (GET)
+  // 🌟 2. ฟังก์ชันดึงข้อมูล (GET) - ปรับแก้ให้ส่ง user_id ไปด้วยเสมอ
   const fetchInventory = async () => {
     try {
-      const response = await fetch(API_URL);
+      // ดึง user จาก localStorage ตรงนี้เลย เพื่อความชัวร์ไม่ว่าฟังก์ชันไหนจะเรียกใช้
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userId = storedUser?.user_id || storedUser?.id;
+
+      // ถ้าไม่มี user (ยังไม่ล็อกอิน) ให้หยุดการดึงข้อมูลเพื่อป้องกัน Error
+      if (!userId) return;
+
+      // 🌟 แนบ user_id ไปเป็น Query String
+      const response = await fetch(`${API_URL}?user_id=${userId}`);
+      
       if (response.ok) {
         const data = await response.json();
         setInventory(data);
@@ -57,7 +66,7 @@ export default function InventoryStatus() {
     });
   };
 
-  // 2. ฟังก์ชันเพิ่มข้อมูล (POST)
+  // 3. ฟังก์ชันเพิ่มข้อมูล (POST)
   const handleAdd = async () => {
     if (!user) {
       alert("กรุณาเข้าสู่ระบบก่อนทำรายการ");
@@ -84,7 +93,7 @@ export default function InventoryStatus() {
       });
 
       if (response.ok) {
-        fetchInventory(); 
+        fetchInventory(); // เรียกข้อมูลใหม่ (มันจะดึง user_id ไปให้อัตโนมัติแล้ว)
         setShowModal(false); 
         setFormData({ job: "", borrowDate: "", returnDate: "", manager: "", phone: "" }); 
       } else {
@@ -95,7 +104,7 @@ export default function InventoryStatus() {
     }
   };
 
-  // 3. ฟังก์ชันกดคืนอุปกรณ์ (PUT)
+  // 4. ฟังก์ชันกดคืนอุปกรณ์ (PUT)
   const handleReturn = async (id) => {
     if (window.confirm("ยืนยันการคืนอุปกรณ์ใช่หรือไม่?")) {
       try {
@@ -116,7 +125,7 @@ export default function InventoryStatus() {
     }
   };
 
-  // 4. ฟังก์ชันลบรายการ (DELETE)
+  // 5. ฟังก์ชันลบรายการ (DELETE)
   const handleRemove = async (id) => {
     if (window.confirm("คุณต้องการลบรายการนี้ใช่หรือไม่?")) {
       try {
@@ -250,13 +259,12 @@ export default function InventoryStatus() {
           </tbody>
         </table>
 
-        {/* 🌟 เช็คสิทธิ์: ให้โชว์ปุ่มเฉพาะ user ที่มี role เป็น admin เท่านั้น */}
         {/* 🌟 เช็คสิทธิ์: ให้โชว์ปุ่มสำหรับ user ชื่อ Lazy หรือ peeranat */}
-{(user?.username === "Lazy" || user?.username === "peeranat") && (
-  <button className="add-btn" onClick={() => setShowModal(true)}>
-    + เพิ่ม
-  </button>
-)}
+        {(user?.username === "Lazy" || user?.username === "peeranat") && (
+          <button className="add-btn" onClick={() => setShowModal(true)}>
+            + เพิ่ม
+          </button>
+        )}
       </main>
 
       {showModal && (
