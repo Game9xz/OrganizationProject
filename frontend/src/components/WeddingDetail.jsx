@@ -33,11 +33,12 @@ export default function WeddingDetail() {
   const [lineId, setLineId] = useState("");
   const [location, setLocation] = useState({ lon: 100.5383, lat: 13.7649, address: "" });
 
+  // 🔥 ปรับให้ตรงกับรายละเอียดแพ็กเกจ (200 - 350 ท่าน)
   const isGuestValid =
     guestCount !== "" &&
     !isNaN(Number(guestCount)) &&
-    Number(guestCount) >= 250 &&
-    Number(guestCount) <= 450;
+    Number(guestCount) >= 200 &&
+    Number(guestCount) <= 350;
 
   const isDateValid =
     selectedDateType === "custom"
@@ -83,8 +84,9 @@ export default function WeddingDetail() {
         event_timeframe = "ภายใน 1 ปี";
       }
 
+      // 🔥 อัปเดต Payload ให้ถูกต้อง
       const payload = {
-        user_id: 1,
+        user_id: user?.user_id || 1, // ดึง ID จาก User ที่ล็อกอิน
         package_id: 6,
         guest_count: Number(guestCount),
         duration: "ทั้งวัน",
@@ -93,7 +95,7 @@ export default function WeddingDetail() {
         contact_email: email,
         phone: phone,
         line_id: lineId,
-        location: location,
+        location: location.address, // ส่งเฉพาะ String ชื่อสถานที่
         start_date: startDate || null,
         end_date: endDate || null,
         event_date: event_date,
@@ -110,7 +112,7 @@ export default function WeddingDetail() {
         setShowSuccess(true);
       } else {
         const data = await response.json();
-        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+        alert(`เกิดข้อผิดพลาด: ${data.error || data.message || "ไม่สามารถลงทะเบียนได้"}`);
       }
     } catch (error) {
       console.error("Submit Error:", error);
@@ -315,6 +317,18 @@ export default function WeddingDetail() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* 🔥 เพิ่มช่องกรอกจำนวนแขกตรงนี้ */}
+            <div className="wed-form-group" style={{ marginBottom: '10px' }}>
+              <label>จำนวนแขก (200 - 350 ท่าน)</label>
+              <input 
+                type="number" 
+                placeholder="ระบุจำนวนแขก" 
+                value={guestCount} 
+                onChange={(e) => setGuestCount(e.target.value)}
+                style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", marginTop: "5px", boxSizing: "border-box" }}
+              />
             </div>
 
             <div className="wed-row-2">

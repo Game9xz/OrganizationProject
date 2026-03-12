@@ -67,60 +67,63 @@ export default function FuneralPackageDetail() {
     }
   };
 
-  /* ================= SUBMIT TO DATABASE ================= */
-  const handleSubmit = async () => {
-    try {
-      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
-      let event_timeframe = null;
-      let event_date = null;
 
-      if (selectedDateType === "custom") {
-        event_date = `${startDate} - ${endDate}`;
-      } else if (selectedDateType === "3m") {
-        event_timeframe = "ภายใน 3 เดือน";
-      } else if (selectedDateType === "6m") {
-        event_timeframe = "ภายใน 6 เดือน";
-      } else if (selectedDateType === "1y") {
-        event_timeframe = "ภายใน 1 ปี";
-      }
+ /* ================= SUBMIT TO DATABASE ================= */
+ const handleSubmit = async () => {
+  try {
+    // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+    let event_timeframe = null;
+    let event_date = null;
 
-      // 2. สร้าง Payload
-      const payload = {
-        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
-        package_id: 3, // 🔥 สมมติแพ็กเกจนี้ id = 3 (งานศพ)
-        duration: "ตามแพ็กเกจ",
-        budget: packagePrice,
-        full_name: name,
-        contact_email: email,
-        phone: phone,
-        line_id: lineId,
-        location: location,
-        start_date: startDate || null,
-        end_date: endDate || null,
-        event_date: event_date,
-        event_timeframe: event_timeframe
-      };
-
-      // 3. ยิง API บันทึกลงฐานข้อมูล
-      const response = await fetch(`${BASE_API}/bookings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        setShowSuccess(true);
-      } else {
-        const data = await response.json();
-        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
-      }
-    } catch (error) {
-      console.error("Submit Error:", error);
-      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    if (selectedDateType === "custom") {
+      event_date = `${startDate} - ${endDate}`;
+    } else if (selectedDateType === "3m") {
+      event_timeframe = "ภายใน 3 เดือน";
+    } else if (selectedDateType === "6m") {
+      event_timeframe = "ภายใน 6 เดือน";
+    } else if (selectedDateType === "1y") {
+      event_timeframe = "ภายใน 1 ปี";
     }
-  };
+
+    // 2. สร้าง Payload
+    const payload = {
+      user_id: user?.user_id || 4, // ✅ ดึง ID ของ user ที่ล็อกอิน (ใส่ 4 สำรองไว้ตามที่คุณมีใน Local Storage)
+      package_id: 3,               // สมมติแพ็กเกจนี้ id = 3
+      guest_count: 50,             // ✅ เติม guest_count เข้าไปให้ Backend อนุญาตให้ผ่าน
+      duration: "ตามแพ็กเกจ",
+      budget: packagePrice,
+      full_name: name,
+      contact_email: email,
+      phone: phone,
+      line_id: lineId,
+      location: location.address,  // ✅ สำคัญมาก! ต้องส่งแค่ชื่อสถานที่ (String) ไม่ใช่ Object ทั้งก้อน
+      start_date: startDate || null,
+      end_date: endDate || null,
+      event_date: event_date,
+      event_timeframe: event_timeframe
+    };
+
+    // 3. ยิง API บันทึกลงฐานข้อมูล
+    const response = await fetch(`${BASE_API}/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      setShowSuccess(true);
+    } else {
+      const data = await response.json();
+      // ✅ ปรับให้แสดง Error จากฝั่ง Backend ตรงๆ จะได้รู้ว่าติดที่อะไร
+      alert(`เกิดข้อผิดพลาด: ${data.error || data.message || "ไม่สามารถลงทะเบียนได้"}`);
+    }
+  } catch (error) {
+    console.error("Submit Error:", error);
+    alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+  }
+};
 
   return (
     <div className="funeralpkg-container">

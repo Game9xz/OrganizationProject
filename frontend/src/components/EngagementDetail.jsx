@@ -82,17 +82,18 @@ export default function EngagementDetail() {
         event_timeframe = "ภายใน 1 ปี";
       }
 
+      // ✅ ปรับ Payload ให้ตรงกับข้อกำหนด Database
       const payload = {
-        user_id: 1,
+        user_id: user?.user_id || 1, // ดึง ID จาก User ที่ล็อกอิน (สำรองเป็น 1)
         package_id: 2,
-        guest_count: null,
+        guest_count: 50, // ใส่จำนวนแขกเริ่มต้น (แพ็กเกจนี้ 30-60 ท่าน)
         duration: "ประมาณ 4 ชั่วโมง",
         budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
         line_id: lineId,
-        location: location,
+        location: location.address, // ส่งเฉพาะ String ชื่อสถานที่
         start_date: startDate || null,
         end_date: endDate || null,
         event_date: event_date,
@@ -111,7 +112,7 @@ export default function EngagementDetail() {
         setShowSuccess(true);
       } else {
         const data = await response.json();
-        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+        alert(`เกิดข้อผิดพลาด: ${data.error || data.message || "ไม่สามารถลงทะเบียนได้"}`);
       }
     } catch (error) {
       console.error("Submit Error:", error);
@@ -272,12 +273,14 @@ export default function EngagementDetail() {
                     <input
                       type="date"
                       value={startDate}
+                      min={new Date().toISOString().split("T")[0]} // กันเลือกวันย้อนหลัง
                       onChange={(e) => setStartDate(e.target.value)}
                     />
                     <span>ถึง</span>
                     <input
                       type="date"
                       value={endDate}
+                      min={startDate}
                       onChange={(e) => {
                         setEndDate(e.target.value);
                         if (startDate && e.target.value) {

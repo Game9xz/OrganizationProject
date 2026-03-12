@@ -78,17 +78,18 @@ export default function PreWeddingDetail() {
         event_timeframe = "ภายใน 1 ปี";
       }
 
-      // 2. สร้าง Payload
+      // 2. สร้าง Payload ให้ตรงกับข้อกำหนด Database
       const payload = {
-        user_id: 1,
+        user_id: user?.user_id || 1, // ดึง ID จาก User ที่ล็อกอิน (สำรองเป็น 1)
         package_id: 5,
+        guest_count: 10, // ใส่จำนวนแขกเริ่มต้น (แพ็กเกจนี้ 5-10 ท่าน)
         duration: "08.00-18.00 น.",
         budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
         line_id: lineId,
-        location: location,
+        location: location.address, // ส่งเฉพาะ String ชื่อสถานที่
         start_date: startDate || null,
         end_date: endDate || null,
         event_date: event_date,
@@ -108,7 +109,7 @@ export default function PreWeddingDetail() {
         setShowSuccess(true);
       } else {
         const data = await response.json();
-        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+        alert(`เกิดข้อผิดพลาด: ${data.error || data.message || "ไม่สามารถลงทะเบียนได้"}`);
       }
     } catch (error) {
       console.error("Submit Error:", error);
