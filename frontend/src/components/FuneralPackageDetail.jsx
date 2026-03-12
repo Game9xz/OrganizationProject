@@ -18,6 +18,7 @@ export default function FuneralPackageDetail() {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
   // 🔥 กำหนดราคาแพ็กเกจงานศพที่นี่
   const packagePrice = 59999;
 
@@ -30,9 +31,6 @@ export default function FuneralPackageDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // จำนวนแขก
-  const [guestCount, setGuestCount] = useState("");
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -41,12 +39,6 @@ export default function FuneralPackageDetail() {
 
   /* ================= VALIDATION ================= */
 
-  const isGuestValid =
-    guestCount !== "" &&
-    !isNaN(Number(guestCount)) &&
-    Number(guestCount) >= 200 &&
-    Number(guestCount) <= 350;
-
   const isDateValid =
     selectedDateType === "custom"
       ? startDate && endDate
@@ -54,7 +46,6 @@ export default function FuneralPackageDetail() {
 
   const isFormComplete =
     isDateValid &&
-    isGuestValid &&
     name.trim() !== "" &&
     phone.trim() !== "" &&
     email.trim() !== "" &&
@@ -82,9 +73,8 @@ export default function FuneralPackageDetail() {
       const payload = {
         user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
         package_id: 3, // 🔥 สมมติแพ็กเกจนี้ id = 3 (งานศพ)
-        guest_count: guestCount,
         duration: "ตามแพ็กเกจ",
-        budget: packagePrice, // ส่งราคา 59999 เข้าไป
+        budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
@@ -96,7 +86,7 @@ export default function FuneralPackageDetail() {
         event_timeframe: event_timeframe
       };
 
-      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
+      // 3. ยิง API บันทึกลงฐานข้อมูล
       const response = await fetch(`${BASE_API}/bookings`, {
         method: "POST",
         headers: {
@@ -106,7 +96,6 @@ export default function FuneralPackageDetail() {
       });
 
       if (response.ok) {
-        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
         setShowSuccess(true);
       } else {
         const data = await response.json();
@@ -177,7 +166,6 @@ export default function FuneralPackageDetail() {
             <div className="funeralpkg-text">
               <h2>Funeral Ceremony</h2>
 
-              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
                 แพ็กเกจจัดงานศพครบวงจร ราคาเริ่มต้น {packagePrice.toLocaleString()} บาท
               </p>
@@ -190,18 +178,14 @@ export default function FuneralPackageDetail() {
 
               <ul>
                 <li>หีบฐาน 3 ชั้น</li>
-                <li>ดอกไม้หน้าศพแบบโค้ง 3 ชั้น</li>
-                <li>อุปกรณ์เชิญวิญญาณ</li>
+                <li>ดอกไม้หน้าศพแบบโค้ง 3 ชั้น (พิเศษ)</li>
+                <li>อุปกรณ์เชิญวิญญาณ 5 ชิ้น</li>
                 <li>ชุดดอกไม้รดน้ำศพ</li>
+                <li>ธูปยาวและน้ำมันก๊าด (สำหรับจัดงาน7คืน)</li>
+                <li>ดอกไม้จันทร์100ดอก + ช่อประธาน2ช่อ</li>
+                <li>ผ้าแพรคลุมศพ</li>
+                <li>ดอกไม้ถวายพระ (คืนแรก)</li>
                 <li>ดอกไม้จันทร์</li>
-              </ul>
-
-              <p className="limit-title">
-                ข้อจำกัดในแพ็กเกจนี้!
-              </p>
-
-              <ul>
-                <li>จำนวนแขกขั้นต่ำ 200 ไม่เกิน 350 คน</li>
               </ul>
 
               <button
@@ -215,34 +199,27 @@ export default function FuneralPackageDetail() {
         </div>
       </main>
 
-      {/* ================= MODAL ================= */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-box large">
             <h2>ลงทะเบียน</h2>
 
-            {/* วันที่ */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
                   }}
                 >
-                  📅{" "}
-                  {startDate && endDate
-                    ? `${startDate} - ${endDate}`
-                    : "ระบุวันที่"}
+                  📅 {startDate && endDate ? `${startDate} - ${endDate}` : "ระบุวันที่"}
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -252,8 +229,7 @@ export default function FuneralPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -263,8 +239,7 @@ export default function FuneralPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
@@ -299,24 +274,6 @@ export default function FuneralPackageDetail() {
               )}
             </div>
 
-            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
-            <div className="form-group">
-              <label>จำนวนแขก (200 - 350 คน)</label>
-              <input
-                type="number"
-                placeholder="ระบุจำนวนแขก"
-                value={guestCount}
-                onChange={(e) => setGuestCount(e.target.value)}
-              />
-
-              {guestCount !== "" && !isGuestValid && (
-                <p style={{ color: "red", fontSize: "13px" }}>
-                  จำนวนแขกต้องอยู่ระหว่าง 200 - 350 คน
-                </p>
-              )}
-            </div>
-
-            {/* สถานที่ */}
             <div className="form-group">
               <label>สถานที่จัดงาน</label>
               <input
@@ -327,7 +284,6 @@ export default function FuneralPackageDetail() {
               />
             </div>
 
-            {/* ข้อมูลติดต่อ */}
             <div className="row-2">
               <input
                 type="text"
@@ -358,7 +314,6 @@ export default function FuneralPackageDetail() {
               />
             </div>
 
-            {/* 🔥 เรียกใช้ handleSubmit แทน */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
@@ -377,7 +332,6 @@ export default function FuneralPackageDetail() {
         </div>
       )}
 
-      {/* SUCCESS */}
       {showSuccess && (
         <div className="modal-overlay">
           <div className="modal-box success-box">

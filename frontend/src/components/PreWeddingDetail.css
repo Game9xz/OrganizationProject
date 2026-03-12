@@ -352,12 +352,6 @@
   color: black;
 }
 
-/* ทำหัวข้อข้อจำกัดเป็นสีแดง */
-.limit-title {
-  color: red;
-  font-weight: bold;
-}
-
 /* ขยายขนาดราคา */
 .price {
   font-size: 30px;

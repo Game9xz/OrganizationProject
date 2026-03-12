@@ -14,7 +14,7 @@
    SIDEBAR
 ========================= */
 
-.sidebar {
+.eng-sidebar {
   width: 220px;
   background: #1a1a1a;
   padding: 20px;
@@ -23,23 +23,23 @@
   justify-content: space-between;
 }
 
-.menu {
+.eng-menu {
   list-style: none;
   padding: 0;
 }
 
-.menu li {
+.eng-menu li {
   padding: 12px 0;
   color: #ccc;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.menu li:hover {
+.eng-menu li:hover {
   color: white;
 }
 
-.logout {
+.eng-logout {
   background: #ff4d4d;
   border: none;
   padding: 10px;
@@ -138,7 +138,7 @@
    MODAL
 ========================= */
 
-.modal-overlay {
+.eng-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
@@ -148,7 +148,7 @@
   z-index: 1000;
 }
 
-.modal-box {
+.eng-modal-box {
   background: #1c1c1c;
   padding: 40px;
   border-radius: 20px;
@@ -160,7 +160,7 @@
   animation: fadeIn 0.25s ease-in-out;
 }
 
-.modal-box h2 {
+.eng-modal-box h2 {
   text-align: center;
 }
 
@@ -168,11 +168,11 @@
    FORM
 ========================= */
 
-.form-group {
+.eng-form-group {
   margin-bottom: 10px;
 }
 
-.form-group label {
+.eng-form-group label {
   font-size: 14px;
   color: #ccc;
   margin-bottom: 8px;
@@ -181,13 +181,14 @@
 
 /* Option buttons */
 
-.option-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.eng-option-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:nowrap;
+  align-items:center;
 }
 
-.option-btn {
+.eng-option-btn {
   background: linear-gradient(90deg, #7c3aed, #a855f7);
   border: none;
   padding: 8px 16px;
@@ -198,11 +199,11 @@
   transition: 0.2s ease;
 }
 
-.option-btn:hover {
+.eng-option-btn:hover {
   transform: scale(1.05);
 }
 
-.option-btn.active {
+.eng-option-btn.active {
   background: white;
   color: #7c3aed;
   font-weight: bold;
@@ -256,12 +257,12 @@
    2 COLUMN INPUT
 ========================= */
 
-.row-2 {
+.eng-row-2 {
   display: flex;
   gap: 15px;
 }
 
-.row-2 input {
+.eng-row-2 input {
   flex: 1;
   padding: 10px;
   border-radius: 15px;
@@ -273,7 +274,7 @@
    BUTTONS
 ========================= */
 
-.submit-btn {
+.eng-submit-btn {
   background: linear-gradient(90deg, #7c3aed, #a855f7);
   border: none;
   padding: 12px;
@@ -282,18 +283,21 @@
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
+
+  width: 100%;
+  margin-top: 10px;
 }
 
-.submit-btn:hover:not(:disabled) {
+.eng-submit-btn:hover:not(:disabled) {
   transform: scale(1.03);
 }
 
-.submit-btn:disabled {
+.eng-submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.close-btn {
+.eng-close-btn {
   background: #555;
   border: none;
   padding: 8px;
@@ -306,14 +310,25 @@
    SUCCESS POPUP
 ========================= */
 
-.success-box {
-  text-align: center;
+.eng-success-box{
+  width:360px;
+  max-width:90%;
+  padding:30px 22px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
 }
 
-.success-icon {
-  font-size: 60px;
-  color: #22c55e;
-  margin: 20px 0;
+.eng-success-icon{
+  font-size:48px;
+  color:#22c55e;
+  margin:20px 0;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 /* =========================
@@ -356,7 +371,7 @@
     height: 400px;
   }
 
-  .row-2 {
+  .eng-row-2 {
     flex-direction: column;
   }
 }
@@ -371,11 +386,6 @@
   color: black;
 }
 
-/* ทำข้อจำกัดเป็นสีแดง */
-.limit-title {
-  color: red;
-  font-weight: bold;
-}
 
 /* ขยายราคา */
 .price {

@@ -329,12 +329,6 @@
   color: #000000 !important;
 }
 
-/* ทำข้อจำกัดเป็นสีแดง */
-.limit-title {
-  color: red;
-  font-weight: bold;
-}
-
 /* ขยายราคาขึ้นอีก */
 .price {
   font-size: 30px;
