@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./SignUpForm.css";
+import "./tempza.css";
 import { registerUser } from "../api/apiService";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
