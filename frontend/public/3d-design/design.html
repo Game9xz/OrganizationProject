@@ -2,6 +2,7 @@
 <html lang="th">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My 3D Room Designer</title>
@@ -137,6 +138,20 @@
             transition: all 0.2s ease;
             border-radius: 10px;
             margin-bottom: 5px;
+        }
+
+        .menu-list-vertical li a {
+            text-decoration: none;
+            color: #ccc;
+            /* หรือสีที่คุณต้องการ */
+            display: block;
+            width: 100%;
+            height: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .menu-list-vertical li:hover a {
+            color: var(--accent-purple);
         }
 
         .menu-list-vertical li:hover {
@@ -886,8 +901,17 @@
     </div>
 
     <nav class="sidebar">
-        <div class="avatar-box">
-            <img src="../image/cat-logo.jpg" class="avatar">
+        <div className="brand-logo">
+            <svg className="cat-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M34 38 L38 24 L50 35 Z" fill="#000" />
+                <path d="M66 38 L62 24 L50 35 Z" fill="#000" />
+                <path d="M20 60 C20 40, 40 35, 50 35 C60 35, 80 40, 80 60 C80 75, 70 85, 50 85 C30 85, 20 75, 20 60 Z"
+                    fill="#000" />
+                <circle cx="42" cy="58" r="6" fill="#fff" />
+                <circle cx="58" cy="58" r="6" fill="#fff" />
+                <circle cx="42" cy="58" r="2.5" fill="#000" />
+                <circle cx="58" cy="58" r="2.5" fill="#000" />
+            </svg>
         </div>
         <div class="side-icons">
             <div id="btn-home-toggle"><i class="fi fi-rr-menu-burger"></i></div>
@@ -903,12 +927,12 @@
         </div>
 
         <ul class="menu-list-vertical">
-            <li id="menu-home-item">หน้าแรก</li>
-            <li id="menu-save-item">บันทึกงาน</li>
-            <li id="menu-status-item">สถานะงาน</li>
-            <li id="menu-design-item">ออกแบบ</li>
-            <li id="menu-inventory-item">คลัง</li>
-            <li id="menu-inv-status-item">สถานะคลัง</li>
+            <li id="menu-home-item"><a href="/homepage">หน้าแรก</a></li>
+            <li id="menu-save-item"><a href="/workrecord">บันทึกงาน</a></li>
+            <li id="menu-status-item"><a href="/workrecord/status">สถานะงาน</a></li>
+            <li id="menu-design-item"><a href="/design3d">ออกแบบ</a></li>
+            <li id="menu-inventory-item"><a href="/inventory">คลัง</a></li>
+            <li id="menu-inv-status-item"><a href="/inventory/status">สถานะคลัง</a></li>
         </ul>
     </div>
 
