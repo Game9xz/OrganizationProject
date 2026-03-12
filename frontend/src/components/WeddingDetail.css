@@ -11,6 +11,7 @@
 }
 
 /* Sidebar */
+
 .sidebar {
   width: 220px;
   background: #1a1a1a;
@@ -66,7 +67,8 @@
   position: relative;
 }
 
-/* Back */
+/* Back button */
+
 .back-btn {
   position: absolute;
   top: 20px;
@@ -80,6 +82,7 @@
 }
 
 /* Layout */
+
 .wed-body {
   display: flex;
   gap: 60px;
@@ -95,19 +98,20 @@
 
 .wed-text {
   flex: 1;
-  line-height: 1.8;
+  max-width: 600px;
+  line-height: 1.9;
 }
 
 .wed-text h2 {
-  margin-bottom: 15px;
   font-size: 28px;
+  margin-bottom: 15px;
 }
 
 .price {
   color: #a78bfa;
+  font-size: 30px;
   font-weight: bold;
-  margin-bottom: 15px;
-  font-size: 34px;
+  margin-bottom: 20px;
 }
 
 .limit-title {
@@ -115,49 +119,52 @@
   font-weight: bold;
 }
 
-
 /* ปุ่มสนใจ */
+
 .wed-btn {
   background: linear-gradient(90deg, #7c3aed, #a855f7);
   border: none;
-  padding: 10px 30px;
-  border-radius: 25px;
+  padding: 10px 25px;
+  border-radius: 20px;
   color: white;
   cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.wed-btn:hover {
-  transform: scale(1.05);
 }
 
 /* =========================
    MODAL
 ========================= */
 
-.modal-overlay {
+.wed-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+
+  padding: 20px;
 }
 
-.modal-box {
+.wed-modal-box {
   background: #1c1c1c;
-  padding: 40px;
+  padding: 30px;
   border-radius: 20px;
-  width: 800px;
-  max-width: 95%;
+
+  width: 70%;
+  max-width: 700px;
+
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  animation: fadeIn 0.2s ease-in-out;
+  gap: 18px;
+
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.modal-box h2 {
+.wed-modal-box h2 {
   text-align: center;
 }
 
@@ -165,86 +172,105 @@
    FORM
 ========================= */
 
-.form-group label {
+.wed-form-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.wed-form-group label {
+  width: 200px;
   font-size: 14px;
-  margin-bottom: 8px;
-  display: block;
   color: #ccc;
 }
 
-/* option buttons */
-.option-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.wed-form-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
 }
 
-.option-btn {
-  background: linear-gradient(90deg, #7c3aed, #a855f7);
+/* option buttons */
+
+.wed-option-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.wed-option-btn {
+  background: linear-gradient(90deg,#7c3aed,#a855f7);
   border: none;
-  padding: 8px 15px;
+  padding: 10px 20px;
   border-radius: 20px;
   color: white;
   cursor: pointer;
   font-size: 13px;
-  transition: 0.2s;
+
+  white-space: nowrap;
+  min-width: 120px;
 }
 
-.option-btn:hover {
+.wed-option-btn:hover {
   transform: scale(1.05);
 }
 
-.option-btn.active {
+.wed-option-btn.active {
   background: white;
   color: #7c3aed;
   font-weight: bold;
 }
 
-/* Date popup */
-.date-popup {
-  margin-top: 12px;
-  background: #2a2a2a;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  animation: slideDown 0.2s ease;
+/* =========================
+   DATE PICKER
+========================= */
+
+.wed-date-popup{
+  margin-top:12px;
+  background:#2a2a2a;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  animation:slideDown 0.2s ease;
+  width: fit-content;
 }
 
-.date-range {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+@keyframes slideDown{
+  from{
+    opacity:0;
+    transform:translateY(-5px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
-.date-range input {
+.wed-date-range input {
   padding: 8px;
   border-radius: 10px;
   border: none;
 }
 
-.date-range span {
+.wed-date-range span {
   color: white;
 }
 
-/* select */
-.budget-select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 20px;
-  border: none;
-  background: white;
-  color: black;
-}
+/* =========================
+   INPUT 2 COLUMN
+========================= */
 
-/* 2 column input */
-.row-2 {
+.wed-row-2 {
   display: flex;
-  gap: 15px;
+  gap: 20px;
 }
 
-.row-2 input {
+.wed-row-2 input {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   border-radius: 15px;
   border: none;
   outline: none;
@@ -255,30 +281,24 @@
 ========================= */
 
 .submit-btn {
-  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  background: linear-gradient(90deg,#7c3aed,#a855f7);
   border: none;
-  padding: 12px;
+  padding: 14px;
   border-radius: 25px;
   color: white;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.submit-btn:hover:not(:disabled) {
-  transform: scale(1.03);
 }
 
 .submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity: .5;
 }
 
 .close-btn {
   background: #555;
   border: none;
-  padding: 8px;
-  border-radius: 15px;
+  padding: 10px;
+  border-radius: 20px;
   color: white;
   cursor: pointer;
 }
@@ -288,47 +308,34 @@
 ========================= */
 
 .success-box {
+  width: 380px;
+  max-width: 380px;   /* override modal width */
+  padding: 40px 30px;
   text-align: center;
+  margin: auto;
 }
 
 .success-icon {
-  font-size: 60px;
+  font-size: 70px;
   color: #22c55e;
-  margin: 20px 0;
+  margin: 25px 0;
 }
 
 /* =========================
-   ANIMATION
+   INPUT STYLE
 ========================= */
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .location-input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border-radius: 20px;
   border: none;
-  outline: none;
-  background: white !important;
-  color: black !important;
+  background: white;
+  color: black;
 }
 
 /* =========================
-   LOGO (เหมือน HomePage)
+   LOGO
 ========================= */
 
 .brand {
@@ -363,4 +370,19 @@
 .brand span {
   font-size: 12px;
   color: #9ca3af;
+}
+
+.wed-form-group > div {
+  flex: 1;
+}
+
+.wed-date-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wed-container input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #7c3aed;
 }

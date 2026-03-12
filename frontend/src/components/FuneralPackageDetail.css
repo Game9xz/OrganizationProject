@@ -358,12 +358,6 @@
   }
 }
 
-/* ทำข้อจำกัดเป็นสีแดง */
-.limit-title {
-  color: red;
-  font-weight: bold;
-}
-
 /* ขยายราคาขึ้น */
 .price {
   font-size: 26px;

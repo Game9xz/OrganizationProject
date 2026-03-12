@@ -18,7 +18,7 @@ export default function EngagementDetail() {
       setUser(JSON.parse(storedUser));
     }
   }, []);
-  // 🔥 กำหนดราคาแพ็กเกจงานหมั้นที่นี่
+
   const packagePrice = 49999;
 
   const [showModal, setShowModal] = useState(false);
@@ -30,9 +30,6 @@ export default function EngagementDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // จำนวนแขก
-  const [guestCount, setGuestCount] = useState("");
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -41,12 +38,6 @@ export default function EngagementDetail() {
 
   /* ================= VALIDATION ================= */
 
-  const isGuestValid =
-    guestCount !== "" &&
-    !isNaN(Number(guestCount)) &&
-    Number(guestCount) >= 50 &&
-    Number(guestCount) <= 150;
-
   const isDateValid =
     selectedDateType === "custom"
       ? startDate && endDate
@@ -54,7 +45,6 @@ export default function EngagementDetail() {
 
   const isFormComplete =
     isDateValid &&
-    isGuestValid &&
     name.trim() !== "" &&
     phone.trim() !== "" &&
     email.trim() !== "" &&
@@ -64,7 +54,6 @@ export default function EngagementDetail() {
   /* ================= SUBMIT TO DATABASE ================= */
   const handleSubmit = async () => {
     try {
-      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
       let event_timeframe = null;
       let event_date = null;
 
@@ -78,13 +67,12 @@ export default function EngagementDetail() {
         event_timeframe = "ภายใน 1 ปี";
       }
 
-      // 2. สร้าง Payload
       const payload = {
-        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
-        package_id: 2, // 🔥 สมมติแพ็กเกจนี้ id = 2 (งานหมั้น)
-        guest_count: guestCount,
-        duration: "ประมาณ 4 ชั่วโมง", // ตามรายละเอียดแพ็กเกจ
-        budget: packagePrice, // ส่งราคา 49999 เข้าไป
+        user_id: 1,
+        package_id: 2,
+        guest_count: null,
+        duration: "ประมาณ 4 ชั่วโมง",
+        budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
@@ -96,7 +84,6 @@ export default function EngagementDetail() {
         event_timeframe: event_timeframe
       };
 
-      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
       const response = await fetch(`${BASE_API}/bookings`, {
         method: "POST",
         headers: {
@@ -106,7 +93,6 @@ export default function EngagementDetail() {
       });
 
       if (response.ok) {
-        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
         setShowSuccess(true);
       } else {
         const data = await response.json();
@@ -120,7 +106,7 @@ export default function EngagementDetail() {
 
   return (
     <div className="eng-container">
-      <aside className="sidebar">
+      <aside className="eng-sidebar">
         <div className="brand">
 
           <div className="cat-logo">
@@ -148,7 +134,7 @@ export default function EngagementDetail() {
           <span>{user?.email}</span>
         </div>
 
-        <ul className="menu">
+        <ul className="eng-menu">
           <li onClick={() => navigate("/homepage")}>หน้าแรก</li>
           <li>บันทึกงาน</li>
           <li>สถานะงาน</li>
@@ -158,7 +144,7 @@ export default function EngagementDetail() {
           <li>งบประมาณ</li>
         </ul>
 
-        <button className="logout">Log out</button>
+        <button className="eng-logout">Log out</button>
       </aside>
 
       <main className="eng-content">
@@ -180,7 +166,6 @@ export default function EngagementDetail() {
             <div className="eng-text">
               <h2>Engagement Ceremony Package</h2>
 
-              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
                 แพ็กเกจงานหมั้น ราคา {packagePrice.toLocaleString()} บาท
               </p>
@@ -191,21 +176,16 @@ export default function EngagementDetail() {
 
               <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
 
-              <ul> <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li>
+              <ul>
+                <li>ห้องจัดเลี้ยง: การใช้สถานที่ประมาณ 4 ชั่วโมง (ช่วงเช้า 08.00 - 12.00 น.)</li>
+                <li>จำนวนแขก 30 - 60 ท่าน</li>
                 <li>การจัดอาสนะ: ชุดโซฟาสำหรับประธานและญาติผู้ใหญ่บนเวที</li>
-                <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (เช่น 30-50 ท่าน)</li>
+                <li>เก้าอี้สำหรับแขก: การจัดที่นั่งแบบ Theater style ตามจำนวนแขกในแพ็กเกจ (30 - 60 ท่าน)</li>
                 <li>ป้ายชื่อบ่าวสาว: Backdrop บนเวทีพร้อมโลโก้ชื่อคู่บ่าวสาว</li>
                 <li>การตกแต่งดอกไม้: สแตนด์ดอกไม้บนเวที 1 คู่, ดอกไม้ตกแต่งโต๊ะลงทะเบียน</li>
                 <li>พานแหวนหมั้น: พานดอกไม้สำหรับวางแหวนหมั้น</li>
                 <li>ห้องพัก: ห้องพัก 1 คืนสำหรับบ่าวสาวพร้อมอาหารเช้า</li>
-                <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li> </ul>
-
-              <p className="limit-title">
-                ข้อจำกัดในแพ็กเกจนี้!
-              </p>
-
-              <ul>
-                <li>จำนวนแขกขั้นต่ำ 50 ไม่เกิน 150 คน</li>
+                <li>ที่จอดรถ: บริการสำรองที่จอดรถสำหรับแขกผู้ใหญ่</li>
               </ul>
 
               <button
@@ -219,34 +199,29 @@ export default function EngagementDetail() {
         </div>
       </main>
 
-      {/* ================= MODAL ================= */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
+        <div className="eng-modal-overlay">
+          <div className="eng-modal-box">
             <h2>ลงทะเบียน</h2>
 
-            {/* DATE */}
-            <div className="form-group">
+            <div className="eng-form-group">
               <label>วันที่กำหนดจัดงาน</label>
 
-              <div className="option-row">
+              <div className="eng-option-row">
                 <button
-                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
-                    }`}
+                  className={`eng-option-btn ${selectedDateType === "custom" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
                   }}
                 >
-                  📅{" "}
-                  {startDate && endDate
+                  📅 {startDate && endDate
                     ? `${startDate} - ${endDate}`
                     : "กำหนดวันที่"}
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
-                    }`}
+                  className={`eng-option-btn ${selectedDateType === "3m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -256,8 +231,7 @@ export default function EngagementDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
-                    }`}
+                  className={`eng-option-btn ${selectedDateType === "6m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -267,8 +241,7 @@ export default function EngagementDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
-                    }`}
+                  className={`eng-option-btn ${selectedDateType === "1y" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
@@ -302,26 +275,7 @@ export default function EngagementDetail() {
               )}
             </div>
 
-            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
-            <div className="form-group">
-              <label>จำนวนแขก (50 - 150 คน)</label>
-              <input
-                type="number"
-                placeholder="ระบุจำนวนแขก"
-                value={guestCount}
-                onChange={(e) => setGuestCount(e.target.value)}
-                className="location-input"
-              />
-
-              {guestCount !== "" && !isGuestValid && (
-                <p style={{ color: "red", fontSize: "13px" }}>
-                  จำนวนแขกต้องอยู่ระหว่าง 50 - 150 คน
-                </p>
-              )}
-            </div>
-
-            {/* LOCATION */}
-            <div className="form-group">
+            <div className="eng-form-group">
               <label>สถานที่จัดงาน</label>
               <input
                 type="text"
@@ -332,8 +286,7 @@ export default function EngagementDetail() {
               />
             </div>
 
-            {/* INFO */}
-            <div className="row-2">
+            <div className="eng-row-2">
               <input
                 type="text"
                 placeholder="ชื่อ - นามสกุล"
@@ -348,7 +301,7 @@ export default function EngagementDetail() {
               />
             </div>
 
-            <div className="row-2">
+            <div className="eng-row-2">
               <input
                 type="email"
                 placeholder="Email"
@@ -363,9 +316,8 @@ export default function EngagementDetail() {
               />
             </div>
 
-            {/* 🔥 เรียกใช้ handleSubmit แทน */}
             <button
-              className="submit-btn"
+              className="eng-submit-btn"
               disabled={!isFormComplete}
               onClick={handleSubmit}
             >
@@ -373,7 +325,7 @@ export default function EngagementDetail() {
             </button>
 
             <button
-              className="close-btn"
+              className="eng-close-btn"
               onClick={() => setShowModal(false)}
             >
               ปิด
@@ -382,18 +334,17 @@ export default function EngagementDetail() {
         </div>
       )}
 
-      {/* SUCCESS */}
       {showSuccess && (
-        <div className="modal-overlay">
-          <div className="modal-box success-box">
+        <div className="eng-modal-overlay">
+          <div className="eng-modal-box eng-success-box">
             <h2>ลงทะเบียนเสร็จสิ้น</h2>
-            <div className="success-icon">✔</div>
+            <div className="eng-success-icon">✔</div>
             <p>ติดต่อสอบถามได้ที่</p>
             <p>📧 cpe_group8@ku.th</p>
             <p>📞 089-999-9999</p>
 
             <button
-              className="submit-btn"
+              className="eng-submit-btn"
               onClick={() => {
                 setShowSuccess(false);
                 setShowModal(false);

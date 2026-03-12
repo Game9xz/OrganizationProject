@@ -30,9 +30,6 @@ export default function CocktailPackageDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // จำนวนแขก
-  const [guestCount, setGuestCount] = useState("");
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -41,12 +38,6 @@ export default function CocktailPackageDetail() {
 
   /* ================= VALIDATION ================= */
 
-  const isGuestValid =
-    guestCount !== "" &&
-    !isNaN(Number(guestCount)) &&
-    Number(guestCount) >= 100 &&
-    Number(guestCount) <= 150;
-
   const isDateValid =
     selectedDateType === "custom"
       ? startDate && endDate
@@ -54,7 +45,6 @@ export default function CocktailPackageDetail() {
 
   const isFormComplete =
     isDateValid &&
-    isGuestValid &&
     name.trim() !== "" &&
     phone.trim() !== "" &&
     email.trim() !== "" &&
@@ -82,9 +72,8 @@ export default function CocktailPackageDetail() {
       const payload = {
         user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน (ปรับเป็น ID ผู้ใช้จริงภายหลัง)
         package_id: 1, // หมายเหตุ: สมมติแพ็กเกจนี้ id = 1
-        guest_count: guestCount,
         duration: "ตามแพ็กเกจ",
-        budget: packagePrice, // 🔥 ส่งราคา 29999 เข้าไปใน Database
+        budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
@@ -180,7 +169,6 @@ export default function CocktailPackageDetail() {
             <div className="cocktailpkg-text">
               <h2>Cocktail Party Package</h2>
 
-              {/* 🔥 ดึงราคามาแสดงผลแบบมีลูกน้ำ (29,999) อัตโนมัติ */}
               <p className="price">
                 แพ็กเกจจัดเลี้ยงค็อกเทล ระดับพรีเมียม ราคา {packagePrice.toLocaleString()} บาท
               </p>
@@ -200,14 +188,6 @@ export default function CocktailPackageDetail() {
                 <li>ระบบเครื่องเสียงมาตรฐาน</li>
               </ul>
 
-              <p className="limit-title">
-                ข้อจำกัดในแพ็กเกจนี้!
-              </p>
-
-              <ul>
-                <li>จำนวนแขกขั้นต่ำ 100 ไม่เกิน 150 คน</li>
-              </ul>
-
               <button
                 className="cocktailpkg-btn"
                 onClick={() => setShowModal(true)}
@@ -225,14 +205,12 @@ export default function CocktailPackageDetail() {
           <div className="modal-box large">
             <h2>ลงทะเบียน</h2>
 
-            {/* DATE */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
@@ -245,8 +223,7 @@ export default function CocktailPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -256,8 +233,7 @@ export default function CocktailPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -267,8 +243,7 @@ export default function CocktailPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
@@ -302,25 +277,6 @@ export default function CocktailPackageDetail() {
               )}
             </div>
 
-            {/* 🔥 จำนวนแขกแบบพิมพ์ */}
-            {/* จำนวนแขก */}
-            <div className="form-group">
-              <label>จำนวนแขก (100 - 150 คน)</label>
-              <input
-                type="number"
-                placeholder="ระบุจำนวนแขก"
-                value={guestCount}
-                onChange={(e) => setGuestCount(e.target.value)}
-              />
-
-              {guestCount !== "" && !isGuestValid && (
-                <p style={{ color: "red", fontSize: "13px" }}>
-                  จำนวนแขกต้องอยู่ระหว่าง 100 - 150 คน
-                </p>
-              )}
-            </div>
-
-            {/* LOCATION */}
             <div className="form-group">
               <label>สถานที่จัดงาน</label>
               <input
@@ -331,7 +287,6 @@ export default function CocktailPackageDetail() {
               />
             </div>
 
-            {/* INFO */}
             <div className="row-2">
               <input
                 type="text"
@@ -362,7 +317,6 @@ export default function CocktailPackageDetail() {
               />
             </div>
 
-            {/* เรียกใช้ handleSubmit แทนที่จะเปิด modal success เฉยๆ */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}

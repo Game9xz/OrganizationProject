@@ -31,9 +31,6 @@ export default function OrdinationPackageDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Guest
-  const [guestCount, setGuestCount] = useState("");
-
   // Contact
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -47,22 +44,15 @@ export default function OrdinationPackageDetail() {
      VALIDATION
   =============================== */
 
-  const isGuestValid =
-    guestCount !== "" &&
-    !isNaN(Number(guestCount)) &&
-    Number(guestCount) >= 100 &&
-    Number(guestCount) <= 350;
-
   const isDateValid =
     selectedDateType === "custom"
       ? startDate !== "" && endDate !== ""
       : selectedDateType === "3m" ||
-      selectedDateType === "6m" ||
-      selectedDateType === "1y";
+        selectedDateType === "6m" ||
+        selectedDateType === "1y";
 
   const isFormComplete =
     isDateValid &&
-    isGuestValid &&
     name.trim() !== "" &&
     phone.trim() !== "" &&
     email.trim() !== "" &&
@@ -90,9 +80,8 @@ export default function OrdinationPackageDetail() {
       const payload = {
         user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
         package_id: 4, // 🔥 สมมติแพ็กเกจนี้ id = 4 (งานบวช)
-        guest_count: guestCount,
-        duration: "ทั้งวัน", // งานบวชตามรายละเอียดคือตั้งแต่เช้าจนจบงาน
-        budget: packagePrice, // ส่งราคา 79999 เข้าไป
+        duration: "ทั้งวัน",
+        budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
@@ -104,7 +93,7 @@ export default function OrdinationPackageDetail() {
         event_timeframe: event_timeframe
       };
 
-      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
+      // 3. ยิง API บันทึกลงฐานข้อมูล
       const response = await fetch(`${BASE_API}/bookings`, {
         method: "POST",
         headers: {
@@ -114,7 +103,6 @@ export default function OrdinationPackageDetail() {
       });
 
       if (response.ok) {
-        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
         setShowSuccess(true);
       } else {
         const data = await response.json();
@@ -190,7 +178,6 @@ export default function OrdinationPackageDetail() {
             <div className="ordpkg-text">
               <h2>Ordination Ceremony</h2>
 
-              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
                 แพ็กเกจงานบวชครบวงจร ราคา {packagePrice.toLocaleString()} บาท
               </p>
@@ -212,14 +199,6 @@ export default function OrdinationPackageDetail() {
                 <li>ทีมงานดูแลตลอดงาน</li>
               </ul>
 
-              <p className="limit-title">
-                ข้อจำกัดในแพ็กเกจนี้!
-              </p>
-
-              <ul>
-                <li>จำนวนแขกขั้นต่ำ 100 ไม่เกิน 350 คน</li>
-              </ul>
-
               <button
                 className="ordpkg-btn"
                 onClick={() => setShowModal(true)}
@@ -237,28 +216,24 @@ export default function OrdinationPackageDetail() {
           <div className="modal-box large">
             <h2>ลงทะเบียน</h2>
 
-            {/* วันที่ */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
                   }}
                 >
-                  📅{" "}
-                  {startDate && endDate
+                  📅 {startDate && endDate
                     ? `${startDate} - ${endDate}`
                     : "ระบุวันที่"}
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -270,8 +245,7 @@ export default function OrdinationPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -283,8 +257,7 @@ export default function OrdinationPackageDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
@@ -319,29 +292,6 @@ export default function OrdinationPackageDetail() {
                     />
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* จำนวนแขก */}
-            <div className="form-group">
-              <label>จำนวนแขก (100 - 350 คน)</label>
-              <input
-                type="number"
-                placeholder="ระบุจำนวนแขก"
-                value={guestCount}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "") {
-                    setGuestCount("");
-                  } else {
-                    setGuestCount(Number(value));
-                  }
-                }}
-              />
-              {guestCount !== "" && !isGuestValid && (
-                <p style={{ color: "red", fontSize: "13px" }}>
-                  จำนวนแขกต้องอยู่ระหว่าง 100 - 350 คน
-                </p>
               )}
             </div>
 
@@ -387,7 +337,6 @@ export default function OrdinationPackageDetail() {
               />
             </div>
 
-            {/* 🔥 เรียกใช้ handleSubmit แทน */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}

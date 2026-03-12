@@ -18,6 +18,7 @@ export default function PreWeddingDetail() {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
   // 🔥 กำหนดราคาแพ็กเกจพรีเวดดิ้งที่นี่
   const packagePrice = 12999;
 
@@ -29,9 +30,6 @@ export default function PreWeddingDetail() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // จำนวนแขกแบบพิมพ์
-  const [guestCount, setGuestCount] = useState("");
-
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -41,14 +39,11 @@ export default function PreWeddingDetail() {
   /* ================= VALIDATION ================= */
   const isFormComplete =
     selectedDateType &&
-    guestCount &&
     name &&
     phone &&
     email &&
     lineId &&
     location &&
-    guestCount >= 10 &&
-    guestCount <= 15 &&
     (selectedDateType !== "custom" || (startDate && endDate));
 
   /* ================= SUBMIT TO DATABASE ================= */
@@ -70,11 +65,10 @@ export default function PreWeddingDetail() {
 
       // 2. สร้าง Payload
       const payload = {
-        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
-        package_id: 5, // 🔥 สมมติแพ็กเกจนี้ id = 5 (Pre-Wedding)
-        guest_count: Number(guestCount),
-        duration: "08.00-18.00 น.", // ตามรายละเอียดแพ็กเกจ
-        budget: packagePrice, // ส่งราคา 12999 เข้าไป
+        user_id: 1,
+        package_id: 5,
+        duration: "08.00-18.00 น.",
+        budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
@@ -86,7 +80,7 @@ export default function PreWeddingDetail() {
         event_timeframe: event_timeframe
       };
 
-      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
+      // 3. ยิง API บันทึกลงฐานข้อมูล
       const response = await fetch(`${BASE_API}/bookings`, {
         method: "POST",
         headers: {
@@ -96,7 +90,6 @@ export default function PreWeddingDetail() {
       });
 
       if (response.ok) {
-        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
         setShowSuccess(true);
       } else {
         const data = await response.json();
@@ -172,7 +165,6 @@ export default function PreWeddingDetail() {
             <div className="pre-text">
               <h2>Pre - Wedding Package</h2>
 
-              {/* 🔥 ดึงราคาจากตัวแปรมาแสดง */}
               <p className="price">
                 แพ็กเกจพรีเวดดิ้ง ราคา {packagePrice.toLocaleString()} บาท
               </p>
@@ -183,19 +175,12 @@ export default function PreWeddingDetail() {
 
               <p className="section-title">สิ่งที่รวมในแพ็กเกจ</p>
               <ul>
+                <li>จำนวนแขก 5 - 10 ท่าน</li>
                 <li>ห้องถ่ายภาพส่วนตัว สำหรับ 2 ท่าน</li>
                 <li>สามารถถ่ายรูปได้ตั้งแต่ 08.00-18.00 น.</li>
                 <li>ดินเนอร์สุดโรแมนติกสำหรับ 2 ท่าน</li>
                 <li>ส่วนลดพิเศษ 15% สำหรับอาหารและเครื่องดื่ม</li>
                 <li>ห้องพักวิลล่า 1 ห้องนอน</li>
-              </ul>
-
-              <p className="limit-title">
-                ข้อจำกัดในแพ็กเกจนี้!
-              </p>
-
-              <ul>
-                <li>จำนวนแขกขั้นต่ำ 10 ไม่เกิน 15 คน</li>
               </ul>
 
               <button
@@ -215,28 +200,22 @@ export default function PreWeddingDetail() {
           <div className="modal-box large">
             <h2>ลงทะเบียน</h2>
 
-            {/* วันที่ */}
             <div className="form-group">
               <label>วันที่กำหนดจัดงาน</label>
 
               <div className="option-row">
                 <button
-                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "custom" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("custom");
                     setShowDateInput(true);
                   }}
                 >
-                  📅{" "}
-                  {startDate && endDate
-                    ? `${startDate} - ${endDate}`
-                    : "ระบุวันที่"}
+                  📅 {startDate && endDate ? `${startDate} - ${endDate}` : "ระบุวันที่"}
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "3m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("3m");
                     setShowDateInput(false);
@@ -248,8 +227,7 @@ export default function PreWeddingDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "6m" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("6m");
                     setShowDateInput(false);
@@ -261,8 +239,7 @@ export default function PreWeddingDetail() {
                 </button>
 
                 <button
-                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""
-                    }`}
+                  className={`option-btn ${selectedDateType === "1y" ? "active" : ""}`}
                   onClick={() => {
                     setSelectedDateType("1y");
                     setShowDateInput(false);
@@ -302,25 +279,6 @@ export default function PreWeddingDetail() {
               )}
             </div>
 
-            {/* จำนวนแขกแบบพิมพ์ */}
-            <div className="form-group">
-              <label>จำนวนแขก (10 - 15 คน)</label>
-              <input
-                type="number"
-                placeholder="ระบุจำนวนแขก"
-                value={guestCount}
-                onChange={(e) => setGuestCount(e.target.value)}
-                className="location-input"
-              />
-              {guestCount &&
-                (guestCount < 10 || guestCount > 15) && (
-                  <p style={{ color: "red", fontSize: "13px", marginTop: "5px" }}>
-                    จำนวนแขกต้องอยู่ระหว่าง 10 - 15 คน
-                  </p>
-                )}
-            </div>
-
-            {/* สถานที่ */}
             <div className="form-group">
               <label>สถานที่จัดงาน</label>
               <input
@@ -332,7 +290,6 @@ export default function PreWeddingDetail() {
               />
             </div>
 
-            {/* ข้อมูลติดต่อ */}
             <div className="row-2">
               <input
                 type="text"
@@ -363,7 +320,6 @@ export default function PreWeddingDetail() {
               />
             </div>
 
-            {/* 🔥 เรียกใช้ handleSubmit แทนการโชว์ Modal ทันที */}
             <button
               className="submit-btn"
               disabled={!isFormComplete}
@@ -382,7 +338,6 @@ export default function PreWeddingDetail() {
         </div>
       )}
 
-      {/* SUCCESS */}
       {showSuccess && (
         <div className="modal-overlay">
           <div className="modal-box success-box">
