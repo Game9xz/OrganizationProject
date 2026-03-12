@@ -93,15 +93,18 @@ export default function OrdinationPackageDetail() {
 
       // 2. สร้าง Payload
       const payload = {
-        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน
+        user_id: user?.user_id || 4, // ✅ ดึง ID จาก User ที่ล็อกอิน (สำรองเป็น 4)
         package_id: 4, // 🔥 สมมติแพ็กเกจนี้ id = 4 (งานบวช)
+        guest_count: 50, // ✅ ใส่จำนวนแขกเริ่มต้นให้ DB ไม่แจ้ง Error
         duration: "ทั้งวัน",
         budget: packagePrice,
         full_name: name,
         contact_email: email,
         phone: phone,
         line_id: lineId,
-        location: location,
+        location: location.address, // ✅ ส่งเฉพาะ String ชื่อสถานที่
+        // latitude: location.lat,  // 💡 เอาคอมเมนต์ออกถ้า DB เก็บพิกัดแล้ว
+        // longitude: location.lon,
         start_date: startDate || null,
         end_date: endDate || null,
         event_date: event_date,
@@ -121,7 +124,7 @@ export default function OrdinationPackageDetail() {
         setShowSuccess(true);
       } else {
         const data = await response.json();
-        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
+        alert(`เกิดข้อผิดพลาด: ${data.error || data.message || "ไม่สามารถลงทะเบียนได้"}`);
       }
     } catch (error) {
       console.error("Submit Error:", error);

@@ -66,61 +66,65 @@ export default function CocktailPackageDetail() {
     }
   };
 
-  /* ================= SUBMIT TO DATABASE ================= */
-  const handleSubmit = async () => {
-    try {
-      // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
-      let event_timeframe = null;
-      let event_date = null;
+ /* ================= SUBMIT TO DATABASE ================= */
+ const handleSubmit = async () => {
+  try {
+    // 1. จัดเตรียมข้อมูลวันที่ให้ตรงกับ Database
+    let event_timeframe = null;
+    let event_date = null;
 
-      if (selectedDateType === "custom") {
-        event_date = `${startDate} - ${endDate}`;
-      } else if (selectedDateType === "3m") {
-        event_timeframe = "ภายใน 3 เดือน";
-      } else if (selectedDateType === "6m") {
-        event_timeframe = "ภายใน 6 เดือน";
-      } else if (selectedDateType === "1y") {
-        event_timeframe = "ภายใน 1 ปี";
-      }
-
-      // 2. สร้าง Payload
-      const payload = {
-        user_id: 1, // หมายเหตุ: สมมติค่าเป็น 1 ไว้ก่อน (ปรับเป็น ID ผู้ใช้จริงภายหลัง)
-        package_id: 1, // หมายเหตุ: สมมติแพ็กเกจนี้ id = 1
-        duration: "ตามแพ็กเกจ",
-        budget: packagePrice,
-        full_name: name,
-        contact_email: email,
-        phone: phone,
-        line_id: lineId,
-        location: location,
-        start_date: startDate || null,
-        end_date: endDate || null,
-        event_date: event_date,
-        event_timeframe: event_timeframe
-      };
-
-      // 3. ยิง API บันทึกลงฐานข้อมูล (ใช้ BASE_API เชื่อมต่ออัตโนมัติ)
-      const response = await fetch(`${BASE_API}/bookings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
-        setShowSuccess(true);
-      } else {
-        const data = await response.json();
-        alert(`เกิดข้อผิดพลาด: ${data.message || "ไม่สามารถลงทะเบียนได้"}`);
-      }
-    } catch (error) {
-      console.error("Submit Error:", error);
-      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+    if (selectedDateType === "custom") {
+      event_date = `${startDate} - ${endDate}`;
+    } else if (selectedDateType === "3m") {
+      event_timeframe = "ภายใน 3 เดือน";
+    } else if (selectedDateType === "6m") {
+      event_timeframe = "ภายใน 6 เดือน";
+    } else if (selectedDateType === "1y") {
+      event_timeframe = "ภายใน 1 ปี";
     }
-  };
+
+    // 2. สร้าง Payload
+    const payload = {
+      user_id: user?.user_id || 4, // ✅ ดึง ID ผู้ใช้จริง (สำรอง 4 ไว้กันเหนียว)
+      package_id: 1,               // สมมติแพ็กเกจนี้ id = 1
+      guest_count: 50,             // ✅ เติม guest_count เข้าไปให้ Backend ให้ผ่าน
+      duration: "ตามแพ็กเกจ",
+      budget: packagePrice,
+      full_name: name,
+      contact_email: email,
+      phone: phone,
+      line_id: lineId,
+      location: location.address,  // ✅ ส่งแค่ชื่อสถานที่ (String)
+      // latitude: location.lat,   // 💡 ถ้าใน DB เพิ่มคอลัมน์แล้ว เอาคอมเมนต์ 2 บรรทัดนี้ออกได้เลยครับ
+      // longitude: location.lon, 
+      start_date: startDate || null,
+      end_date: endDate || null,
+      event_date: event_date,
+      event_timeframe: event_timeframe
+    };
+
+    // 3. ยิง API บันทึกลงฐานข้อมูล
+    const response = await fetch(`${BASE_API}/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      // ถ้าบันทึกสำเร็จ ให้แสดงหน้าต่าง Success
+      setShowSuccess(true);
+    } else {
+      const data = await response.json();
+      // ✅ ปรับให้แสดง Error จาก Backend ตรงๆ
+      alert(`เกิดข้อผิดพลาด: ${data.error || data.message || "ไม่สามารถลงทะเบียนได้"}`);
+    }
+  } catch (error) {
+    console.error("Submit Error:", error);
+    alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+  }
+};
 
   return (
     <div className="cocktailpkg-container">
