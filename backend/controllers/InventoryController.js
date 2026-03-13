@@ -81,13 +81,15 @@ export const updateStockQuantity = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 /* =====================================================
    ADD NEW PRODUCT
    POST /api/inventory
 ===================================================== */
 export const addProduct = async (req, res) => {
   try {
-    const { name, remain } = req.body;
+    // 🌟 1. เพิ่มการรับค่า price จาก req.body
+    const { name, remain, price } = req.body;
     let image_url = null;
 
     // ถ้ามีการแนบไฟล์รูปภาพมา (เดี๋ยวเราต้องใช้ multer จัดการที่ไฟล์ routes)
@@ -103,12 +105,11 @@ export const addProduct = async (req, res) => {
       status_id = 2;
     }
 
-    // ทำการเพิ่มข้อมูลลง Database
-    // หมายเหตุ: category_id และ unit_price ผมใส่ค่าเริ่มต้นเป็น 1 และ 0 ไว้ก่อน ถ้าในอนาคตมีให้กรอก ค่อยมารับค่าเพิ่มครับ
+    // 🌟 2. อัปเดตคำสั่ง SQL ให้รับค่า price ไปใส่ในคอลัมน์ unit_price
     const [result] = await db.query(
       `INSERT INTO products (product_name, total_stock, available_stock, status_id, image_url, category_id, unit_price, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, 1, 0, NOW(), NOW())`,
-      [name, remain, remain, status_id, image_url]
+       VALUES (?, ?, ?, ?, ?, 1, ?, NOW(), NOW())`,
+      [name, remain, remain, status_id, image_url, price || 0]
     );
 
     res.status(201).json({ 
@@ -120,6 +121,7 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 /* =====================================================
    DELETE PRODUCT
    DELETE /api/inventory/products/:id

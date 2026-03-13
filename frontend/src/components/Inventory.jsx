@@ -267,7 +267,8 @@ export default function Inventory() {
       product_id: tempId,
       product_name: name,
       available_stock: remain,
-      price: price,
+      unit_price: price, // 🌟 เปลี่ยนชื่อคีย์ให้ตรงกับฐานข้อมูล เผื่อหน้าเว็บเรียกใช้ทันที
+      price: price, // ใส่เผื่อไว้ให้ด้วย
       image_url: newItem.previewUrl || fallbackImage,
     };
 
@@ -300,9 +301,11 @@ export default function Inventory() {
 
   // ฟังก์ชันช่วยดึงราคาเป็นตัวเลข
   const getNumericPrice = (it) => {
-    if (it.price && it.price > 0) return Number(it.price);
+    // 🌟 จุดที่แก้ไข: ดักจับ unit_price จากฐานข้อมูล และ price จาก state ชั่วคราว
+    if (it.unit_price !== undefined && it.unit_price !== null && Number(it.unit_price) > 0) return Number(it.unit_price);
+    if (it.price !== undefined && it.price !== null && Number(it.price) > 0) return Number(it.price);
 
-    // ตัวอย่างราคาสำหรับสินค้าที่มีในหน้าคลัง
+    // ตัวอย่างราคาสำหรับสินค้าที่มีในหน้าคลัง (ดึงมาเป็น fallback ถ้าข้อมูลใน DB ไม่มีราคา)
     const examplePrices = {
       "โต๊ะหมู่บูชา": 7000,
       "โต๊ะจัดเลี้ยง": 7000,
@@ -331,7 +334,7 @@ export default function Inventory() {
     };
 
     for (const [key, value] of Object.entries(examplePrices)) {
-      if (it.product_name.includes(key)) return value;
+      if (it.product_name && it.product_name.includes(key)) return value;
     }
 
     return 0;
@@ -495,7 +498,7 @@ export default function Inventory() {
                   <span>ราคา (บาท)</span>
                   <input
                     type="number"
-                    min="0"
+                    min="50"
                     className="inv-input"
                     value={newItem.price}
                     onChange={(e) =>
